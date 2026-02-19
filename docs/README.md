@@ -1,4 +1,4 @@
-# Duke
+# GoldenCompass
 
 {Give product intro here}
 
