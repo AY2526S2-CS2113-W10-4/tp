@@ -1,8 +1,19 @@
 package seedu.duke.preparser;
 
-import java.util.*;
 
-import static seedu.duke.preparser.Config.*;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+
+import static seedu.duke.preparser.Config.ALL_COMMANDS;
+import static seedu.duke.preparser.Config.ALL_FLAGS;
+import static seedu.duke.preparser.Config.COMMAND_WORD_INDEX;
+import static seedu.duke.preparser.Config.DEFAULT_FLAG;
+import static seedu.duke.preparser.Config.FLAG_INDICATOR;
+
 
 /**
  * Provides methods to parse user input.
@@ -17,7 +28,8 @@ public class Preparser {
      * User can get the information after parsing with getter methods.
      * @param userInput a string
      * @throws Exception if a command word or a flag is not recognizable.
-     * @see
+     * @see Preparser#getCommandWord()
+     * @see Preparser#getFlagToParameterMap()
      */
     public Preparser(String userInput) throws Exception {
         parse(userInput);
@@ -30,7 +42,7 @@ public class Preparser {
      */
     private void parse(String userInput) throws Exception{
         String[] userInputs = userInput.split("\\s+");
-        String commandWord = userInputs[0];
+        String commandWord = userInputs[COMMAND_WORD_INDEX];
         String[] arguments = Arrays.copyOfRange(userInputs, 1, userInputs.length);
 
         this.commandWord = checkCommandWord(commandWord);
@@ -38,7 +50,7 @@ public class Preparser {
     }
 
     /**
-     *Returns {@code true} if {@code text} is a flag, and {@code false} if it is a parameter.
+     * Returns {@code true} if {@code text} is a flag, and {@code false} if it is a parameter.
      * <p></p>
      * Any {@code text} that starts with {@code -} is expected
      * to be a flag.
@@ -101,15 +113,6 @@ public class Preparser {
 
         return map;
     }
-
-    private static String findConsecutiveParams(int startIndex, String[] arguments) {
-        ArrayList<String> params = new ArrayList<>();
-
-
-
-        return null;
-    }
-
     /**
      * Puts a {@code value} into a list associating with the {@code key}.
      * @param map a map from string to list of string
