@@ -14,20 +14,20 @@ public class Parser {
         command = words[0];
 
         switch (command) {
-            case "bye", "list" -> {
+        case "bye", "list" -> {
 
-            }
-            case "find" -> {
-                try {
-                    companyName = message.substring(5);
-                } catch (StringIndexOutOfBoundsException e) {
-                    throw new GoldenCompassException("Find what?");
-                }
-            }
-            default -> {
-                throw new GoldenCompassException("Invalid command");
+        }
+        case "find" -> {
+            try {
+                companyName = message.substring(5);
+            } catch (StringIndexOutOfBoundsException e) {
+                throw new GoldenCompassException("Find what?");
             }
         }
-
+        default -> {
+            throw new GoldenCompassException("Invalid command");
+        }
+        }
     }
 }
+
