@@ -17,7 +17,7 @@ public class Ui {
     }
 
     public void print(String s) {
-        System.out.println("\t" + s);
+        System.out.println(s);
     }
 
     public String read() {
