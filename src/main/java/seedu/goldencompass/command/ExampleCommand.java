@@ -27,8 +27,8 @@ public class ExampleCommand implements Executable{
         checkFlag(flagToParamMap, FLAGS);
         System.out.println("hi, I am ExampleCommand");
         for(String key : flagToParamMap.keySet()) {
-            List<String> params = flagToParamMap.get(key);
-            System.out.println("I have this flag " + key + " with params: " + params);
+            String[] params = getParamsOf(key, flagToParamMap);
+            System.out.println("I have this flag " + key + " with params: " + Arrays.toString(params));
         }
     }
 }

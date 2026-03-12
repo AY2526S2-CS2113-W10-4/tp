@@ -48,4 +48,8 @@ public interface Executable {
         }
     }
 
+    default String[] getParamsOf(String flag, Map<String, List<String>> flagToParamMap) {
+        List<String> paramsList = flagToParamMap.get(flag);
+        return paramsList.toArray(String[]::new);
+    }
 }
