@@ -26,10 +26,12 @@ public class CommandRegistry {
      */
     public static Executable getCommand(String commandWord) throws GoldenCompassException {
         Executable executable = executableMap.get(commandWord);
+
+        //cannot find an executable given the command word
         if(executable == null) {
-            //TODO: by right it should not throw anything.
-            throw new GoldenCompassException("Valid command but it was not registered: " + commandWord);
+            throw new GoldenCompassException("Error: Unknown command: " + commandWord);
         }
+
         return executable;
     }
 }

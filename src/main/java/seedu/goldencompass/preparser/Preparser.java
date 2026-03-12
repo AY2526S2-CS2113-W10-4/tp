@@ -47,7 +47,6 @@ public class Preparser {
         String[] arguments = Arrays.copyOfRange(userInputs, 1, userInputs.length);
 
         this.commandWord = commandWord;
-        //this.commandWord = checkCommandWord(commandWord);
         this.flagToParameterMap = findFlags(arguments);
     }
 
