@@ -1,6 +1,8 @@
 package seedu.goldencompass.command;
 
 import seedu.goldencompass.exception.GoldenCompassException;
+
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -19,7 +21,8 @@ public interface Executable {
      * @param flags  a String array
      * @throws GoldenCompassException if there is missing flag and/or flag not used by the command
      */
-    default void checkFlag(Map<String, List<String>> flagToParamMap, ArrayList<String> flags) throws GoldenCompassException {
+    default void checkFlag(Map<String, List<String>> flagToParamMap, ArrayList<String> flags)
+            throws GoldenCompassException {
         //each input flag must map to a flag recognized by the command
         String[] extraFlags = flagToParamMap.keySet().stream()
                 .filter(key -> !key.equals(DEFAULT_FLAG) && !flags.contains(key))
@@ -46,6 +49,7 @@ public interface Executable {
             throw new GoldenCompassException(errorMessage.toString());
         }
     }
+
     default String[] getParamsOf(String flag, Map<String, List<String>> flagToParamMap) {
         List<String> paramsList = flagToParamMap.get(flag);
         return paramsList.toArray(String[]::new);
