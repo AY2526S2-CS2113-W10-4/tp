@@ -1,4 +1,4 @@
-package seedu.duke.preparser;
+package seedu.goldencompass.preparser;
 
 
 
@@ -8,12 +8,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 
-import static seedu.duke.preparser.Config.ALL_COMMANDS;
-import static seedu.duke.preparser.Config.ALL_FLAGS;
-import static seedu.duke.preparser.Config.COMMAND_WORD_INDEX;
-import static seedu.duke.preparser.Config.DEFAULT_FLAG;
-import static seedu.duke.preparser.Config.FLAG_INDICATOR;
+import static seedu.goldencompass.preparser.Config.ALL_COMMANDS;
+import static seedu.goldencompass.preparser.Config.ALL_FLAGS;
+import static seedu.goldencompass.preparser.Config.COMMAND_WORD_INDEX;
+import static seedu.goldencompass.preparser.Config.DEFAULT_FLAG;
+import static seedu.goldencompass.preparser.Config.FLAG_INDICATOR;
 
+import seedu.goldencompass.exception.GoldenCompassParsingException;
 
 /**
  * Provides methods to parse user input.
@@ -27,25 +28,25 @@ public class Preparser {
      * <p></p>
      * User can get the information after parsing with getter methods.
      * @param userInput a string
-     * @throws Exception if a command word or a flag is not recognizable.
+     * @throws GoldenCompassParsingException if a command word or a flag is not recognizable.
      * @see Preparser#getCommandWord()
      * @see Preparser#getFlagToParameterMap()
      */
-    public Preparser(String userInput) throws Exception {
+    public Preparser(String userInput) throws GoldenCompassParsingException {
         parse(userInput);
     }
 
     /**
      * Parses the userInput
      * @param userInput a string to parse
-     * @throws Exception if a command word or a flag is not recognizable
+     * @throws GoldenCompassParsingException if a command word or a flag is not recognizable
      */
-    private void parse(String userInput) throws Exception{
+    private void parse(String userInput) throws GoldenCompassParsingException{
         String[] userInputs = userInput.split("\\s+");
         String commandWord = userInputs[COMMAND_WORD_INDEX];
         String[] arguments = Arrays.copyOfRange(userInputs, 1, userInputs.length);
 
-        this.commandWord = checkCommandWord(commandWord);
+        this.commandWord = commandWord;
         this.flagToParameterMap = findFlags(arguments);
     }
 
@@ -56,9 +57,10 @@ public class Preparser {
      * to be a flag.
      * @param text a string to be checked against.
      * @return {@code true} if {@code text} is a flag, and {@code false} if it is a parameter.
-     * @throws Exception if {@code text} starts with {@code -} but not found in the Set of all flags.
+     * @throws GoldenCompassParsingException if {@code text} starts with {@code -}
+     * but not found in the Set of all flags.
      */
-    private static boolean isFlag(String text) throws Exception{
+    private static boolean isFlag(String text) throws GoldenCompassParsingException{
 
         //text not starting with "-" is not a flag
         if(!text.startsWith(FLAG_INDICATOR)) {
@@ -70,18 +72,18 @@ public class Preparser {
         }
 
         //text with "-" is considered as a flag, but not found in the flag set.
-        throw new Exception("Error: Unknown flag: " + text);
+        throw new GoldenCompassParsingException("Error: Unknown flag: " + text);
     }
 
     /**
      * Returns the {@code commandWord}
      * @param commandWord a string
      * @return the {@code commandWord}
-     * @throws Exception if no command word is found.
+     * @throws GoldenCompassParsingException if no command word is found.
      */
-    private static String checkCommandWord(String commandWord) throws Exception{
+    private static String checkCommandWord(String commandWord) throws GoldenCompassParsingException{
         if(!ALL_COMMANDS.contains(commandWord)) {
-            throw new Exception("Error: Command " + commandWord + " does not exist");
+            throw new GoldenCompassParsingException("Error: Command " + commandWord + " does not exist");
         }
         return commandWord;
     }
@@ -90,10 +92,11 @@ public class Preparser {
      * Returns a Map from a flag to a list of params pointed by this flag
      * @param arguments a string array
      * @return a Map from a flag to a list of params pointed by this flag
-     * @throws Exception if a non-recognizable flag is detected or a parameter is not identified by any flag.
+     * @throws GoldenCompassParsingException if a non-recognizable flag is detected or a parameter
+     * is not identified by any flag.
      * @see Preparser#isFlag(String)
      */
-    private static Map<String, List<String>> findFlags(String[] arguments) throws Exception {
+    private static Map<String, List<String>> findFlags(String[] arguments) throws GoldenCompassParsingException {
         String flag = DEFAULT_FLAG;
         ArrayList<String> params = new ArrayList<>();
         Map<String, List<String>> map = new HashMap<>();
@@ -131,7 +134,7 @@ public class Preparser {
      * Returns the command word identified by the preparser instance.
      * <p>
      *     <b>Warning:</b>
-     *     It can only be called after a {@code Preparser} is instantiated without exception.
+     *     It can only be called after a {@code Preparser} is instantiated without Exception.
      * </p>
      * @return the command word identified by the preparser instance.
      * @see Preparser#Preparser(String) the constructor
@@ -148,7 +151,7 @@ public class Preparser {
      * </p>
      * <p>
      *     <b>Warning:</b>
-     *     It can only be called after a {@code Preparser} is instantiated without exception.
+     *     It can only be called after a {@code Preparser} is instantiated without Exception.
      * </p>
      * @return a Map of flag to list of parameters identified by the preparser instance.
      * @see Preparser#Preparser(String) the constructor
