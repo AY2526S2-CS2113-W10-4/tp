@@ -23,9 +23,21 @@ public class Config {
      * @param flags a string array
      */
     public static void registerFlag(String... flags) {
-        for(String flag : flags) {
+        for (String flag : flags) {
             ALL_FLAGS.add(flag);
         }
-        
+    }
+
+    /**
+     * Registers an array of command words to the set that contains all command words of the app.
+     * <P>
+     *     Duplicated command word entries are ignored.
+     * </P>
+     * @param commands a string array of command words to register.
+     */
+    public static void registerCommand(String... commands) {
+        for (String command : commands) {
+            ALL_COMMANDS.add(command);
+        }
     }
 }
