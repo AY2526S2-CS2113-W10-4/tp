@@ -20,7 +20,7 @@ public class ExampleCommand implements Executable{
     /**
      * Prints a list of legal flags with their respective parameters.
      * <P><B>Example Use</B></P>
-     * @param flagToParamMap
+     * @param flagToParamMap map
      */
     @Override
     public void execute(Map<String, List<String>> flagToParamMap) throws GoldenCompassException {

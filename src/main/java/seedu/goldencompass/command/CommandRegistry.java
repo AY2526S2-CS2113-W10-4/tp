@@ -7,7 +7,7 @@ import java.util.Map;
 
 public class CommandRegistry {
 
-    private static Map<String, Executable> executableMap = new HashMap<>();
+    private static final Map<String, Executable> executableMap = new HashMap<>();
 
     /**
      * Associates a command extending {@code Executable} with a {@code commandWord} into a Map.

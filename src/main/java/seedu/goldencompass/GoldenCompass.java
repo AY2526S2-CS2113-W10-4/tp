@@ -1,5 +1,6 @@
 package seedu.goldencompass;
 
+import seedu.goldencompass.command.AddAliasCommand;
 import seedu.goldencompass.command.ExampleCommand;
 import seedu.goldencompass.command.CommandRegistry;
 import seedu.goldencompass.command.Executable;
@@ -45,7 +46,7 @@ public class GoldenCompass {
 
         //register an example command for testing
         CommandRegistry.registerCommand("example", new ExampleCommand());
-
+        CommandRegistry.registerCommand("alias", new AddAliasCommand());
         //loop for input
         while(true) {
             try {

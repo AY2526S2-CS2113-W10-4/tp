@@ -19,6 +19,7 @@ public interface Executable {
      * Checks for missing flag and flag not used by the command
      * @param flagToParamMap a Map
      * @param flags  a String array
+     * @throws GoldenCompassException if there is missing flag and/or flag not used by the command
      */
     default void checkFlag(Map<String, List<String>> flagToParamMap, ArrayList<String> flags)
             throws GoldenCompassException {
