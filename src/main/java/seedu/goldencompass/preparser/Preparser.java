@@ -14,6 +14,7 @@ import static seedu.goldencompass.preparser.Config.COMMAND_WORD_INDEX;
 import static seedu.goldencompass.preparser.Config.DEFAULT_FLAG;
 import static seedu.goldencompass.preparser.Config.FLAG_INDICATOR;
 
+import seedu.goldencompass.exception.GoldenCompassException;
 import seedu.goldencompass.exception.GoldenCompassParsingException;
 
 /**
@@ -32,8 +33,9 @@ public class Preparser {
      * @see Preparser#getCommandWord()
      * @see Preparser#getFlagToParameterMap()
      */
-    public Preparser(String userInput) throws GoldenCompassParsingException {
+    public Preparser(String userInput) throws GoldenCompassException {
         parse(userInput);
+        FlagValidator.checkFlag(flagToParameterMap.keySet(), Config.getCommandFlags(commandWord));
     }
 
     /**
@@ -116,6 +118,7 @@ public class Preparser {
 
         return map;
     }
+
     /**
      * Puts a {@code value} into a list associating with the {@code key}.
      * @param map a map from string to list of string
