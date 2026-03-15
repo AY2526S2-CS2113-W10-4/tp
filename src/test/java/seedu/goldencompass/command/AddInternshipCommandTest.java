@@ -3,7 +3,8 @@ package seedu.goldencompass.command;
 import org.junit.jupiter.api.Test;
 import seedu.goldencompass.exception.GoldenCompassException;
 import seedu.goldencompass.internship.InternshipList;
-import seedu.goldencompass.preparser.Config;
+import seedu.goldencompass.parser.Config;
+import seedu.goldencompass.ui.Ui;
 
 import java.util.HashMap;
 import java.util.List;
@@ -17,6 +18,7 @@ public class AddInternshipCommandTest {
     @Test
     public void execute_validInput_addsInternshipSuccessfully() throws GoldenCompassException {
         // 1. Setup the environment
+        Ui ui = new Ui();
         InternshipList internships = new InternshipList();
         AddInternshipCommand addCommand = new AddInternshipCommand(internships);
 
@@ -34,6 +36,7 @@ public class AddInternshipCommandTest {
 
     @Test
     public void execute_emptyCompanyName_throwsException() {
+        Ui ui = new Ui();
         InternshipList internships = new InternshipList();
         AddInternshipCommand addCommand = new AddInternshipCommand(internships);
 
@@ -47,6 +50,7 @@ public class AddInternshipCommandTest {
 
     @Test
     public void execute_emptyTitle_throwsException() {
+        Ui ui = new Ui();
         InternshipList internships = new InternshipList();
         AddInternshipCommand addCommand = new AddInternshipCommand(internships);
 
