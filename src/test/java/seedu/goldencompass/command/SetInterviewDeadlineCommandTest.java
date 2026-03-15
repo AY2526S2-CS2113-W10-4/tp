@@ -7,6 +7,7 @@ import seedu.goldencompass.internship.Internship;
 import seedu.goldencompass.internship.Interview;
 import seedu.goldencompass.internship.InterviewList;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -25,7 +26,7 @@ public class SetInterviewDeadlineCommandTest {
     @BeforeEach
     public void setUp() {
         interviewList = new InterviewList();
-        interviewList.add(new Interview(new Internship("SWE", "Google"), "2025-01-01"));
+        interviewList.add(new Interview(new Internship("SWE", "Google"), LocalDate.parse("2025-01-01")));
         command = new SetInterviewDeadlineCommand(interviewList);
     }
 
@@ -39,7 +40,7 @@ public class SetInterviewDeadlineCommandTest {
     @Test
     public void execute_validInput_setsDeadline() throws GoldenCompassException {
         command.execute(buildMap("1", "2026-06-01"));
-        assertEquals("2026-06-01", interviewList.get(0).getDate());
+        assertEquals(LocalDate.parse("2026-06-01"), interviewList.get(0).getDate());
     }
 
     @Test
