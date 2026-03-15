@@ -3,9 +3,7 @@ package seedu.goldencompass.preparser;
 import seedu.goldencompass.exception.GoldenCompassException;
 import seedu.goldencompass.set_operation.SetOperation;
 
-import java.util.*;
-
-import static seedu.goldencompass.preparser.Config.DEFAULT_FLAG;
+import java.util.Set;
 
 public class FlagValidator {
 
