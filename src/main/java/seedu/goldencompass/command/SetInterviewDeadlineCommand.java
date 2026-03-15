@@ -29,19 +29,17 @@ public class SetInterviewDeadlineCommand implements Executable {
     private static final ArrayList<String> FLAGS = new ArrayList<>(Arrays.asList(FLAG_DATE));
 
     private final InterviewList interviewList;
-    private final Ui ui;
+    private final Ui ui = new Ui();
 
     /**
-     * Constructs a {@code SetInterviewDeadlineCommand} with the given {@code InterviewList} and {@code Ui}.
+     * Constructs a {@code SetInterviewDeadlineCommand} with the given {@code InterviewList}.
      * <p>
      *     Registers the command word with the global command set on construction.
      * </p>
      * @param interviewList the list of interviews to operate on.
-     * @param ui the UI instance used to print output.
      */
-    public SetInterviewDeadlineCommand(InterviewList interviewList, Ui ui) {
+    public SetInterviewDeadlineCommand(InterviewList interviewList) {
         this.interviewList = interviewList;
-        this.ui = ui;
         Config.registerCommand(COMMAND_WORD);
     }
 
