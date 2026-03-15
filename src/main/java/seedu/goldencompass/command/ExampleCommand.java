@@ -22,10 +22,10 @@ public class ExampleCommand implements Executable{
     /**
      * Prints a list of legal flags with their respective parameters.
      * <P><B>Example Use</B></P>
-     * @param flagToParamMap
+     * @param flagToParamMap a Map
      */
     @Override
-    public void execute(Map<String, List<String>> flagToParamMap) throws GoldenCompassException {
+    public void execute(Map<String, List<String>> flagToParamMap) {
         System.out.println("hi, I am ExampleCommand");
         for(String key : flagToParamMap.keySet()) {
             String[] params = getParamsOf(key, flagToParamMap);
