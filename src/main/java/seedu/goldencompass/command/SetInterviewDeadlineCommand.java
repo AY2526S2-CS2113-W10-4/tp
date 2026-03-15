@@ -3,7 +3,7 @@ package seedu.goldencompass.command;
 import seedu.goldencompass.exception.GoldenCompassException;
 import seedu.goldencompass.internship.Interview;
 import seedu.goldencompass.internship.InterviewList;
-import seedu.goldencompass.preparser.Config;
+import seedu.goldencompass.parser.Config;
 import seedu.goldencompass.ui.Ui;
 
 import java.time.LocalDate;
@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import static seedu.goldencompass.preparser.Config.DEFAULT_FLAG;
+import static seedu.goldencompass.parser.Config.DEFAULT_FLAG;
 
 /**
  * Sets the deadline date of an interview identified by its 1-based index in the interview list.

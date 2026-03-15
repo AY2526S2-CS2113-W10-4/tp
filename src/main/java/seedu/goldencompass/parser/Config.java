@@ -1,4 +1,4 @@
-package seedu.goldencompass.preparser;
+package seedu.goldencompass.parser;
 
 import java.util.Arrays;
 import java.util.HashMap;

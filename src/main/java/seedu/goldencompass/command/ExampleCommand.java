@@ -1,6 +1,6 @@
 package seedu.goldencompass.command;
 
-import seedu.goldencompass.preparser.Config;
+import seedu.goldencompass.parser.Config;
 
 import java.util.Arrays;
 import java.util.List;
