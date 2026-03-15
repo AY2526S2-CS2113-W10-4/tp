@@ -1,7 +1,6 @@
 package seedu.goldencompass;
 
 import seedu.goldencompass.command.ExampleCommand;
-import seedu.goldencompass.command.SetInterviewDeadlineCommand;
 import seedu.goldencompass.command.CommandRegistry;
 import seedu.goldencompass.command.Executable;
 import seedu.goldencompass.exception.GoldenCompassException;
@@ -44,10 +43,8 @@ public class GoldenCompass {
 
     public void testCommand() {
 
-        //register commands
+        //register an example command for testing
         CommandRegistry.registerCommand("example", new ExampleCommand());
-        CommandRegistry.registerCommand(SetInterviewDeadlineCommand.COMMAND_WORD,
-                new SetInterviewDeadlineCommand(interviews));
 
         //loop for input
         while(true) {
