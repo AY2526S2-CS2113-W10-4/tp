@@ -22,6 +22,15 @@ public class InternshipList {
     }
 
     /**
+     * Returns the number of internships in the list.
+     *
+     * @return The size of the internship list
+     */
+    public int size() {
+        return internships.size();
+    }
+
+    /**
      * Displays all internships in the list with their index numbers.
      * Shows company name and job title for each internship.
      * If the list is empty, displays a message indicating no internships.
