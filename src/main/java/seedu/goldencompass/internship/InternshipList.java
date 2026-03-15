@@ -10,4 +10,8 @@ public class InternshipList {
         internships.add(x);
     }
 
+    public int getSize() {
+        return internships.size();
+    }
+
 }
