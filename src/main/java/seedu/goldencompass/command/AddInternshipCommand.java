@@ -1,7 +1,7 @@
 package seedu.goldencompass.command;
 
 import seedu.goldencompass.exception.GoldenCompassException;
-import seedu.goldencompass.preparser.Config;
+import seedu.goldencompass.parser.Config;
 import seedu.goldencompass.internship.Internship;
 import seedu.goldencompass.internship.InternshipList;
 import seedu.goldencompass.ui.Ui; // Import the UI class
