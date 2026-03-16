@@ -19,7 +19,8 @@ public class Executor {
         commands = Map.of(
                 "example", new ExampleCommand(parser, internshipList),
                 "add", new AddInternshipCommand(parser, internshipList),
-                "list", new ListCommand(parser, internshipList)
+                "list", new ListCommand(internshipList),
+                "list-interview", new ListInterviewCommand(interviewList)
         );
 
     }

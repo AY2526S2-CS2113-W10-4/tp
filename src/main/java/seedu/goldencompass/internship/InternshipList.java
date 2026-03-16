@@ -2,6 +2,7 @@ package seedu.goldencompass.internship;
 
 import seedu.goldencompass.ui.Ui;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Manages a list of internship applications.
@@ -10,10 +11,11 @@ import java.util.ArrayList;
 public class InternshipList {
 
     /** Internal list to store internship objects */
-    private final ArrayList<Internship> internships = new ArrayList<>();
+    private final List<Internship> internships = new ArrayList<>();
 
-    /** UI object for printing messages */
-    private Ui ui;
+    public List<Internship> getInternships() {
+        return internships;
+    }
 
     /**
      * Adds a new internship to the list.
@@ -34,23 +36,4 @@ public class InternshipList {
         return internships.size();
     }
 
-    /**
-     * Displays all internships in the list with their index numbers.
-     * Shows company name and job title for each internship.
-     * If the list is empty, displays a message indicating no internships.
-     */
-    public void list() {
-        Ui ui = new Ui();
-
-        if (internships.isEmpty()) {
-            System.out.println("No internships in the list.");
-            return;
-        }
-
-        ui.print("Here are the internships you have added:");
-        for (int i = 0; i < internships.size(); i++) {
-            Internship intern = internships.get(i);
-            ui.print((i + 1) + ". " + intern.companyName + " - " + intern.title);
-        }
-    }
 }

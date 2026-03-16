@@ -1,10 +1,10 @@
-package seedu.goldencompass;
+package seedu.goldencompass.command;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import seedu.goldencompass.exception.GoldenCompassException;
 import seedu.goldencompass.internship.Internship;
 import seedu.goldencompass.internship.InternshipList;
-import seedu.goldencompass.ui.Ui;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -19,32 +19,32 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class InternshipListTest {
 
     private InternshipList internshipList;
-    private Ui ui;
+    private ListCommand listCommand;
     private final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     private final PrintStream originalOut = System.out;
 
     @BeforeEach
     public void setUp() {
-        ui = new Ui();
         internshipList = new InternshipList();
+        listCommand = new ListCommand(internshipList);
         //internshipList.setUi(new Ui());
         // Redirect System.out to capture output for testing
         System.setOut(new PrintStream(outputStream));
     }
 
     @Test
-    public void list_emptyList_printsNoInternshipsMessage() {
-        internshipList.list();
+    public void list_emptyList_printsNoInternshipsMessage() throws GoldenCompassException {
+        listCommand.execute();
         String output = outputStream.toString().trim();
         assertEquals("No internships in the list.", output);
     }
 
     @Test
-    public void list_singleInternship_printsCorrectly() {
+    public void list_singleInternship_printsCorrectly() throws GoldenCompassException {
         Internship internship = new Internship("Software Engineer", "Google");
         internshipList.add(internship);
 
-        internshipList.list();
+        listCommand.execute();
         String output = outputStream.toString().trim();
 
         assertTrue(output.contains("Here are the internships you have added:"));
@@ -52,13 +52,13 @@ public class InternshipListTest {
     }
 
     @Test
-    public void list_multipleInternships_printsAllCorrectly() {
+    public void list_multipleInternships_printsAllCorrectly() throws GoldenCompassException {
         // Add multiple internships
         internshipList.add(new Internship("Software Engineer", "Google"));
         internshipList.add(new Internship("Frontend Developer", "Meta"));
         internshipList.add(new Internship("Backend Developer", "Amazon"));
 
-        internshipList.list();
+        listCommand.execute();
         String output = outputStream.toString();
 
         assertTrue(output.contains("1. Google - Software Engineer"));
@@ -80,13 +80,13 @@ public class InternshipListTest {
 
     // Optional: Test for large number of entries
     @Test
-    public void list_largeNumberOfInternships_printsAll() {
+    public void list_largeNumberOfInternships_printsAll() throws GoldenCompassException {
         int numberOfInternships = 10;
         for (int i = 0; i < numberOfInternships; i++) {
             internshipList.add(new Internship("Position " + i, "Company " + i));
         }
 
-        internshipList.list();
+        listCommand.execute();
         String output = outputStream.toString();
 
         for (int i = 0; i < numberOfInternships; i++) {

@@ -1,5 +1,6 @@
 package seedu.goldencompass.command;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import seedu.goldencompass.exception.GoldenCompassException;
 import seedu.goldencompass.internship.InternshipList;
@@ -10,13 +11,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class AddInternshipCommandTest {
 
-    private final Parser parser;
-    private final InternshipList internshipList;
-    private final AddInternshipCommand addInternshipCommand;
+    private Parser parser;
+    private InternshipList internshipList;
+    private AddInternshipCommand addInternshipCommand;
 
-    public AddInternshipCommandTest() throws GoldenCompassException {
-        this.parser = new Parser();
-        this.internshipList = new InternshipList();
+    @BeforeEach
+    public void setUp() throws GoldenCompassException {
+        parser = new Parser();
+        internshipList = new InternshipList();
         addInternshipCommand = new AddInternshipCommand(parser, internshipList);
     }
 

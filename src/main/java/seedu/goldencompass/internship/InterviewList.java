@@ -3,11 +3,15 @@ package seedu.goldencompass.internship;
 import seedu.goldencompass.ui.Ui;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class InterviewList {
 
-    private final ArrayList<Interview> interviews = new ArrayList<>();
-    private final Ui ui = new Ui();
+    private final List<Interview> interviews = new ArrayList<>();
+
+    public List<Interview> getInterviews() {
+        return interviews;
+    }
 
     public void add(Interview x) {
         interviews.add(x);
@@ -38,10 +42,6 @@ public class InterviewList {
      */
     public boolean isValidIndex(int index) {
         return index >= 1 && index <= interviews.size();
-    }
-
-    public void list() {
-        interviews.forEach(x -> ui.print(x.toString()));
     }
 
 }
