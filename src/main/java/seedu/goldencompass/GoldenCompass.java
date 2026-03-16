@@ -29,18 +29,19 @@ public class GoldenCompass {
 
     public static void main(String[] args) throws IOException, GoldenCompassException {
         new GoldenCompass().run();
-        //new GoldenCompass().testCommand();
 
     }
 
     public void run() {
 
         ui.greet();
-//        ui.print("Hello " + ui.read());
 
         while (true) {
             try {
                 parser.parse(ui.read());
+                if (parser.getCommand().equals("bye")) {
+                    break;
+                }
                 executor.execute();
             } catch (GoldenCompassException e) {
                 ui.print(e.getMessage());
@@ -49,7 +50,4 @@ public class GoldenCompass {
 
     }
 
-    public void testCommand() {
-
-    }
 }

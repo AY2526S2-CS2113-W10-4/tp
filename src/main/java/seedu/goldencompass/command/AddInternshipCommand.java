@@ -4,7 +4,7 @@ import seedu.goldencompass.exception.GoldenCompassException;
 import seedu.goldencompass.internship.Internship;
 import seedu.goldencompass.internship.InternshipList;
 import seedu.goldencompass.parser.Parser;
-import seedu.goldencompass.ui.Ui; // Import the UI class
+import seedu.goldencompass.ui.Ui;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,19 +27,14 @@ public class AddInternshipCommand implements Command {
         this.flagToParamMap = parser.getFlagToParamMap();
     }
 
-    // 1. Roaring Cat says no need for DEFAULT_FLAG in the list, just the extra flags
     private static final ArrayList<String> FLAGS = new ArrayList<>(List.of("/t"));
 
 
     @Override
     public void execute() throws GoldenCompassException {
 
-        // 2. Trust their checkFlag; it already throws "missing flags" errors
 //        checkFlag(flagToParamMap, FLAGS);
 
-        // 3. Extract logic: DEFAULT_FLAG is used for the company (the first part)
-        // String.join handles multiple entries if the user repeats a flag
-//        String companyName = String.join(" ", parser.getParamsOf("add")).trim();
         String companyName = parser.getParamsOf("add").get(0);
         String title = "";
         if (parser.getParamsOf("/t") != null) {
@@ -53,7 +48,8 @@ public class AddInternshipCommand implements Command {
         Internship newInternship = new Internship(title, companyName);
         internshipList.add(newInternship);
 
-        // 4. Use Ui.print instead of System.out.println
         ui.print("Got it! I've added this internship to your compass:\n  " + newInternship);
+
     }
+
 }

@@ -7,32 +7,32 @@ import seedu.goldencompass.parser.Parser;
 
 import java.util.Map;
 
-    public class Executor {
+public class Executor {
 
-        private final Map<String, Command> commands;
-        private final Parser parser;
+    private final Map<String, Command> commands;
+    private final Parser parser;
 
-        public Executor(Parser parser, InternshipList internships, InterviewList interviews) {
+    public Executor(Parser parser, InternshipList internships, InterviewList interviews) {
 
-            this.parser = parser;
+        this.parser = parser;
 
-            commands = Map.of(
-                    "example", new ExampleCommand(parser, internships),
-                    "add", new AddInternshipCommand(parser, internships)
-            );
-
-        }
-
-        public void execute() throws GoldenCompassException {
-
-            Command cmd = commands.get(parser.getCommand());
-
-            if (cmd == null) {
-                throw new GoldenCompassException("Error: unknown command: " + parser.getCommand());
-            }
-
-            cmd.execute();
-
-        }
+        commands = Map.of(
+                "example", new ExampleCommand(parser, internships),
+                "add", new AddInternshipCommand(parser, internships)
+        );
 
     }
+
+    public void execute() throws GoldenCompassException {
+
+        Command cmd = commands.get(parser.getCommand());
+
+        if (cmd == null) {
+            throw new GoldenCompassException("Error: unknown command: " + parser.getCommand());
+        }
+
+        cmd.execute();
+
+    }
+
+}

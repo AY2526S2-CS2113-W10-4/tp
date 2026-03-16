@@ -3,7 +3,6 @@ package seedu.goldencompass.command;
 import seedu.goldencompass.exception.GoldenCompassException;
 import seedu.goldencompass.internship.InternshipList;
 import seedu.goldencompass.parser.Parser;
-import seedu.goldencompass.parser.Config;
 import seedu.goldencompass.ui.Ui;
 
 import java.util.Arrays;
@@ -24,14 +23,8 @@ public class ExampleCommand implements Command {
         ui = new Ui();
         this.parser = parser;
         this.internships = internships;
-//        Config.registerCommandFlag("example", COMMAND_FLAGS);
-//        CommandRegistry.registerCommand("example", this); //self register
     }
 
-    /**
-     * Prints a list of legal flags with their respective parameters.
-     * <P><B>Example Use</B></P>
-     */
     @Override
     public void execute() throws GoldenCompassException {
 
