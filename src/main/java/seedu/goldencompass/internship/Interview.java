@@ -29,4 +29,9 @@ public class Interview {
         return date;
     }
 
+    @Override
+    public String toString() {
+        return internship.toString() + " @ " + date;
+    }
+
 }

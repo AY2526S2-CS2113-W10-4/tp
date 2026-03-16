@@ -14,6 +14,7 @@ public class Internship {
         this.title = title;
         this.companyName = companyName;
     }
+
     @Override
     public String toString() {
         return title + " at " + companyName;
