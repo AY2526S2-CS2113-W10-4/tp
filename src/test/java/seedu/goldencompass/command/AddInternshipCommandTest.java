@@ -5,6 +5,7 @@ import seedu.goldencompass.exception.GoldenCompassException;
 import seedu.goldencompass.internship.InternshipList;
 import seedu.goldencompass.parser.Parser;
 
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -41,7 +42,7 @@ public class AddInternshipCommandTest {
 
     @Test
     public void execute_emptyTitle_throwsException() throws GoldenCompassException {
-
+        
         parser.parse("add Shopee /t    ");
 
         assertThrows(GoldenCompassException.class, addInternshipCommand::execute);
