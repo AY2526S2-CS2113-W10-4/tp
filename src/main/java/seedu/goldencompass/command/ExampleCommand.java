@@ -5,11 +5,8 @@ import seedu.goldencompass.internship.InternshipList;
 import seedu.goldencompass.parser.Parser;
 import seedu.goldencompass.ui.Ui;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.HashSet;
 
 public class ExampleCommand implements Command {
 

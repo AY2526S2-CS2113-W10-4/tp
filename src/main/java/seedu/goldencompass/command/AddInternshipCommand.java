@@ -6,7 +6,6 @@ import seedu.goldencompass.internship.InternshipList;
 import seedu.goldencompass.parser.Parser;
 import seedu.goldencompass.ui.Ui;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -32,7 +31,7 @@ public class AddInternshipCommand implements Command {
 
         String companyName = parser.getParamsOf("add").get(0);
         String title = "";
-        
+
         if (parser.getParamsOf("/t") != null) {
             title = String.join(" ", parser.getParamsOf("/t")).trim();
         }
