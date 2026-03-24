@@ -12,6 +12,7 @@ public class InterviewList {
     }
 
     public void add(Interview x) {
+        assert x != null : "Interview to add should not be null";
         interviews.add(x);
     }
 
@@ -22,6 +23,7 @@ public class InterviewList {
      * @throws IndexOutOfBoundsException if the index is out of range.
      */
     public Interview get(int index) {
+        assert index >= 0 && index < interviews.size() : "Index should be within valid range";
         return interviews.get(index);
     }
 

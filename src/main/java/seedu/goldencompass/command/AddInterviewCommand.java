@@ -30,6 +30,10 @@ public class AddInterviewCommand extends CommandClass {
 
     @Override
     public void execute() throws GoldenCompassException {
+        assert parser != null : "Parser should not be null";
+        assert internshipList != null : "InternshipList should not be null";
+        assert interviewList != null : "InterviewList should not be null";
+
         List<String> params = parser.getParamsOf(COMMAND_WORD);
 
         if (params == null || params.get(0).trim().isEmpty()) {
@@ -37,6 +41,7 @@ public class AddInterviewCommand extends CommandClass {
         }
 
         String indexParam = params.get(0).trim();
+        assert !indexParam.isEmpty() : "Index parameter should not be empty after validation";
 
         int index;
         try {
@@ -51,7 +56,11 @@ public class AddInterviewCommand extends CommandClass {
                             + internshipList.getSize() + " internship(s).");
         }
 
+        assert index >= 1 && index <= internshipList.getSize() : "Index should be within valid range";
+
         Internship internship = internshipList.getInternships().get(index - 1);
+        assert internship != null : "Retrieved internship should not be null";
+
         Interview interview = new Interview(internship);
         interviewList.add(interview);
 

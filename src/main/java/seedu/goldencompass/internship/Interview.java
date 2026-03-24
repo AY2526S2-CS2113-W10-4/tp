@@ -9,11 +9,14 @@ public class Interview {
     protected String comments;
 
     public Interview(Internship internship, LocalDate date) {
+        assert internship != null : "Internship should not be null";
+        assert date != null : "Date should not be null when provided";
         this.internship = internship;
         this.date = date;
     }
 
     public Interview(Internship internship) {
+        assert internship != null : "Internship should not be null";
         this.internship = internship;
         this.date = null;
     }
@@ -23,6 +26,7 @@ public class Interview {
      * @param date a {@code LocalDate} representing the new deadline date.
      */
     public void setDate(LocalDate date) {
+        assert date != null : "Date should not be null";
         this.date = date;
     }
 

@@ -49,12 +49,16 @@ public class SetInterviewDeadlineCommand implements Command {
      */
     @Override
     public void execute() throws GoldenCompassException {
+        assert parser != null : "Parser should not be null";
+        assert interviewList != null : "InterviewList should not be null";
+
         List<String> indexParams = parser.getParamsOf(COMMAND_WORD);
         if (indexParams == null || indexParams.get(0).trim().isEmpty()) {
             throw new GoldenCompassException("Error: Please provide the index of the interview. "
                     + "Usage: set-deadline INDEX /d DATE");
         }
         String indexParam = indexParams.get(0).trim();
+        assert !indexParam.isEmpty() : "Index parameter should not be empty after validation";
 
         List<String> dateParams = parser.getParamsOf(FLAG_DATE);
         if (dateParams == null || dateParams.get(0).trim().isEmpty()) {
@@ -62,6 +66,7 @@ public class SetInterviewDeadlineCommand implements Command {
                     + "Usage: set-deadline INDEX /d DATE");
         }
         String dateParam = dateParams.get(0).trim();
+        assert !dateParam.isEmpty() : "Date parameter should not be empty after validation";
 
         int index;
         try {
@@ -75,6 +80,8 @@ public class SetInterviewDeadlineCommand implements Command {
                     "Error: Index " + index + " is out of range. There are " + interviewList.size() + " interview(s).");
         }
 
+        assert interviewList.isValidIndex(index) : "Index should be valid after validation";
+
         LocalDate date;
         try {
             date = LocalDate.parse(dateParam);
@@ -82,7 +89,11 @@ public class SetInterviewDeadlineCommand implements Command {
             throw new GoldenCompassException("Error: Invalid date format, expected yyyy-MM-dd, got: " + dateParam);
         }
 
+        assert date != null : "Parsed date should not be null";
+
         Interview interview = interviewList.get(index - 1);
+        assert interview != null : "Retrieved interview should not be null";
+
         interview.setDate(date);
 
         ui.print("Deadline set for interview " + index + ": " + date);
