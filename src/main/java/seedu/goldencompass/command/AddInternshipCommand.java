@@ -7,7 +7,6 @@ import seedu.goldencompass.parser.Parser;
 import seedu.goldencompass.ui.Ui;
 
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
@@ -34,7 +33,7 @@ public class AddInternshipCommand implements Command {
      * Executes the command to add a new internship to the tracker.
      * Extracts and validates the company name and the internship title from the parsed user input.
      * If all inputs are valid, a new {@code Internship} is created and appended to the {@code InternshipList}.
-     * * @throws GoldenCompassException If the company name is missing, the '/t' flag is missing or invalid,
+     * @throws GoldenCompassException If the company name is missing, the '/t' flag is missing or invalid,
      * or the title text is left blank.
      */
     @Override
