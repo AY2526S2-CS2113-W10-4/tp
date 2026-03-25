@@ -40,8 +40,7 @@ public class InternshipList {
         this.ui = ui;
         logger.fine("UI instance set successfully");
     }
-
-
+    
     public List<Internship> getInternships() {
         assert internships != null : "Internships list should not be null";
         logger.finer("Returning internships list, size: " + internships.size());
@@ -60,19 +59,19 @@ public class InternshipList {
             throw new IllegalArgumentException("Internship cannot be null");
         }
 
-    int sizeBefore = internships.size();
+        int sizeBefore = internships.size();
         internships.add(x);
-    int sizeAfter = internships.size();
+        int sizeAfter = internships.size();
 
         logger.info("Added internship: " + x.getCompanyName() + " - " + x.getTitle());
 
-    // Assertion: size should increase by exactly 1
-        assert sizeAfter == sizeBefore + 1 : "List size should increase by 1. Before: " + sizeBefore + ", After: " + sizeAfter;
-}
+        // Assertion: size should increase by exactly 1
+        assert sizeAfter == sizeBefore + 1
+                : "List size should increase by 1. Before: " + sizeBefore + ", After: " + sizeAfter;
+    }
 
     /**
      * Returns the number of internships in the list.
-     *
      *
      * @return The size of the internship list
      */
@@ -94,7 +93,8 @@ public class InternshipList {
         assert internships != null : "Internships list should not be null";
 
         if (index < 0 || index >= internships.size()) {
-            logger.warning("Invalid index requested: " + index + " (list size: " + internships.size() + ")");
+            logger.warning("Invalid index requested: " + index
+                    + " (list size: " + internships.size() + ")");
             throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + internships.size());
         }
 
