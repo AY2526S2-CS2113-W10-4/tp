@@ -30,32 +30,52 @@ public class AddInternshipCommand implements Command {
         this.internshipList = internshipList;
     }
 
+    /**
+     * Executes the command to add a new internship to the tracker.
+     * Extracts and validates the company name and the internship title from the parsed user input.
+     * If all inputs are valid, a new {@code Internship} is created and appended to the {@code InternshipList}.
+     * * @throws GoldenCompassException If the company name is missing, the '/t' flag is missing or invalid,
+     * or the title text is left blank.
+     */
     @Override
     public void execute() throws GoldenCompassException {
         // LOGGING: Track when the command actually starts running
         logger.log(Level.INFO, "Starting execution of AddInternshipCommand...");
 
         List<String> addParams = parser.getParamsOf("add");
+        List<String> titleParams = parser.getParamsOf("/t");
 
-        // DEFENSIVE PROGRAMMING: Prevent code crashes by checking for null or empty lists BEFORE getting index 0
+        // Create a "bucket" to collect all our error messages
+        StringBuilder errorMessage = new StringBuilder();
+
+        // 1. DEFENSIVE CHECK: Company Name
         if (addParams == null || addParams.isEmpty() || addParams.get(0).trim().isEmpty()) {
             logger.log(Level.WARNING, "Failed to add internship: Company name is missing.");
-            throw new GoldenCompassException("Company name cannot be empty!");
+            errorMessage.append("Company name cannot be empty!\n");
         }
 
-        String companyName = parser.getParamsOf("add").get(0);
-        String title = "";
-
-        // Defensive check: Ensure the list exists AND is not empty before joining it
-        if (parser.getParamsOf("/t") != null && !parser.getParamsOf("/t").isEmpty()) {
-            title = String.join(" ", parser.getParamsOf("/t")).trim();
+        // 2. DEFENSIVE CHECK: Missing or invalid flags
+        if (titleParams == null) {
+            logger.log(Level.WARNING, "Failed to add internship: Invalid flag or missing /t flag.");
+            errorMessage.append("Invalid flag or missing title! Please use the '/t' flag for the role.\n");
+        } else {
+            // 3. DEFENSIVE CHECK: Empty title text (only check if the /t flag actually exists)
+            String titleCheck = String.join(" ", titleParams).trim();
+            if (titleCheck.isEmpty()) {
+                logger.log(Level.WARNING, "Failed to add internship: Title text is missing after /t.");
+                errorMessage.append("Internship title cannot be empty!\n");
+            }
         }
 
-        // EXCEPTION & LOGGING: Reject empty titles
-        if (title.isEmpty()) {
-            logger.log(Level.WARNING, "Failed to add internship: Title is missing.");
-            throw new GoldenCompassException("Internship title cannot be empty!");
+        // 4. THE MOMENT OF TRUTH: If our error bucket has anything in it, throw everything at once!
+        if (!errorMessage.isEmpty()) {
+            throw new GoldenCompassException(errorMessage.toString().trim());
         }
+
+        // --- If the code reaches here, the input is 100% flawless ---
+
+        String companyName = addParams.get(0).trim();
+        String title = String.join(" ", titleParams).trim();
 
         Internship newInternship = new Internship(title, companyName);
         internshipList.add(newInternship);
