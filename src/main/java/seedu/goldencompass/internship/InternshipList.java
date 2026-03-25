@@ -146,4 +146,13 @@ public class InternshipList {
 
         logger.info("Displayed " + internships.size() + " internships");
     }
+
+    public Internship findInternshipByCompany(String companyName) {
+        for (Internship i : internships) {
+            if (i.getCompanyName().equalsIgnoreCase(companyName)) {
+                return i;
+            }
+        }
+        return null;
+    }
 }
