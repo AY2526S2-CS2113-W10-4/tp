@@ -55,8 +55,10 @@ public class Internship {
         this.hasReceivedOffer = false;
 
         // Assertions to verify invariants
-        assert this.title != null && !this.title.isEmpty() : "Title should be set after construction";
-        assert this.companyName != null && !this.companyName.isEmpty() : "Company name should be set after construction";
+        assert this.title != null && !this.title.isEmpty()
+                : "Title should be set after construction";
+        assert this.companyName != null && !this.companyName.isEmpty()
+                : "Company name should be set after construction";
         assert this.hasApplied : "hasApplied should be true after creation";
 
         logger.info("Created internship: " + this.companyName
