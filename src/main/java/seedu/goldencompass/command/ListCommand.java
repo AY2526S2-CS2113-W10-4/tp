@@ -69,29 +69,31 @@ public class ListCommand extends CommandClass {
 
             //Check if list is empty
             if (internships.isEmpty()) {
-            ui.print("No internships in the list.");
-            logger.fine("List is empty, displayed message");
-            return;
-        }
+                ui.print("No internships in the list.");
+                logger.fine("List is empty, displayed message");
+                return;
+            }
 
-        // Display header
-        ui.print("Here are the internships you have added:");
+            // Display header
+            ui.print("Here are the internships you have added:");
             logger.finer("Displaying " + internships.size() + " internships");
 
             // Display each internship
-        for (int i = 0; i < internships.size(); i++) {
-            Internship intern = internships.get(i);
+            for (int i = 0; i < internships.size(); i++) {
+                Internship intern = internships.get(i);
 
-            // Defensive check: each internship should not be null
-            if (intern == null) {
-                logger.warning("Null internship found at index " + i);
-                ui.print((i + 1) + ". [Error: Invalid internship data]");
-            } else {
-                ui.print((i + 1) + ". " + intern.getCompanyName() + " - " + intern.getTitle());
+                // Defensive check: each internship should not be null
+                if (intern == null) {
+                    logger.warning("Null internship found at index " + i);
+                    ui.print((i + 1) + ". [Error: Invalid internship data]");
+                } else {
+                    ui.print((i + 1) + ". " + intern.getCompanyName() +
+                            " - " + intern.getTitle());
+                }
             }
-        }
 
-            logger.info("ListCommand executed successfully, displayed " + internships.size() + " internships");
+            logger.info("ListCommand executed successfully, displayed " + internships.size() +
+                    " internships");
 
         } catch (GoldenCompassException e) {
             // Re-throw GoldenCompassException

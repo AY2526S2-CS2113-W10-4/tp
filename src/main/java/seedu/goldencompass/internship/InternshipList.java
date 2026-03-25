@@ -40,7 +40,7 @@ public class InternshipList {
         this.ui = ui;
         logger.fine("UI instance set successfully");
     }
-    
+
     public List<Internship> getInternships() {
         assert internships != null : "Internships list should not be null";
         logger.finer("Returning internships list, size: " + internships.size());
@@ -63,7 +63,8 @@ public class InternshipList {
         internships.add(x);
         int sizeAfter = internships.size();
 
-        logger.info("Added internship: " + x.getCompanyName() + " - " + x.getTitle());
+        logger.info("Added internship: " + x.getCompanyName()
+                + " - " + x.getTitle());
 
         // Assertion: size should increase by exactly 1
         assert sizeAfter == sizeBefore + 1
