@@ -18,7 +18,6 @@ public class Internship {
     protected boolean hasApplied;
     protected boolean hasReceivedOffer;
     protected Interview interview;
-    private boolean isOfferReceived = false;
 
 
     /**
@@ -88,15 +87,6 @@ public class Internship {
 
     @Override
     public String toString() {
-        String offerStatus = isOfferReceived ? " [OFFER RECEIVED] 🏆" : "";
-        return title + " at " + companyName + offerStatus;
-    }
-
-    public void markAsOffer() {
-        this.isOfferReceived = true;
-    }
-
-    public boolean hasOffer() {
-        return isOfferReceived;
+        return companyName + " - " + title;
     }
 }
