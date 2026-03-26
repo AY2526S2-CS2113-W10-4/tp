@@ -28,7 +28,8 @@ public class Executor {
                 "list-interview", new ListInterviewCommand(interviewList),
                 "set-deadline", new SetInterviewDeadlineCommand(parser, interviewList),
                 "add-interview", new AddInterviewCommand(parser, internshipList, interviewList),
-                "alias", new AddAliasCommand(parser)
+                "alias", new AddAliasCommand(parser),
+                "mark", new MarkOfferCommand(parser, internshipList)
         );
 
         //copy the key of commands into alias map
