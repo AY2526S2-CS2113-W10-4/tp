@@ -1,4 +1,4 @@
-package seedu.goldencompass.set_operation;
+package seedu.goldencompass.setoperation;
 
 import java.util.HashSet;
 import java.util.Set;
