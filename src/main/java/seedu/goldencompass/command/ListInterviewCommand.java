@@ -27,9 +27,13 @@ public class ListInterviewCommand extends CommandClass {
 
         ui.print("Here are the interview invitations:");
 
-        interviews.stream()
-                  .sorted(Comparator.comparing(Interview::getDate))
-                  .forEach(x -> ui.print(x.toString()));
+        List<Interview> sorted_interviews = interviews.stream()
+                                                      .sorted(Comparator.comparing(Interview::getDate))
+                                                      .toList();
+
+        for (int i = 0; i < sorted_interviews.size(); i++) {
+            ui.print((i + 1) + ". " + sorted_interviews.get(i).toString());
+        }
 
     }
 
