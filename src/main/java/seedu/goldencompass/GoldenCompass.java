@@ -11,6 +11,9 @@ import seedu.goldencompass.storage.InternshipStorage;
 import seedu.goldencompass.storage.InterviewStorage;
 
 import java.io.IOException;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class GoldenCompass {
     /**
@@ -41,6 +44,13 @@ public class GoldenCompass {
     }
 
     public static void main(String[] args) throws IOException, GoldenCompassException {
+
+        Logger rootLogger = Logger.getLogger("");
+        rootLogger.setLevel(Level.WARNING);
+
+        for (Handler h : rootLogger.getHandlers()) {
+            h.setLevel(Level.WARNING);
+        }
         new GoldenCompass().run();
 
     }

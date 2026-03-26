@@ -6,7 +6,6 @@ public class Interview {
 
     protected Internship internship;
     protected LocalDate date;
-    protected String comments;
 
     public Interview(Internship internship, LocalDate date) {
         assert internship != null : "Internship should not be null";

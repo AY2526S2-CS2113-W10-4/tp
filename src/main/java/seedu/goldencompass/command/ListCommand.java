@@ -87,8 +87,9 @@ public class ListCommand extends CommandClass {
                     logger.warning("Null internship found at index " + i);
                     ui.print((i + 1) + ". [Error: Invalid internship data]");
                 } else {
+                    String offerTag = intern.hasOffer() ? " [OFFER RECEIVED] 🏆" : "";
                     ui.print((i + 1) + ". " + intern.getCompanyName() +
-                            " - " + intern.getTitle());
+                            " - " + intern.getTitle() + offerTag);
                 }
             }
 

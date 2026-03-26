@@ -4,6 +4,7 @@ import seedu.goldencompass.exception.GoldenCompassException;
 import seedu.goldencompass.internship.Interview;
 import seedu.goldencompass.internship.InterviewList;
 
+import java.util.Comparator;
 import java.util.List;
 
 public class ListInterviewCommand extends CommandClass {
@@ -26,10 +27,9 @@ public class ListInterviewCommand extends CommandClass {
 
         ui.print("Here are the interview invitations:");
 
-        for (int i = 0; i < interviews.size(); i++) {
-            Interview interview = interviews.get(i);
-            ui.print((i + 1) + ". " + interview.toString());
-        }
+        interviews.stream()
+                  .sorted(Comparator.comparing(Interview::getDate))
+                  .forEach(x -> ui.print(x.toString()));
 
     }
 
