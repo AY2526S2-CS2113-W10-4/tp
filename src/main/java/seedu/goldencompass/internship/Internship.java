@@ -89,7 +89,7 @@ public class Internship {
     @Override
     public String toString() {
         String offerStatus = isOfferReceived ? " [OFFER RECEIVED] 🏆" : "";
-        return title + " at " + companyName + offerStatus;
+        return companyName + " - " + title + offerStatus;
     }
 
     public void markAsOffer() {
