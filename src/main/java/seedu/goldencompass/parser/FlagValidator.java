@@ -1,7 +1,7 @@
 package seedu.goldencompass.parser;
 
 import seedu.goldencompass.exception.GoldenCompassException;
-import seedu.goldencompass.set_operation.SetOperation;
+import seedu.goldencompass.setoperation.SetOperation;
 
 import java.util.Set;
 
