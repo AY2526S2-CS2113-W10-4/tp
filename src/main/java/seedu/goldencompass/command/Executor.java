@@ -10,7 +10,7 @@ import java.util.Map;
 
 public class Executor {
 
-    private static final Map<String, String> ALIAS_MAP = new HashMap<>();
+    private final Map<String, String> aliasMap = new HashMap<>();
 
     private final Map<String, Command> commands;
     private final Parser parser;
@@ -28,22 +28,23 @@ public class Executor {
                 "list-interview", new ListInterviewCommand(interviewList),
                 "set-deadline", new SetInterviewDeadlineCommand(parser, interviewList),
                 "add-interview", new AddInterviewCommand(parser, internshipList, interviewList),
-                "alias", new AddAliasCommand(parser)
+                "alias", new AddAliasCommand(parser, this),
+                "remove-alias", new RemoveAliasCommand(parser, this)
         );
 
         //copy the key of commands into alias map
 
-        commands.keySet().forEach(key -> ALIAS_MAP.put(key, key));
+        commands.keySet().forEach(key -> aliasMap.put(key, key));
     }
 
     public void execute() throws GoldenCompassException {
 
         String inputAlias = parser.getCommand();
         // Check if the alias exists at all
-        if (!ALIAS_MAP.containsKey(inputAlias)) {
+        if (!aliasMap.containsKey(inputAlias)) {
             throw new GoldenCompassException("Error: unknown command: " + inputAlias);
         }
-        String commandWord = ALIAS_MAP.get(inputAlias);
+        String commandWord = aliasMap.get(inputAlias);
         Command cmd = commands.get(commandWord);
 
         if (cmd == null) {
@@ -54,14 +55,31 @@ public class Executor {
 
     }
 
-    public static void addAlias(String command, String alias) throws GoldenCompassException {
-        if(ALIAS_MAP.get(command) == null) {
+    public void addAlias(String command, String alias) throws GoldenCompassException {
+        if(aliasMap.get(command) == null) {
             throw new GoldenCompassException("Error: Cannot add alias to \"" + command + " since it does not exist.");
         }
-        ALIAS_MAP.put(alias, command);
+        if(aliasMap.containsKey(alias)) {
+            throw new GoldenCompassException("Error: Alias \"" + alias + "\" already exists.");
+        }
+        aliasMap.put(alias, command);
     }
 
-    public static Map<String, String> getAliasMap() {
-        return ALIAS_MAP;
+    public void removeAlias(String alias) throws GoldenCompassException{
+        //alias does not exist
+        if(!aliasMap.containsKey(alias)) {
+            throw new GoldenCompassException("Error: Alias: \"" + alias +"\" does not exist.");
+        }
+
+        //cannot remove default command
+        if(commands.containsKey(alias)) {
+            throw new GoldenCompassException("Error: Cannot remove default command: \"" + alias +"\"");
+        }
+
+        aliasMap.remove(alias);
+    }
+
+    public Map<String, String> getAliasMap() {
+        return aliasMap;
     }
 }

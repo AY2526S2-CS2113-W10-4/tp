@@ -10,8 +10,10 @@ public class AddAliasCommand extends CommandClass{
     //default + /c + /a; total 3
     private static final int PARAM_LENGTH = 3;
 
-    public AddAliasCommand(Parser parser) {
+    private final Executor executor;
+    public AddAliasCommand(Parser parser, Executor executor) {
         super(parser);
+        this.executor = executor;
     }
 
 
@@ -23,7 +25,7 @@ public class AddAliasCommand extends CommandClass{
         String commandWord = parser.getParamsOf("/c").get(0);
         String alias = parser.getParamsOf("/a").get(0);
 
-        Executor.addAlias(commandWord, alias);
+        executor.addAlias(commandWord, alias);
         ui.print("Command: \"" + commandWord + "\" now has a new alias: \"" + alias + "\"");
     }
 }

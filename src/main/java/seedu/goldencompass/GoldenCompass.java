@@ -33,10 +33,11 @@ public class GoldenCompass {
         internships.setUi(ui);
         this.interviewStorage = new InterviewStorage("data/interviews.txt");
         this.interviews = new InterviewList();
+        executor = new Executor(parser, internships, interviews);
         this.interviewStorage.load(interviews, internships);
         this.aliasStorage = new AliasStorage("data/aliases.txt");
-        this.aliasStorage.load(Executor.getAliasMap());
-        executor = new Executor(parser, internships, interviews);
+        this.aliasStorage.load(executor.getAliasMap());
+
     }
 
     public static void main(String[] args) throws IOException, GoldenCompassException {
@@ -57,7 +58,7 @@ public class GoldenCompass {
                 executor.execute();
                 internshipStorage.save(internships);
                 interviewStorage.save(interviews);
-                aliasStorage.save(Executor.getAliasMap());
+                aliasStorage.save(executor.getAliasMap());
             } catch (GoldenCompassException e) {
                 ui.print(e.getMessage());
             }
