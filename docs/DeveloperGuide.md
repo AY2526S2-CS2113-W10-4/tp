@@ -8,6 +8,55 @@
 
 {Describe the design and implementation of the product. Use UML diagrams and short code snippets where applicable.}
 
+### Internship Management — Class Overview
+
+The following class diagram shows the key classes involved in internship management and their relationships.
+
+Each `AddInternshipCommand` holds a reference to the `Parser` and the `InternshipList`.
+The command relies on the `Parser` to extract user inputs and writes the newly created `Internship` directly to the `InternshipList`.
+
+### Add Internship Feature
+
+#### Overview
+
+The `add` command allows the user to create a new internship application in the tracker.
+The user specifies the company name and the role title, and the system creates an `Internship` object
+and adds it to the `InternshipList`.
+
+**Command format:** `add COMPANY_NAME /t ROLE_TITLE`
+
+**Example:** `add Grab /t Software Engineer` creates an internship at Grab for a Software Engineer role.
+
+#### Implementation
+
+The feature is implemented in `AddInternshipCommand`, which implements the `Command` interface.
+When `execute()` is called, it performs the following steps:
+
+1. Retrieves the company name parameter from the `Parser` using `getParamsOf("add")`.
+2. Retrieves the role title parameter from the `Parser` using `getParamsOf("/t")`.
+3. Validates that the company name parameter is present and not an empty string.
+4. Validates that the `/t` flag is present and that the title text is not empty.
+5. Throws a `GoldenCompassException` with an accumulated error message if any validation steps fail.
+6. Creates a new `Internship` object using the validated company name and title.
+7. Adds the newly created `Internship` to the `InternshipList`.
+8. Prints a confirmation message to the user via the `Ui`.
+
+![Add Internship Sequence Diagram](diagrams/AddInternshipCommandSequenceDiagram.png)
+
+#### Design Considerations
+
+**Aspect: Input Validation and Error Handling Strategy**
+
+* **Alternative 1 (Current Implementation): Error Accumulation**
+  * **Description:** The command checks all potential failure points (missing company name, missing `/t` flag, empty title) and collects all error messages into a single `StringBuilder`. If the builder is not empty at the end of the checks, it throws one consolidated `GoldenCompassException`.
+  * **Pros:** Significantly improves User Experience (UX). If a user makes multiple syntax mistakes, they are informed of all of them at once, rather than having to fix one error just to be immediately hit by another.
+  * **Cons:** Slightly more verbose code, as it requires setting up a `StringBuilder` and using `if` blocks that don't immediately return.
+
+* **Alternative 2: Fail-Fast Validation**
+  * **Description:** The command throws a `GoldenCompassException` immediately upon encountering the very first invalid input and halts execution.
+  * **Pros:** Simpler and shorter code. Execution stops immediately, saving minor amounts of processing time.
+  * **Cons:** Frustrating UX. A user who forgets both the company name and the `/t` flag will only see the "missing company name" error. After fixing it and pressing enter, they will be hit with the "missing flag" error, creating an annoying "whack-a-mole" experience.
+
 ### Interview Management — Class Overview
 
 The following class diagram shows the key classes involved in interview management and their relationships.
