@@ -1,7 +1,6 @@
 package seedu.goldencompass.command;
 
 import seedu.goldencompass.exception.GoldenCompassException;
-import seedu.goldencompass.exception.GoldenCompassTooManyArgumentsException;
 import seedu.goldencompass.parser.Parser;
 
 
