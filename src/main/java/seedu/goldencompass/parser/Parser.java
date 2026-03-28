@@ -13,7 +13,7 @@ public class Parser {
     private final Preparser preparser;
 
     public Parser() throws GoldenCompassException {
-        Set<String> flagSet = Set.of("/by", "/from", "/to", "/t", "/d", "/c", "/a");
+        Set<String> flagSet = Set.of("/by", "/from", "/to", "/t", "/d", "/c", "/a", "/help");
         preparser = new Preparser(flagSet);
     }
 
@@ -38,4 +38,7 @@ public class Parser {
         }
     }
 
+    public boolean isFlagExist(String flag) {
+        return flagToParamMap.containsKey(flag);
+    }
 }

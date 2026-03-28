@@ -6,6 +6,8 @@ import seedu.goldencompass.ui.Ui;
 
 public class CommandClass implements Command {
 
+    private static final String FLAG_MISSING_MESSAGE = "Error: This command requires this flag: ";
+
     /** Package-private UI and parser */
     Ui ui;
     Parser parser;
@@ -23,6 +25,32 @@ public class CommandClass implements Command {
     @Override
     public void execute() throws GoldenCompassException {
 
+    }
+
+    private void printHelp(String commandDescription, String flagDescription) {
+        ui.print(commandDescription, flagDescription);
+    }
+
+    protected boolean checkHelpFlag(String commandDescription, String flagDescription) {
+        if(parser.isFlagExist("/help")) {
+            printHelp(commandDescription, flagDescription);
+            return true;
+        }
+        return false;
+    }
+
+    protected void checkFlagPresence(String... flags) throws GoldenCompassException {
+        StringBuilder errorMessage = new StringBuilder();
+
+        for(String flag : flags) {
+            if(!parser.isFlagExist(flag)) {
+                errorMessage.append(FLAG_MISSING_MESSAGE).append(flag).append(System.lineSeparator());
+            }
+        }
+
+        if(!errorMessage.isEmpty()) {
+            throw new GoldenCompassException(errorMessage.toString());
+        }
     }
 
 }
