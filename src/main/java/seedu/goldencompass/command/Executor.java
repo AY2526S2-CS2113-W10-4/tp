@@ -21,18 +21,19 @@ public class Executor {
 
         this.parser = parser;
 
-        commands = Map.of(
-                "example", new ExampleCommand(parser, internshipList),
-                "add", new AddInternshipCommand(parser, internshipList),
-                "list", new ListCommand(internshipList),
-                "list-interview", new ListInterviewCommand(interviewList),
-                "set-deadline", new SetInterviewDeadlineCommand(parser, interviewList),
-                "add-interview", new AddInterviewCommand(parser, internshipList, interviewList),
-                "alias", new AddAliasCommand(parser, this),
-                "remove-alias", new RemoveAliasCommand(parser, this),
-                "mark", new MarkOfferCommand(parser, internshipList),
-                "delete", new DeleteInternshipCommand(parser, internshipList)
-                //"delete-interview", new DeleteInterviewCommand(parser, internshipList, interviewList)
+        commands = Map.ofEntries(
+                Map.entry("example", new ExampleCommand(parser, internshipList)),
+                Map.entry("add", new AddInternshipCommand(parser, internshipList)),
+                Map.entry("list", new ListCommand(internshipList)),
+                Map.entry("list-interview", new ListInterviewCommand(interviewList)),
+                Map.entry("set-deadline", new SetInterviewDeadlineCommand(parser, interviewList)),
+                Map.entry("add-interview", new AddInterviewCommand(parser, internshipList, interviewList)),
+                Map.entry("alias", new AddAliasCommand(parser, this)),
+                Map.entry("remove-alias", new RemoveAliasCommand(parser, this)),
+                Map.entry("mark", new MarkOfferCommand(parser, internshipList)),
+                Map.entry("delete", new DeleteInternshipCommand(parser, internshipList)),
+                // Added your new reject command safely here!
+                Map.entry("reject", new RejectOfferCommand(parser, internshipList))
         );
 
         //copy the key of commands into alias map

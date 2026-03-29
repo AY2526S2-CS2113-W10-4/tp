@@ -19,6 +19,7 @@ public class Internship {
     protected boolean hasReceivedOffer;
     protected Interview interview;
     private boolean isOfferReceived = false;
+    private boolean isRejected = false;
 
 
     /**
@@ -107,14 +108,29 @@ public class Internship {
         }
     }
 
+    public void markAsRejected() {
+        this.isRejected = true;
+        this.isOfferReceived = false; // Safety check
+    }
+
+    public boolean isRejected() {
+        return isRejected;
+    }
+
     @Override
     public String toString() {
-        String offerStatus = isOfferReceived ? " [OFFER RECEIVED] 🏆" : "";
-        return companyName + " - " + title + offerStatus;
+        String status = "";
+        if (isOfferReceived) {
+            status = " [OFFER RECEIVED] 🏆";
+        } else if (isRejected) {
+            status = " [REJECTED] ❌";
+        }
+        return companyName + " - " + title + status;
     }
 
     public void markAsOffer() {
         this.isOfferReceived = true;
+        this.isRejected = false;
     }
 
     public boolean hasOffer() {
