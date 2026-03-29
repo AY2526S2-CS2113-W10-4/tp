@@ -32,7 +32,6 @@ public class Executor {
                 Map.entry("remove-alias", new RemoveAliasCommand(parser, this)),
                 Map.entry("mark", new MarkOfferCommand(parser, internshipList)),
                 Map.entry("delete", new DeleteInternshipCommand(parser, internshipList)),
-                // Added your new reject command safely here!
                 Map.entry("reject", new RejectOfferCommand(parser, internshipList))
         );
 

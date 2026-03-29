@@ -38,7 +38,7 @@ public class RejectOfferCommand extends CommandClass {
         List<String> params = parser.getParamsOf("reject");
 
         // 1. DEFENSIVE CHECK: Missing index
-        if (params == null || params.isEmpty() || params.get(0).trim().isEmpty()) {
+        if (params == null || params.isEmpty() || params.get(0).isBlank()) {
             logger.log(Level.WARNING, "Failed to reject: Index is missing.");
             throw new GoldenCompassException("Please provide the index of the internship! (e.g., reject 1)");
         }

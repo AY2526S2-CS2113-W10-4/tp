@@ -13,6 +13,7 @@ public class Internship {
 
     protected String title;
     protected String companyName;
+    private ApplicationStatus status;
     protected String comments;
     protected String link;
     protected boolean hasApplied;
@@ -54,7 +55,7 @@ public class Internship {
         this.title = title.trim();
         this.companyName = companyName.trim();
         this.hasApplied = true;
-        this.hasReceivedOffer = false;
+        this.status = ApplicationStatus.PENDING;
 
         // Assertions to verify invariants
         assert this.title != null && !this.title.isEmpty()
@@ -108,32 +109,37 @@ public class Internship {
         }
     }
 
+    public void markAsOffer() {
+        this.status = ApplicationStatus.OFFER;
+    }
+
     public void markAsRejected() {
-        this.isRejected = true;
-        this.isOfferReceived = false; // Safety check
+        this.status = ApplicationStatus.REJECTED;
+    }
+
+    public boolean hasOffer() {
+        return this.status == ApplicationStatus.OFFER;
     }
 
     public boolean isRejected() {
-        return isRejected;
+        return this.status == ApplicationStatus.REJECTED;
     }
 
     @Override
     public String toString() {
-        String status = "";
-        if (isOfferReceived) {
-            status = " [OFFER RECEIVED] 🏆";
-        } else if (isRejected) {
-            status = " [REJECTED] ❌";
+        String tag = "";
+        // Your teammate's suggested switch statement!
+        switch (status) {
+        case OFFER:
+            tag = " [OFFER RECEIVED] 🏆";
+            break;
+        case REJECTED:
+            tag = " [REJECTED] ❌";
+            break;
+        default:
+            tag = ""; // PENDING has no tag
+            break;
         }
-        return companyName + " - " + title + status;
-    }
-
-    public void markAsOffer() {
-        this.isOfferReceived = true;
-        this.isRejected = false;
-    }
-
-    public boolean hasOffer() {
-        return isOfferReceived;
+        return companyName + " - " + title + tag;
     }
 }

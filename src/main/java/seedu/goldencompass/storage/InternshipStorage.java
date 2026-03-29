@@ -61,10 +61,17 @@ public class InternshipStorage {
             ensureFileExists();
             FileWriter fw = new FileWriter(filePath);
 
-            // Use your teammate's getInternships() method to loop through everything!
             for (Internship intern : internshipList.getInternships()) {
-                // Format: Title | CompanyName
-                String saveLine = intern.getTitle() + " | " + intern.getCompanyName() + "\n";
+                // Determine the status to save
+                String status = "PENDING";
+                if (intern.hasOffer()) {
+                    status = "OFFER";
+                } else if (intern.isRejected()) {
+                    status = "REJECTED";
+                }
+
+                // Format: Title | CompanyName | Status
+                String saveLine = intern.getTitle() + " | " + intern.getCompanyName() + " | " + status + "\n";
                 fw.write(saveLine);
             }
 
@@ -93,18 +100,33 @@ public class InternshipStorage {
             while (s.hasNext()) {
                 String line = s.nextLine();
                 if (line.trim().isEmpty()) {
-                    continue; // Skip empty lines
+                    continue;
                 }
 
-                // Split by the " | " delimiter we used during save
                 String[] parts = line.split(" \\| ");
 
-                if (parts.length == 2) {
+                if (parts.length >= 2) {
                     String title = parts[0].trim();
                     String company = parts[1].trim();
-                    loadedList.add(new Internship(title, company));
+
+                    // 1. Create it and hold it in a variable
+                    Internship loadedInternship = new Internship(title, company);
+
+                    // 2. Update the status if a 3rd column exists
+                    if (parts.length == 3) {
+                        String status = parts[2].trim();
+                        if (status.equals("OFFER")) {
+                            loadedInternship.markAsOffer();
+                        } else if (status.equals("REJECTED")) {
+                            loadedInternship.markAsRejected();
+                        }
+                    }
+
+                    // 3. ONLY ADD ONCE at the very end
+                    loadedList.add(loadedInternship);
+
                 } else {
-                    logger.log(Level.WARNING, "Skipped corrupted line in save file: " + line);
+                    logger.log(Level.WARNING, "Skipped corrupted line: " + line);
                 }
             }
             s.close();
