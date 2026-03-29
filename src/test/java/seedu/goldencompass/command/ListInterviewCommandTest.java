@@ -44,7 +44,7 @@ public class ListInterviewCommandTest {
         String output = outputStream.toString().trim();
         System.out.println(output);
         assertTrue(output.contains("Here are the interview invitations:"));
-        assertTrue(output.contains("Google - Software Engineer @ 2026-03-25"));
+        assertTrue(output.contains("Google - Software Engineer [PENDING] @ 2026-03-25"));
 
     }
 
@@ -60,10 +60,10 @@ public class ListInterviewCommandTest {
 
         String output = outputStream.toString().trim();
 
-        int nusIndex = output.indexOf("NUS - Bus Driver @ 2026-02-26");
-        int metaIndex = output.indexOf("Meta - Frontend Developer @ 2026-03-25");
-        int googleIndex = output.indexOf("Google - Software Engineer @ 2026-03-31");
-        int amazonIndex = output.indexOf("Amazon - Backend Developer @ 2026-04-01");
+        int nusIndex = output.indexOf("NUS - Bus Driver [PENDING] @ 2026-02-26");
+        int metaIndex = output.indexOf("Meta - Frontend Developer [PENDING] @ 2026-03-25");
+        int googleIndex = output.indexOf("Google - Software Engineer [PENDING] @ 2026-03-31");
+        int amazonIndex = output.indexOf("Amazon - Backend Developer [PENDING] @ 2026-04-01");
 
         assertTrue(nusIndex < metaIndex);
         assertTrue(metaIndex < googleIndex);
