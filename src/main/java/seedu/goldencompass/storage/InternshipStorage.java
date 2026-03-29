@@ -109,6 +109,11 @@ public class InternshipStorage {
                     String title = parts[0].trim();
                     String company = parts[1].trim();
 
+                    if (title.isEmpty() || company.isEmpty()) {
+                        logger.log(Level.WARNING, "Skipped line with empty title or company: " + line);
+                        continue;
+                    }
+
                     // 1. Create it and hold it in a variable
                     Internship loadedInternship = new Internship(title, company);
 
