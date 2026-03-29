@@ -4,7 +4,6 @@ import seedu.goldencompass.exception.GoldenCompassException;
 import seedu.goldencompass.internship.Internship;
 import seedu.goldencompass.internship.InternshipList;
 import seedu.goldencompass.parser.Parser;
-import seedu.goldencompass.ui.Ui;
 
 import java.util.List;
 import java.util.logging.Logger;
