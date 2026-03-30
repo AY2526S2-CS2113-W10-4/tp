@@ -32,7 +32,8 @@ public class Executor {
                 Map.entry("remove-alias", new RemoveAliasCommand(parser, this)),
                 Map.entry("mark", new MarkOfferCommand(parser, internshipList)),
                 Map.entry("delete", new DeleteInternshipCommand(parser, internshipList)),
-                Map.entry("reject", new RejectOfferCommand(parser, internshipList))
+                Map.entry("reject", new RejectOfferCommand(parser, internshipList)),
+                Map.entry("search-interview", new SearchInterviewCommand(parser, interviewList))
         );
 
         //copy the key of commands into alias map
