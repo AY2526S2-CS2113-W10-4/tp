@@ -7,7 +7,7 @@ import seedu.goldencompass.parser.Parser;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
-import java.util.Comparator;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -61,9 +61,7 @@ public class SearchInterviewCommand extends CommandClass {
             }
         }
 
-        List<Interview> results = interviewList.getInterviews().stream()
-                .sorted(Comparator.comparing(Interview::getDate))
-                .toList();
+        List<Interview> results = new ArrayList<>(interviewList.getInterviews());
 
         if (companyKeyword != null) {
             String keyword = companyKeyword.toLowerCase();
