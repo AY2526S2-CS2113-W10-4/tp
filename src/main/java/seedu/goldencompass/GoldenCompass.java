@@ -4,12 +4,13 @@ import seedu.goldencompass.command.Executor;
 import seedu.goldencompass.exception.GoldenCompassException;
 import seedu.goldencompass.internship.InternshipList;
 import seedu.goldencompass.internship.InterviewList;
+import seedu.goldencompass.operation.OperationHistory;
 import seedu.goldencompass.parser.Parser;
 import seedu.goldencompass.storage.AliasStorage;
 import seedu.goldencompass.ui.Ui;
 import seedu.goldencompass.storage.InternshipStorage;
 import seedu.goldencompass.storage.InterviewStorage;
-import seedu.goldencompass.undo.OperationSnapshot;
+import seedu.goldencompass.operation.OperationSnapshot;
 
 import java.io.IOException;
 import java.util.logging.Handler;
@@ -28,9 +29,9 @@ public class GoldenCompass {
     private final InternshipStorage internshipStorage;
     private final InterviewStorage interviewStorage;
     private final AliasStorage aliasStorage;
-    private final OperationSnapshot oldOperationSnapshot;
-    private final OperationSnapshot newOperationSnapshot;
 
+    private final OperationSnapshot operationSnapshot;
+    private final OperationHistory operationHistory;
     public GoldenCompass() throws GoldenCompassException {
         ui = new Ui();
         parser = new Parser();
@@ -39,9 +40,10 @@ public class GoldenCompass {
         internships.setUi(ui);
         this.interviewStorage = new InterviewStorage("data/interviews.txt");
         this.interviews = new InterviewList();
-        this.oldOperationSnapshot = new OperationSnapshot();
-        this.newOperationSnapshot = new OperationSnapshot();
-        executor = new Executor(parser, internships, interviews, oldOperationSnapshot);
+
+        this.operationSnapshot = new OperationSnapshot();
+        this.operationHistory = new OperationHistory();
+        executor = new Executor(parser, internships, interviews, operationHistory);
         this.interviewStorage.load(interviews, internships);
         this.aliasStorage = new AliasStorage("data/aliases.txt");
         this.aliasStorage.load(executor.getAliasMap());
@@ -62,9 +64,9 @@ public class GoldenCompass {
     public void run() {
 
         ui.greet();
-        oldOperationSnapshot.snapshot(internships, interviews, executor.getAliasMap());
-        newOperationSnapshot.snapshot(internships, interviews, executor.getAliasMap());//initialise
 
+        operationSnapshot.snapshot(internships, interviews, executor.getAliasMap()); //initialise
+        operationHistory.saveSnapshot(new OperationSnapshot(operationSnapshot)); //snapshot after initialisation.
 
         while (true) {
             try {
@@ -74,8 +76,10 @@ public class GoldenCompass {
                 }
                 executor.execute();
                 if (executor.isUndoable(parser.getCommand())) {
-                    oldOperationSnapshot.snapshot(newOperationSnapshot);
-                    newOperationSnapshot.snapshot(internships, interviews, executor.getAliasMap());
+                    //first take a photo
+                    operationSnapshot.snapshot(internships, interviews, executor.getAliasMap());
+                    //then store that photo
+                    operationHistory.saveSnapshot(new OperationSnapshot(operationSnapshot));
                 }
                 internshipStorage.save(internships);
                 interviewStorage.save(interviews);

@@ -3,8 +3,9 @@ package seedu.goldencompass.command;
 import seedu.goldencompass.exception.GoldenCompassException;
 import seedu.goldencompass.internship.InternshipList;
 import seedu.goldencompass.internship.InterviewList;
+import seedu.goldencompass.operation.OperationHistory;
 import seedu.goldencompass.parser.Parser;
-import seedu.goldencompass.undo.OperationSnapshot;
+import seedu.goldencompass.operation.OperationSnapshot;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,11 +18,11 @@ public class Executor {
     private final Map<String, Executable> commands;
     private final Parser parser;
     private final Set<String> undoable=Set.of("add", "update-date", "add-interview", "alias", "remove-alias", "mark",
-            "delete", "reject", "undo");
+            "delete", "reject");
 
 
     public Executor(Parser parser, InternshipList internshipList, InterviewList interviewList,
-                    OperationSnapshot operationSnapshot) {
+                    OperationHistory operationHistory) {
 
         this.parser = parser;
 
@@ -38,7 +39,9 @@ public class Executor {
                 Map.entry("delete", new DeleteInternshipCommand(parser, internshipList)),
                 Map.entry("reject", new RejectOfferCommand(parser, internshipList)),
                 Map.entry("undo", new UndoCommand(parser, this, internshipList, interviewList,
-                        operationSnapshot))
+                        operationHistory)),
+                Map.entry("redo", new RedoCommand(parser, this, internshipList, interviewList,
+                        operationHistory))
         );
 
         //copy the key of commands into alias map

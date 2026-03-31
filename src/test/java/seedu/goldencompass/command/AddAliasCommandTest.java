@@ -7,8 +7,9 @@ import org.junit.jupiter.api.Test;
 import seedu.goldencompass.exception.GoldenCompassException;
 import seedu.goldencompass.internship.InternshipList;
 import seedu.goldencompass.internship.InterviewList;
+import seedu.goldencompass.operation.OperationHistory;
 import seedu.goldencompass.parser.Parser;
-import seedu.goldencompass.undo.OperationSnapshot;
+import seedu.goldencompass.operation.OperationSnapshot;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -22,7 +23,7 @@ public class AddAliasCommandTest {
     private InternshipList internshipList;
     private InterviewList interviewList;
     private AddAliasCommand addAliasCommand;
-    private OperationSnapshot operationSnapshot;
+    private OperationHistory operationHistory;
     private final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     private final PrintStream originalOut = System.out;
 
@@ -31,8 +32,8 @@ public class AddAliasCommandTest {
         parser = new Parser();
         internshipList = new InternshipList();
         interviewList = new InterviewList();
-        operationSnapshot = new OperationSnapshot();
-        executor = new Executor(parser, internshipList, interviewList, operationSnapshot);
+        operationHistory = new OperationHistory();
+        executor = new Executor(parser, internshipList, interviewList, operationHistory);
         addAliasCommand = new AddAliasCommand(parser, executor);
 
         System.setOut(new PrintStream(outputStream));

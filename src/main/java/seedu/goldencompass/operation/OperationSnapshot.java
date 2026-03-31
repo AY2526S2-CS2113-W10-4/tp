@@ -1,4 +1,4 @@
-package seedu.goldencompass.undo;
+package seedu.goldencompass.operation;
 
 
 import seedu.goldencompass.internship.InternshipList;
