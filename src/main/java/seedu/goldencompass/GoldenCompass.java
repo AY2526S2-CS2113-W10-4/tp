@@ -9,6 +9,7 @@ import seedu.goldencompass.storage.AliasStorage;
 import seedu.goldencompass.ui.Ui;
 import seedu.goldencompass.storage.InternshipStorage;
 import seedu.goldencompass.storage.InterviewStorage;
+import seedu.goldencompass.undo.OperationSnapshot;
 
 import java.io.IOException;
 import java.util.logging.Handler;
@@ -27,6 +28,8 @@ public class GoldenCompass {
     private final InternshipStorage internshipStorage;
     private final InterviewStorage interviewStorage;
     private final AliasStorage aliasStorage;
+    private final OperationSnapshot oldOperationSnapshot;
+    private final OperationSnapshot newOperationSnapshot;
 
     public GoldenCompass() throws GoldenCompassException {
         ui = new Ui();
@@ -36,11 +39,12 @@ public class GoldenCompass {
         internships.setUi(ui);
         this.interviewStorage = new InterviewStorage("data/interviews.txt");
         this.interviews = new InterviewList();
-        executor = new Executor(parser, internships, interviews);
+        this.oldOperationSnapshot = new OperationSnapshot();
+        this.newOperationSnapshot = new OperationSnapshot();
+        executor = new Executor(parser, internships, interviews, oldOperationSnapshot);
         this.interviewStorage.load(interviews, internships);
         this.aliasStorage = new AliasStorage("data/aliases.txt");
         this.aliasStorage.load(executor.getAliasMap());
-
     }
 
     public static void main(String[] args) throws IOException, GoldenCompassException {
@@ -58,6 +62,9 @@ public class GoldenCompass {
     public void run() {
 
         ui.greet();
+        oldOperationSnapshot.snapshot(internships, interviews, executor.getAliasMap());
+        newOperationSnapshot.snapshot(internships, interviews, executor.getAliasMap());//initialise
+
 
         while (true) {
             try {
@@ -66,6 +73,10 @@ public class GoldenCompass {
                     break;
                 }
                 executor.execute();
+                if (!parser.getCommand().equals("list")) {
+                    oldOperationSnapshot.snapshot(newOperationSnapshot);
+                    newOperationSnapshot.snapshot(internships, interviews, executor.getAliasMap());
+                }
                 internshipStorage.save(internships);
                 interviewStorage.save(interviews);
                 aliasStorage.save(executor.getAliasMap());

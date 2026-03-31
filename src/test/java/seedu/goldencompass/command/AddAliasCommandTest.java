@@ -8,6 +8,7 @@ import seedu.goldencompass.exception.GoldenCompassException;
 import seedu.goldencompass.internship.InternshipList;
 import seedu.goldencompass.internship.InterviewList;
 import seedu.goldencompass.parser.Parser;
+import seedu.goldencompass.undo.OperationSnapshot;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -21,7 +22,7 @@ public class AddAliasCommandTest {
     private InternshipList internshipList;
     private InterviewList interviewList;
     private AddAliasCommand addAliasCommand;
-
+    private OperationSnapshot operationSnapshot;
     private final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     private final PrintStream originalOut = System.out;
 
@@ -30,7 +31,8 @@ public class AddAliasCommandTest {
         parser = new Parser();
         internshipList = new InternshipList();
         interviewList = new InterviewList();
-        executor = new Executor(parser, internshipList, interviewList);
+        operationSnapshot = new OperationSnapshot();
+        executor = new Executor(parser, internshipList, interviewList, operationSnapshot);
         addAliasCommand = new AddAliasCommand(parser, executor);
 
         System.setOut(new PrintStream(outputStream));

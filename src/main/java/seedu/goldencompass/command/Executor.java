@@ -4,9 +4,11 @@ import seedu.goldencompass.exception.GoldenCompassException;
 import seedu.goldencompass.internship.InternshipList;
 import seedu.goldencompass.internship.InterviewList;
 import seedu.goldencompass.parser.Parser;
+import seedu.goldencompass.undo.OperationSnapshot;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class Executor {
 
@@ -14,10 +16,12 @@ public class Executor {
 
     private final Map<String, Command> commands;
     private final Parser parser;
+    private final Set<String> undoable=Set.of("add", "update-date", "add-interview", "alias", "remove-alias", "mark",
+            "delete", "reject", "undo");
 
 
-
-    public Executor(Parser parser, InternshipList internshipList, InterviewList interviewList) {
+    public Executor(Parser parser, InternshipList internshipList, InterviewList interviewList,
+                    OperationSnapshot operationSnapshot) {
 
         this.parser = parser;
 
@@ -32,7 +36,9 @@ public class Executor {
                 Map.entry("remove-alias", new RemoveAliasCommand(parser, this)),
                 Map.entry("mark", new MarkOfferCommand(parser, internshipList)),
                 Map.entry("delete", new DeleteInternshipCommand(parser, internshipList)),
-                Map.entry("reject", new RejectOfferCommand(parser, internshipList))
+                Map.entry("reject", new RejectOfferCommand(parser, internshipList)),
+                Map.entry("undo", new UndoCommand(parser, this, internshipList, interviewList,
+                        operationSnapshot))
         );
 
         //copy the key of commands into alias map
@@ -84,5 +90,10 @@ public class Executor {
 
     public Map<String, String> getAliasMap() {
         return aliasMap;
+    }
+
+    public void setAliasMap(Map<String, String> newAliasMap) {
+        aliasMap.clear();
+        aliasMap.putAll(newAliasMap);
     }
 }
