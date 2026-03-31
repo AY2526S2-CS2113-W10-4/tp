@@ -80,10 +80,12 @@ public class GoldenCompass {
                     operationSnapshot.snapshot(internships, interviews, executor.getAliasMap());
                     //then store that photo
                     operationHistory.saveSnapshot(new OperationSnapshot(operationSnapshot));
+                    //clear redo since there is new changes.
+                    operationHistory.clearRedo();
                 }
-                internshipStorage.save(internships);
-                interviewStorage.save(interviews);
-                aliasStorage.save(executor.getAliasMap());
+                //internshipStorage.save(internships);
+                //interviewStorage.save(interviews);
+                //aliasStorage.save(executor.getAliasMap());
             } catch (GoldenCompassException e) {
                 ui.print(e.getMessage());
             }

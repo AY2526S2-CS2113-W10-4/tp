@@ -50,4 +50,8 @@ public class OperationHistory {
 
         return current;
     }
+
+    public void clearRedo() {
+        redoStack.clear();
+    }
 }
