@@ -24,12 +24,15 @@ public class OperationHistory {
 
     public OperationSnapshot getUndo() {
 
-        //pop the current version from undo, and push into redo
+        //pop the current version from undo
         OperationSnapshot current = undoStack.pollFirst();
-        if(current == null) {
-            //there is no undo history
+        OperationSnapshot past = undoStack.peekFirst();
+        if(past == null) {
+            //since no history, push back
+            undoStack.addFirst(current);
             return null;
         }
+
         redoStack.addFirst(current);
 
         //peek the second version, which is one version behind the current version
