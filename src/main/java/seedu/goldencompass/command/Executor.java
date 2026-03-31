@@ -14,7 +14,7 @@ public class Executor {
 
     private final Map<String, String> aliasMap = new HashMap<>();
 
-    private final Map<String, Command> commands;
+    private final Map<String, Executable> commands;
     private final Parser parser;
     private final Set<String> undoable=Set.of("add", "update-date", "add-interview", "alias", "remove-alias", "mark",
             "delete", "reject", "undo");
@@ -54,7 +54,7 @@ public class Executor {
             throw new GoldenCompassException("Error: unknown command: " + inputAlias);
         }
         String commandWord = aliasMap.get(inputAlias);
-        Command cmd = commands.get(commandWord);
+        Executable cmd = commands.get(commandWord);
 
         if (cmd == null) {
             throw new GoldenCompassException("Error: unknown command: " + parser.getCommand());

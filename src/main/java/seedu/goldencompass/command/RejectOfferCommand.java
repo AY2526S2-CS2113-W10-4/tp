@@ -12,7 +12,7 @@ import java.util.logging.Level;
 /**
  * Represents a command to mark an existing internship as "Rejected".
  */
-public class RejectOfferCommand extends CommandClass {
+public class RejectOfferCommand extends Command {
     private static final Logger logger = Logger.getLogger(RejectOfferCommand.class.getName());
     private final InternshipList internshipList;
 

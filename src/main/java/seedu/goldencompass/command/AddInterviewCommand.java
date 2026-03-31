@@ -17,7 +17,7 @@ import java.util.List;
  * Command format: {@code add-interview INDEX /d DATE}
  * </p>
  */
-public class AddInterviewCommand extends CommandClass {
+public class AddInterviewCommand extends Command {
 
     public static final String COMMAND_WORD = "add-interview";
     private static final String FLAG_DATE = "/d";

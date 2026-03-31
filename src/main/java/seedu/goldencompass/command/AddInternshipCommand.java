@@ -12,7 +12,7 @@ import java.util.logging.Level;
 /**
  * Represents a command to add a new internship to the GoldenCompass tracker.
  */
-public class AddInternshipCommand extends CommandClass {
+public class AddInternshipCommand extends Command {
     // LOGGING: Create the logger for this specific class
     private static final Logger logger = Logger.getLogger(AddInternshipCommand.class.getName());
     private final InternshipList internshipList;

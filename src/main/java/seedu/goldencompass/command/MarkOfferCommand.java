@@ -12,7 +12,7 @@ import java.util.logging.Level;
 /**
  * Represents a command to mark an existing internship as "Offer Received".
  */
-public class MarkOfferCommand extends CommandClass {
+public class MarkOfferCommand extends Command {
     private static final Logger logger = Logger.getLogger(MarkOfferCommand.class.getName());
     private final InternshipList internshipList;
 

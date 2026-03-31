@@ -12,7 +12,7 @@ import java.util.logging.Logger;
  * This command displays a numbered list of all internships with their company
  * names and job titles.
  */
-public class ListCommand extends CommandClass {
+public class ListCommand extends Command {
 
     private static final Logger logger = Logger.getLogger(ListCommand.class.getName());
 

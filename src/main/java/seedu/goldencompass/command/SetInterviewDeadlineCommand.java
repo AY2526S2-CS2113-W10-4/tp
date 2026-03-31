@@ -15,7 +15,7 @@ import java.util.List;
  * Command format: {@code update-date INDEX /d DATE}
  * </p>
  */
-public class SetInterviewDeadlineCommand extends CommandClass {
+public class SetInterviewDeadlineCommand extends Command {
 
     public static final String COMMAND_WORD = "update-date";
 
