@@ -50,17 +50,7 @@ public class SearchInterviewCommand extends CommandClass {
                     + "Usage: search-interview [/c COMPANY] [/t ROLE] [/d DATE]");
         }
 
-        LocalDate dateFilter = null;
-        if (dateKeyword != null) {
-            try {
-                dateFilter = LocalDate.parse(dateKeyword);
-            } catch (DateTimeParseException e) {
-                throw new GoldenCompassException(
-                        "Error: Invalid date format, expected yyyy-MM-dd, got: " + dateKeyword);
-            }
-        }
-
-        LocalDate date = dateFilter;
+        LocalDate date = parseDate(dateKeyword);
         List<Interview> results = interviewList.getInterviews().stream()
                 .filter(i -> i.matches(companyKeyword, titleKeyword, date))
                 .toList();
@@ -73,6 +63,18 @@ public class SearchInterviewCommand extends CommandClass {
         ui.print("Found " + results.size() + " interview(s):");
         for (int i = 0; i < results.size(); i++) {
             ui.print((i + 1) + ". " + results.get(i).toString());
+        }
+    }
+
+    private LocalDate parseDate(String dateKeyword) throws GoldenCompassException {
+        if (dateKeyword == null) {
+            return null;
+        }
+        try {
+            return LocalDate.parse(dateKeyword);
+        } catch (DateTimeParseException e) {
+            throw new GoldenCompassException(
+                    "Error: Invalid date format, expected yyyy-MM-dd, got: " + dateKeyword);
         }
     }
 

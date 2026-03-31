@@ -57,11 +57,11 @@ public class Interview {
      */
     public boolean matches(String company, String title, LocalDate date) {
         if (company != null
-                && !internship.getCompanyName().toLowerCase().contains(company.toLowerCase())) {
+                && !internship.companyName.toLowerCase().contains(company.toLowerCase())) {
             return false;
         }
         if (title != null
-                && !internship.getTitle().toLowerCase().contains(title.toLowerCase())) {
+                && !internship.title.toLowerCase().contains(title.toLowerCase())) {
             return false;
         }
         if (date != null && (this.date == null || !this.date.equals(date))) {
