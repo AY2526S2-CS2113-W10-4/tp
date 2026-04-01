@@ -14,6 +14,12 @@ public class Ui {
         System.out.println(s);
     }
 
+    public void print(String... strings) {
+        for (String string : strings) {
+            print(string);
+        }
+    }
+
     public String read() {
         return in.nextLine();
     }
