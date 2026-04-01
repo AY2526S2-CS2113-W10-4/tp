@@ -7,7 +7,7 @@ import seedu.goldencompass.operation.OperationHistory;
 import seedu.goldencompass.parser.Parser;
 import seedu.goldencompass.operation.OperationSnapshot;
 
-public class UndoCommand extends Command{
+public class UndoCommand extends Command implements DataHistory {
 
     //default
     private static final int PARAM_LENGTH = 1;
@@ -38,8 +38,6 @@ public class UndoCommand extends Command{
             throw new GoldenCompassException("Error: there is no more undo history.");
         }
 
-        executor.setAliasMap(past.getAliasMapCopy());
-        internshipList.setInternships(past.getInternshipListCopy().getInternships());
-        interviewList.setInterviews(past.getInterviewListCopy().getInterviews());
+        modifyDataWith(past, executor, internshipList, interviewList);
     }
 }

@@ -7,7 +7,7 @@ import seedu.goldencompass.operation.OperationHistory;
 import seedu.goldencompass.operation.OperationSnapshot;
 import seedu.goldencompass.parser.Parser;
 
-public class RedoCommand extends Command{
+public class RedoCommand extends Command implements DataHistory{
     //default
     private static final int PARAM_LENGTH = 1;
     private static final String COMMAND_KEYWORD = "redo";
@@ -36,8 +36,6 @@ public class RedoCommand extends Command{
             throw new GoldenCompassException("Error: there is no more redo history.");
         }
 
-        executor.setAliasMap(future.getAliasMapCopy());
-        internshipList.setInternships(future.getInternshipListCopy().getInternships());
-        interviewList.setInterviews(future.getInterviewListCopy().getInterviews());
+        modifyDataWith(future, executor, internshipList, interviewList);
     }
 }
