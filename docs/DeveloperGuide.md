@@ -326,6 +326,13 @@ via `executor.addAlias(commandWord, alias)` and `executor.removeAlias(alias)`.
 Defensive validation of the user input would be carried out before calling the above methods. This includes the 
 **number** of the parameters, and the expected **flags**. 
 
+This is add alias sequence diagram:
+
+![](diagrams/AddAliasDigram.png)
+
+This is remove alias sequence diagram:
+
+![](diagrams/RemoveAliasDigram.png)
 ### Data History
 
 #### Overview
@@ -357,7 +364,11 @@ reference.
 To redo an action, the top snapshot in redo stack is popped into the undo stack and its reference is also returned.
 The current data of the app would be replaced by the data copies in that reference.
 
+This is undo sequence diagram:
+![UndoSequenceDiagram.png](diagrams/UndoSequenceDiagram.png)
 
+This is redo sequence diagram:
+![RedoSequenceDigram.png](diagrams/RedoSequenceDigram.png)
 
 ### Future Enhancements
 
