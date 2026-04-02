@@ -50,5 +50,4 @@ public class Command implements Executable {
             throw new GoldenCompassException(errorMessage.toString());
         }
     }
-
 }

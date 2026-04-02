@@ -29,15 +29,23 @@ public class AddAliasCommand extends Command {
 
     @Override
     public void execute() throws GoldenCompassException {
-
+        //provide help
         if(checkHelpFlag(COMMAND_DESCRIPTION, FLAG_DESCRIPTION)) {
             return;
         }
 
+        //validate number of param
         if(parser.getFlagToParamMap().size() != PARAM_LENGTH) {
             throw new GoldenCompassException("Error: This command takes 2 arguments");
         }
 
+        //validate no default param
+        String defaultParam = parser.getDefaultParam();
+        if(!defaultParam.isBlank()) {
+            throw new GoldenCompassException("Error: Need to provide flag to the parameter: " + defaultParam);
+        }
+
+        //validate the correct type of params
         checkFlagPresence(COMMAND_FLAG, ALIAS_FLAG);
 
         String commandWord = parser.getParamsOf("/c").get(0);

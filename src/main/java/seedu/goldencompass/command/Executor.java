@@ -68,22 +68,41 @@ public class Executor {
     }
 
     public void addAlias(String command, String alias) throws GoldenCompassException {
-        if(aliasMap.get(command) == null) {
-            throw new GoldenCompassException("Error: Cannot add alias to \"" + command + " since it does not exist.");
+        command = command.trim();
+        alias = alias.trim();
+
+        //alias is empty
+        if(alias.isEmpty()) {
+            throw new GoldenCompassException("Error: Cannot add blank alias");
         }
+
+        //command is not found
+        if(aliasMap.get(command) == null) {
+            throw new GoldenCompassException("Error: Cannot add alias to \"" + command + "\" since it does not exist.");
+        }
+
+        //alias is already registered
         if(aliasMap.containsKey(alias)) {
             throw new GoldenCompassException("Error: Alias \"" + alias + "\" already exists.");
         }
+
         aliasMap.put(alias, command);
     }
 
     public void removeAlias(String alias) throws GoldenCompassException{
+        alias = alias.trim();
+
+        //alias is empty
+        if(alias.isEmpty()) {
+            throw new GoldenCompassException("Error: Cannot remove blank alias");
+        }
+
         //alias does not exist
         if(!aliasMap.containsKey(alias)) {
             throw new GoldenCompassException("Error: Alias: \"" + alias +"\" does not exist.");
         }
 
-        //cannot remove default command
+        //alias is default command
         if(commands.containsKey(alias)) {
             throw new GoldenCompassException("Error: Cannot remove default command: \"" + alias +"\"");
         }

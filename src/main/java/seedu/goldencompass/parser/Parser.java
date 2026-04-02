@@ -41,4 +41,8 @@ public class Parser {
     public boolean isFlagExist(String flag) {
         return flagToParamMap.containsKey(flag);
     }
+
+    public String getDefaultParam() throws GoldenCompassException {
+        return getParamsOf(command).get(0);
+    }
 }
