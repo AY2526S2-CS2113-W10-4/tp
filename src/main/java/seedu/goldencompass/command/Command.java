@@ -6,7 +6,7 @@ import seedu.goldencompass.ui.Ui;
 
 public class Command implements Executable {
     private static final String FLAG_MISSING_MESSAGE = "Error: This command requires this flag: ";
-    /** Package-private UI and parser */
+
     protected Ui ui;
     protected Parser parser;
 
