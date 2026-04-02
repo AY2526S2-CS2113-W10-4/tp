@@ -5,7 +5,7 @@ import seedu.goldencompass.internship.Interview;
 import seedu.goldencompass.internship.InterviewList;
 import seedu.goldencompass.parser.Parser;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.logging.Level;
@@ -72,8 +72,8 @@ public class UpcomingCommand extends Command {
             logger.log(Level.INFO, "No parameter provided. Using default days: {0}", DEFAULT_DAYS);
         }
 
-        LocalDate now = LocalDate.now(ZoneId.systemDefault());
-        LocalDate limit = now.plusDays(days);
+        LocalDateTime now = LocalDateTime.now(ZoneId.systemDefault());
+        LocalDateTime limit = now.plusDays(days);
 
         logger.log(Level.INFO, "Filtering interviews from {0} to {1}", new Object[]{now, limit});
 

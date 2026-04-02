@@ -10,8 +10,9 @@ import seedu.goldencompass.parser.Parser;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -24,20 +25,21 @@ public class UpcomingCommandTest {
     private InterviewList interviewList;
     private UpcomingCommand upcomingCommand;
     private final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-    private LocalDate now;
+    private LocalDateTime now;
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     @BeforeEach
     public void setUp() throws GoldenCompassException {
         parser = new Parser();
         interviewList = new InterviewList();
         upcomingCommand = new UpcomingCommand(parser, interviewList);
-        now = LocalDate.now(ZoneId.systemDefault());
+        now = LocalDateTime.now(ZoneId.systemDefault());
         System.setOut(new PrintStream(outputStream));
     }
 
     @Test
     public void execute_upcomingWithoutParameter_printsUpcomingInterviewsCorrectly() throws GoldenCompassException {
-        interviewList.add(new Interview(new Internship("Software Engineer", "Google"), now));
+        interviewList.add(new Interview(new Internship("Software Engineer", "Google"), now.plusMinutes(1)));
         interviewList.add(new Interview(new Internship("Frontend Developer", "Meta"), now.plusDays(3)));
         interviewList.add(new Interview(new Internship("Backend Developer", "Amazon"), now.plusDays(6)));
         interviewList.add(new Interview(new Internship("Bus Driver", "NUS"), now.plusDays(20)));
@@ -46,15 +48,15 @@ public class UpcomingCommandTest {
         upcomingCommand.execute();
         String output = outputStream.toString().trim();
 
-        assertTrue(output.contains("Google - Software Engineer @ " + now));
-        assertTrue(output.contains("Meta - Frontend Developer @ " + now.plusDays(3)));
+        assertTrue(output.contains("Google - Software Engineer @ " + now.plusMinutes(1).format(formatter)));
+        assertTrue(output.contains("Meta - Frontend Developer @ " + now.plusDays(3).format(formatter)));
         assertFalse(output.contains("Amazon - Backend Developer @ "));
         assertFalse(output.contains("NUS - Bus Driver @ "));
     }
 
     @Test
     public void execute_upcomingWithIntegerParameter_printsUpcomingInterviewsCorrectly() throws GoldenCompassException {
-        interviewList.add(new Interview(new Internship("Software Engineer", "Google"), now));
+        interviewList.add(new Interview(new Internship("Software Engineer", "Google"), now.plusMinutes(1)));
         interviewList.add(new Interview(new Internship("Frontend Developer", "Meta"), now.plusDays(3)));
         interviewList.add(new Interview(new Internship("Backend Developer", "Amazon"), now.plusDays(6)));
         interviewList.add(new Interview(new Internship("Bus Driver", "NUS"), now.plusDays(20)));
@@ -63,24 +65,24 @@ public class UpcomingCommandTest {
         upcomingCommand.execute();
         String output = outputStream.toString().trim();
 
-        assertTrue(output.contains("Google - Software Engineer @ " + now));
-        assertTrue(output.contains("Meta - Frontend Developer @ " + now.plusDays(3)));
-        assertTrue(output.contains("Amazon - Backend Developer @ " + now.plusDays(6)));
+        assertTrue(output.contains("Google - Software Engineer @ " + now.plusMinutes(1).format(formatter)));
+        assertTrue(output.contains("Meta - Frontend Developer @ " + now.plusDays(3).format(formatter)));
+        assertTrue(output.contains("Amazon - Backend Developer @ " + now.plusDays(6).format(formatter)));
         assertFalse(output.contains("NUS - Bus Driver @ "));
 
         parser.parse("upcoming 21");
         upcomingCommand.execute();
         output = outputStream.toString().trim();
 
-        assertTrue(output.contains("Google - Software Engineer @ " + now));
-        assertTrue(output.contains("Meta - Frontend Developer @ " + now.plusDays(3)));
-        assertTrue(output.contains("Amazon - Backend Developer @ " + now.plusDays(6)));
-        assertTrue(output.contains("NUS - Bus Driver @ " + now.plusDays(20)));
+        assertTrue(output.contains("Google - Software Engineer @ " + now.plusMinutes(1).format(formatter)));
+        assertTrue(output.contains("Meta - Frontend Developer @ " + now.plusDays(3).format(formatter)));
+        assertTrue(output.contains("Amazon - Backend Developer @ " + now.plusDays(6).format(formatter)));
+        assertTrue(output.contains("NUS - Bus Driver @ " + now.plusDays(20).format(formatter)));
     }
 
     @Test
     public void execute_emptyFilteredList_printsNoUpcomingInterviewsMessage() throws GoldenCompassException {
-        interviewList.add(new Interview(new Internship("Software Engineer", "Google"), now.minusDays(1)));
+        interviewList.add(new Interview(new Internship("Software Engineer", "Google"), now.minusMinutes(1)));
         interviewList.add(new Interview(new Internship("Frontend Developer", "Meta"), now.minusDays(3)));
 
         parser.parse("upcoming 1");
