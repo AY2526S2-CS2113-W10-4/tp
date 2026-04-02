@@ -271,13 +271,16 @@ When `execute()` is called, it performs the following steps:
     - Cons: Adds unnecessary complexity — if the user wants to keep a rejected entry,
       they likely would not have rejected it in the first place.
 
-### Feature: Listing All Interviews
+### Feature: Listing Upcoming Interviews
 
 #### Overview
 
-The user can list all interviews in increasing order of dates such that the earliest interview is shown at the top.
+The user can list upcoming interviews within a specific number of days.
 
-**Command format:** `list-interview`
+**Command format:** `upcoming [N]`, where `N` is an integer.
+
+This lists all upcoming interviews within the following `N` days. If the optional parameter `[N]` is omitted, a default 
+of `5` days will be used. That is, `upcoming` will list all upcoming interviews within the subsequent `5` days.
 
 #### Implementation
 
