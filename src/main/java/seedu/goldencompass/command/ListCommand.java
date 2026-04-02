@@ -49,6 +49,7 @@ public class ListCommand extends Command {
      */
     @Override
     public void execute() throws GoldenCompassException {
+
         logger.info("Executing ListCommand");
 
         try {
