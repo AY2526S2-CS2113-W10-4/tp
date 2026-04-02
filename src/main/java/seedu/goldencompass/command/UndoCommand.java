@@ -29,7 +29,7 @@ public class UndoCommand extends Command implements DataHistory {
 
     @Override
     public void execute() throws GoldenCompassException {
-        if(parser.getFlagToParamMap().size() != PARAM_LENGTH) {
+        if(parser.getFlagToParamMap().size() != PARAM_LENGTH || !parser.getDefaultParam().isBlank()) {
             throw new GoldenCompassException("Error: expecting no variable");
         }
         OperationSnapshot past = operationHistory.getUndo();
