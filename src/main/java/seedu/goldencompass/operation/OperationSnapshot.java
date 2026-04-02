@@ -27,7 +27,7 @@ public class OperationSnapshot {
     public void snapshot(InternshipList internshipList, InterviewList interviewList, Map<String, String> aliasMap,
                          String command) {
         this.command = command;
-        this.internshipListCopy = new InternshipList(internshipList.getInternships());
+        this.internshipListCopy = new InternshipList(internshipList);
         this.interviewListCopy = new InterviewList(interviewList);
         this.aliasMapCopy = new HashMap<>(aliasMap);
     }
