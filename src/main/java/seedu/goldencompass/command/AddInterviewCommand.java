@@ -7,7 +7,8 @@ import seedu.goldencompass.internship.Interview;
 import seedu.goldencompass.internship.InterviewList;
 import seedu.goldencompass.parser.Parser;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 
@@ -21,6 +22,12 @@ public class AddInterviewCommand extends Command {
 
     public static final String COMMAND_WORD = "add-interview";
     private static final String FLAG_DATE = "/d";
+    private static final String COMMAND_DESCRIPTION =
+            "Adds an interview linked to an existing internship.\n"
+            + "Format: add-interview INDEX /d DATE";
+    private static final String FLAG_DESCRIPTION =
+            "Flags:\n"
+            + "/d - specifies the interview date (yyyy-MM-dd).";
 
     private final InternshipList internshipList;
     private final InterviewList interviewList;
@@ -36,6 +43,10 @@ public class AddInterviewCommand extends Command {
         assert parser != null : "Parser should not be null";
         assert internshipList != null : "InternshipList should not be null";
         assert interviewList != null : "InterviewList should not be null";
+
+        if (checkHelpFlag(COMMAND_DESCRIPTION, FLAG_DESCRIPTION)) {
+            return;
+        }
 
         List<String> params = parser.getParamsOf(parser.getCommand());
 
@@ -70,11 +81,13 @@ public class AddInterviewCommand extends Command {
 
         assert index >= 1 && index <= internshipList.getSize() : "Index should be within valid range";
 
-        LocalDate date;
+        LocalDateTime date;
         try {
-            date = LocalDate.parse(dateParam);
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+            date = LocalDateTime.parse(dateParam, formatter);
         } catch (DateTimeParseException e) {
-            throw new GoldenCompassException("Error: Invalid date format, expected yyyy-MM-dd, got: " + dateParam);
+            throw new GoldenCompassException(
+                    "Error: Invalid date format, expected yyyy-MM-dd HH:mm, got: " + dateParam);
         }
 
         assert date != null : "Parsed date should not be null";
@@ -83,6 +96,7 @@ public class AddInterviewCommand extends Command {
         assert internship != null : "Retrieved internship should not be null";
 
         Interview interview = new Interview(internship, date);
+        internship.setInterview(interview);
         interviewList.add(interview);
 
         ui.print("Got it! I've added an interview on " + date + " for: " + internship);

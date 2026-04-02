@@ -5,7 +5,8 @@ import seedu.goldencompass.internship.Interview;
 import seedu.goldencompass.internship.InterviewList;
 import seedu.goldencompass.parser.Parser;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Comparator;
 import java.util.List;
@@ -20,6 +21,12 @@ public class SetInterviewDeadlineCommand extends Command {
     public static final String COMMAND_WORD = "update-date";
 
     private static final String FLAG_DATE = "/d";
+    private static final String COMMAND_DESCRIPTION =
+            "Sets the deadline date of an interview.\n"
+            + "Format: update-date INDEX /d DATE";
+    private static final String FLAG_DESCRIPTION =
+            "Flags:\n"
+            + "/d - specifies the date (yyyy-MM-dd).";
 
     private final InterviewList interviewList;
 
@@ -48,6 +55,10 @@ public class SetInterviewDeadlineCommand extends Command {
     public void execute() throws GoldenCompassException {
         assert parser != null : "Parser should not be null";
         assert interviewList != null : "InterviewList should not be null";
+
+        if (checkHelpFlag(COMMAND_DESCRIPTION, FLAG_DESCRIPTION)) {
+            return;
+        }
 
         List<String> indexParams = parser.getParamsOf(parser.getCommand());
         if (indexParams == null || indexParams.get(0).isBlank()) {
@@ -79,11 +90,13 @@ public class SetInterviewDeadlineCommand extends Command {
 
         assert interviewList.isValidIndex(index) : "Index should be valid after validation";
 
-        LocalDate date;
+        LocalDateTime date;
         try {
-            date = LocalDate.parse(dateParam);
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+            date = LocalDateTime.parse(dateParam, formatter);
         } catch (DateTimeParseException e) {
-            throw new GoldenCompassException("Error: Invalid date format, expected yyyy-MM-dd, got: " + dateParam);
+            throw new GoldenCompassException(
+                    "Error: Invalid date format, expected yyyy-MM-dd HH:mm, got: " + dateParam);
         }
 
         assert date != null : "Parsed date should not be null";
