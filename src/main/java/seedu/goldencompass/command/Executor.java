@@ -28,7 +28,7 @@ public class Executor {
         commands = Map.ofEntries(
                 Map.entry("example", new ExampleCommand(parser, internshipList)),
                 Map.entry("add", new AddInternshipCommand(parser, internshipList)),
-                Map.entry("list", new ListCommand(internshipList)),
+                Map.entry("list", new ListCommand(parser, internshipList)),
                 Map.entry("list-interview", new ListInterviewCommand(interviewList)),
                 Map.entry("update-date", new SetInterviewDeadlineCommand(parser, interviewList)),
                 Map.entry("add-interview", new AddInterviewCommand(parser, internshipList, interviewList)),
