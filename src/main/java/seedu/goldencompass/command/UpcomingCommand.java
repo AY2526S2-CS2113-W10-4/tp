@@ -33,9 +33,7 @@ public class UpcomingCommand extends Command {
     private static final Logger logger = Logger.getLogger(UpcomingCommand.class.getName());
     private static final int DEFAULT_DAYS = 5;
 
-
-    Parser parser;
-    InterviewList interviewList;
+    private final InterviewList interviewList;
 
     public UpcomingCommand(Parser parser, InterviewList interviewList) {
 
