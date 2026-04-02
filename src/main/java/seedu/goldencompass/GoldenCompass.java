@@ -37,7 +37,6 @@ public class GoldenCompass {
         parser = new Parser();
         internshipStorage = new InternshipStorage("data/internships.txt");
         internships = new InternshipList(internshipStorage.load());
-        internships.setUi(ui);
         this.interviewStorage = new InterviewStorage("data/interviews.txt");
         this.interviews = new InterviewList();
 
