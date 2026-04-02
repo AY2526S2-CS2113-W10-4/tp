@@ -20,19 +20,14 @@ public class DeleteInternshipCommand extends Command {
 
     public DeleteInternshipCommand(Parser parser, InternshipList internshipList) {
         super(parser);
-        //assert parser != null : "Parser passed to DeleteInternshipCommand cannot be null";
+
+        assert parser != null : "Parser passed to DeleteInternshipCommand cannot be null";
         assert internshipList != null : "InternshipList passed to DeleteInternshipCommand cannot be null";
 
         this.internshipList = internshipList;
         logger.log(Level.INFO, "DeleteInternshipCommand initialized");
     }
 
-    /**
-     * Executes the command to delete an internship.
-     * Extracts the index from the parsed user input and deletes the corresponding Internship.
-     *
-     * @throws GoldenCompassException If the index is missing, not a number, or out of bounds.
-     */
     @Override
     public void execute() throws GoldenCompassException {
         logger.log(Level.INFO, "Starting execution of DeleteInternshipCommand...");
