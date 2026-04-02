@@ -19,6 +19,16 @@ public class ListCommand extends Command {
     /** Reference to the internship list to display */
     private final InternshipList internshipList;
 
+    @Override
+    public String getCommandDescription() {
+        return "";
+    }
+
+    @Override
+    public String getFlagDescription() {
+        return "";
+    }
+
     /**
      * Constructs a ListCommand with the specified internship list.
      *
