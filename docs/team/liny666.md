@@ -76,6 +76,7 @@ Given below are my contributions to the project.
 * **Community**:
   * PRs reviewed (with non-trivial comments):
     [#55](https://github.com/AY2526S2-CS2113-W10-4/tp/pull/55),
+    [#107](https://github.com/AY2526S2-CS2113-W10-4/tp/pull/107),
     [#108](https://github.com/AY2526S2-CS2113-W10-4/tp/pull/108)
   * Addressed code review feedback across multiple iterations for search-interview
     ([#89](https://github.com/AY2526S2-CS2113-W10-4/tp/pull/89)) — refactored filtering
