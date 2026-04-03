@@ -22,11 +22,12 @@ public class SetInterviewDeadlineCommand extends Command {
 
     private static final String FLAG_DATE = "/d";
     private static final String COMMAND_DESCRIPTION =
-            "Sets the deadline date of an interview.\n"
-            + "Format: update-date INDEX /d DATE";
+            "Sets the deadline date and time of an interview.\n"
+            + "Format: update-date INDEX /d DATE\n"
+            + "Example: update-date 1 /d 2025-04-15 14:00";
     private static final String FLAG_DESCRIPTION =
             "Flags:\n"
-            + "/d - specifies the date (yyyy-MM-dd).";
+            + "/d - specifies the date and time (yyyy-MM-dd HH:mm).";
 
     private final InterviewList interviewList;
 
@@ -40,16 +41,6 @@ public class SetInterviewDeadlineCommand extends Command {
     public SetInterviewDeadlineCommand(Parser parser, InterviewList interviewList) {
         super(parser);
         this.interviewList = interviewList;
-    }
-
-    @Override
-    public String getCommandDescription() {
-        return "";
-    }
-
-    @Override
-    public String getFlagDescription() {
-        return "";
     }
 
     /**
@@ -116,5 +107,15 @@ public class SetInterviewDeadlineCommand extends Command {
         interview.setDate(date);
 
         ui.print("Deadline set for interview " + index + ": " + date);
+    }
+
+    @Override
+    protected String getCommandDescription() {
+        return COMMAND_DESCRIPTION;
+    }
+
+    @Override
+    protected String getFlagDescription() {
+        return FLAG_DESCRIPTION;
     }
 }

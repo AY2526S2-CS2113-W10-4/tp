@@ -24,10 +24,11 @@ public class AddInterviewCommand extends Command {
     private static final String FLAG_DATE = "/d";
     private static final String COMMAND_DESCRIPTION =
             "Adds an interview linked to an existing internship.\n"
-            + "Format: add-interview INDEX /d DATE";
+            + "Format: add-interview INDEX /d DATE\n"
+            + "Example: add-interview 2 /d 2025-06-15 10:00";
     private static final String FLAG_DESCRIPTION =
             "Flags:\n"
-            + "/d - specifies the interview date (yyyy-MM-dd).";
+            + "/d - specifies the interview date and time (yyyy-MM-dd HH:mm).";
 
     private final InternshipList internshipList;
     private final InterviewList interviewList;

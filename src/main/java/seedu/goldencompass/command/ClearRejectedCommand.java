@@ -45,11 +45,12 @@ public class ClearRejectedCommand extends Command {
 
     @Override
     protected String getCommandDescription() {
-        return "";
+        return "Removes all internships marked as rejected from the list.\n"
+                + "Format: clear-rejected";
     }
 
     @Override
     protected String getFlagDescription() {
-        return "";
+        return "This command does not take any flags.";
     }
 }

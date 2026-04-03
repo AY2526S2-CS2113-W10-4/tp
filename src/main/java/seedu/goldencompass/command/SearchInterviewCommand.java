@@ -41,16 +41,6 @@ public class SearchInterviewCommand extends Command {
     }
 
     @Override
-    public String getCommandDescription() {
-        return "";
-    }
-
-    @Override
-    public String getFlagDescription() {
-        return "";
-    }
-
-    @Override
     public void execute() throws GoldenCompassException {
         assert parser != null : "Parser should not be null";
         assert interviewList != null : "InterviewList should not be null";
@@ -101,5 +91,15 @@ public class SearchInterviewCommand extends Command {
             return null;
         }
         return params.get(0).trim();
+    }
+
+    @Override
+    protected String getCommandDescription() {
+        return COMMAND_DESCRIPTION;
+    }
+
+    @Override
+    protected String getFlagDescription() {
+        return FLAG_DESCRIPTION;
     }
 }
