@@ -24,34 +24,13 @@ all from your terminal.
 
 > **Notes about the command format:**
 > - Words in `UPPER_CASE` are parameters to be supplied by the user.
->   e.g. in `add-interview INDEX /d DATE`, `INDEX` and `DATE` are parameters.
+    >   e.g. in `add-interview INDEX /d DATE`, `INDEX` and `DATE` are parameters.
 > - Items in square brackets are optional.
->   e.g. `search-interview [/c COMPANY] [/t ROLE] [/d DATE]`.
+    >   e.g. `search-interview [/c COMPANY] [/t ROLE] [/d DATE]`.
 > - Flags start with `/` and are followed by their value.
->   e.g. `/c Google` supplies `Google` as the company parameter.
+    >   e.g. `/c Google` supplies `Google` as the company parameter.
 > - Parameters can be in any order.
 > - Indexes are **1-based** and refer to the position shown in the most recent list.
-
-### Adding an internship application: `add`
-
-Adds a new internship application to the tracker. By default, the status of a newly added internship is set to `PENDING`.
-
-**Format:** `add COMPANY_NAME /t TITLE`
-
-* `COMPANY_NAME` is the name of the company you are applying to.
-* The `/t` flag is strictly required and denotes the title of the role.
-
-**Examples:**
-* `add Grab /t Software Engineer`
-  Adds a Software Engineer role at Grab to your list.
-* `add Google /t Data Analyst`
-  Adds a Data Analyst role at Google to your list.
-
-**Expected Output:**
-```text
-Got it! I've added this internship to your compass:
-  Grab - Software Engineer
-```
 
 ### Adding an interview: `add-interview`
 
@@ -208,79 +187,6 @@ upcoming 6
 NUS - Bus Driver @ 2026-03-25 11:00
 ```
 
-### Marking an internship application as offer received: `mark`
-
-Updates the status of an existing internship application in your tracker to indicate that you have successfully received an offer.
-
-**Format:** `mark INDEX`
-
-* `INDEX` refers to the index number shown in the displayed internship list.
-* The index **must be a positive integer** (e.g., 1, 2, 3, ...).
-
-**Examples:**
-* `list` followed by `mark 4`
-  Marks the 4th internship in the current list as having an offer.
-
-**Expected Output:**
-```text
-HUGE CONGRATS! 🥳 Marked this internship as [OFFER RECEIVED]:
-  Grab - Software Engineer [OFFER RECEIVED] 🏆
-```
-
-### Marking an internship application as rejected: `reject`
-
-Updates the status of an existing internship application to indicate that it is no longer an active prospect (e.g., the company rejected your application, or you declined their offer).
-
-**Format:** `reject INDEX`
-
-* `INDEX` refers to the index number shown in the displayed internship list.
-* The index **must be a positive integer** (e.g., 1, 2, 3, ...).
-
-**Examples:**
-* `list` followed by `reject 4`
-  Marks the 4th internship in the current list as rejected.
-
-**Expected Output:**
-```text
-Rejection builds character! 💪 Marked this internship as [REJECTED]:
-  Grab - Software Engineer [REJECTED] ❌
-```
-
-### Saving the data
-
-GoldenCompass saves your data to your hard disk automatically after any command that changes the data. There is no need to save manually!
-
-Your tracker's data is safely stored in the `data/` folder in the same directory as the application.
-
-**1. Internship Data (`data/internships.txt`)**
-Your internship applications are saved in the following format:
-`TITLE | COMPANY_NAME | STATUS`
-
-* **Default Status:** When you first add a new internship, its status is automatically saved as `PENDING`.
-* **Updating Status:** When you use commands like `mark` or `reject` to update an internship application, the new status seamlessly overwrites the old one on the exact same line. It will not create a new or duplicate entry.
-   * *Example:* If you receive an offer from Grab, the saved file updates to `Software Engineer | Grab | OFFER`. If you eventually decide to decline it and use the `reject` command, that exact line updates to `Software Engineer | Grab | REJECTED`.
-* **Deleting Data:** If you remove an internship using the `delete` or `clear-rejected` commands, that specific application is completely erased from the text file.
-
-**2. Interview Data (`data/interviews.txt`)**
-Your scheduled interviews are saved in the following format:
-`COMPANY_NAME | DATE_AND_TIME`
-
-* **Date Format:** The date and time are saved in the standard ISO-8601 format (e.g., `2026-08-07T16:00`), where the `T` acts as a standard separator between the calendar date and the clock time.
-* **Updating Dates:** If you use the `update-date` command to reschedule an interview, the new date and time will overwrite the old one on the exact same line. It will not create a new or duplicate entry.
-   * *Example:* If your file shows `Grab | 2026-08-07T16:00` and you postpone the interview to the next day, the line updates directly to `Grab | 2026-08-08T16:00`.
-* **Deleting Data:** If you cancel an interview using the `delete-interview` command, that specific interview entry is completely erased from the text file.
-
-**3. Alias Data (`data/aliases.txt`)**
-Your custom command shortcuts are saved in the following format:
-`ALIAS | ORIGINAL_COMMAND`
-
-* **Multiple Shortcuts:** GoldenCompass supports multiple aliases for a single command. If you create a new alias for a command that already has one, a new line will be added to the file instead of overwriting the previous shortcut.
-   * *Example:* If you have `ls | list` and you add `l | list`, both will be saved as separate lines, allowing you to use either `ls` or `l` to view your internships.
-* **Deleting Data:** If you remove a shortcut using the `remove-alias` command, that specific alias mapping is completely erased from the text file.
-
-> ⚠️ **Caution:** While you can open and read these text files, it is highly recommended not to manually edit them. If you do, please ensure you strictly follow the exact formatting above. Incorrect formatting, missing data, or missing ` | ` separators will cause the application to skip loading those specific lines to prevent crashing.
-
-
 ## FAQ
 
 **Q**: How do I transfer my data to another computer?
@@ -299,18 +205,15 @@ same location on the other computer.
 
 ## Command Summary
 
-| Action                                        | Format                                              | Example                               |
-|-----------------------------------------------|-----------------------------------------------------|---------------------------------------|
-| Add internship                                | `add COMPANY_NAME /t TITLE`                         | `add Grab /t Software Engineer`       |
-| Add interview                                 | `add-interview INDEX /d DATE`                       | `add-interview 1 /d 2025-06-15 10:00` |
-| Update interview date                         | `update-date INDEX /d DATE`                         | `update-date 1 /d 2025-06-20 09:00`   |
-| List internships                              | `list`                                              | `list`                                |
-| Delete internship                             | `delete INDEX`                                      | `delete 1`                            |
-| Delete interview                              | `delete-interview INDEX`                            | `delete-interview 1`                  |
-| Search internships                            | `search [/c COMPANY] [/t TITLE]`                    | `search /c Google`                    |
-| Search interviews                             | `search-interview [/c COMPANY] [/t ROLE] [/d DATE]` | `search-interview /d 2025-06-15`      |
-| Clear rejected                                | `clear-rejected`                                    | `clear-rejected`                      |
-| List interviews                               | `list-interview`                                    | `list-interview`                      |
-| List upcoming interviews                      | `upcoming [N]`                                      | `upcoming` / `upcoming 3`             |
-| Mark internship application as offer received | `mark INDEX`                                        | `mark 4`                              |
-| Mark internship application as rejected       | `reject INDEX`                                      | `reject 4`                            |
+| Action                   | Format                                              | Example                               |
+|--------------------------|-----------------------------------------------------|---------------------------------------|
+| Add interview            | `add-interview INDEX /d DATE`                       | `add-interview 1 /d 2025-06-15 10:00` |
+| Update interview date    | `update-date INDEX /d DATE`                         | `update-date 1 /d 2025-06-20 09:00`   |
+| List internships         | `list`                                              | `list`                                |
+| Delete internship        | `delete INDEX`                                      | `delete 1`                            |
+| Delete interview         | `delete-interview INDEX`                            | `delete-interview 1`                  |
+| Search internships       | `search [/c COMPANY] [/t TITLE]`                    | `search /c Google`                    |
+| Search interviews        | `search-interview [/c COMPANY] [/t ROLE] [/d DATE]` | `search-interview /d 2025-06-15`      |
+| Clear rejected           | `clear-rejected`                                    | `clear-rejected`                      |
+| List interviews          | `list-interview`                                    | `list-interview`                      |
+| List upcoming interviews | `upcoming [N]`                                      | `upcoming` / `upcoming 3`             |
