@@ -15,7 +15,7 @@ public class ListInterviewCommand extends Command {
     private static final Logger logger = Logger.getLogger(ListInterviewCommand.class.getName());
     private static final String COMMAND_DESCRIPTION =
             "The command lists all interviews in ascending order of their dates.";
-    private static final String FORMAT_DESCRIPTION = "Format: list-interview" + System.lineSeparator();
+    private static final String FORMAT_DESCRIPTION = "Format: list-interview";
 
     private final InterviewList interviewList;
 

@@ -73,4 +73,12 @@ public class ListInterviewCommandTest {
         assertEquals(4, interviewList.size());
     }
 
+    @Test
+    public void getDescription_returnsCorrectStrings() throws GoldenCompassException {
+        assertEquals("The command lists all interviews in ascending order of their dates.",
+                listInterviewCommand.getCommandDescription());
+        assertEquals("Format: list-interview",
+                listInterviewCommand.getFlagDescription());
+    }
+
 }
