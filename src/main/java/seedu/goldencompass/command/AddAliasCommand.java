@@ -27,14 +27,20 @@ public class AddAliasCommand extends Command {
     }
 
 
+
+
+    @Override
+    public String getCommandDescription() {
+        return COMMAND_DESCRIPTION;
+    }
+
+    @Override
+    public String getFlagDescription() {
+        return FLAG_DESCRIPTION;
+    }
+
     @Override
     public void execute() throws GoldenCompassException {
-        //provide help
-        if(checkHelpFlag(COMMAND_DESCRIPTION, FLAG_DESCRIPTION)) {
-            return;
-        }
-
-        //validate number of param
         if(parser.getFlagToParamMap().size() != PARAM_LENGTH) {
             throw new GoldenCompassException("Error: This command takes 2 arguments");
         }
@@ -54,6 +60,4 @@ public class AddAliasCommand extends Command {
         executor.addAlias(commandWord, alias);
         ui.print("Command: \"" + commandWord + "\" now has a new alias: \"" + alias + "\"");
     }
-
-
 }

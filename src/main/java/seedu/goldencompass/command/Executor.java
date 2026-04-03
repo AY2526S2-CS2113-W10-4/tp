@@ -14,7 +14,7 @@ public class Executor {
 
     private final Map<String, String> aliasMap = new HashMap<>();
 
-    private final Map<String, Executable> commands;
+    private final Map<String, Command> commands;
     private final Parser parser;
     private final Set<String> undoable=Set.of("add", "update-date", "add-interview", "alias", "remove-alias", "mark",
             "delete", "reject");
@@ -28,16 +28,20 @@ public class Executor {
         commands = Map.ofEntries(
                 Map.entry("example", new ExampleCommand(parser, internshipList)),
                 Map.entry("add", new AddInternshipCommand(parser, internshipList)),
-                Map.entry("list", new ListCommand(internshipList)),
+                Map.entry("list", new ListCommand(parser, internshipList)),
                 Map.entry("list-interview", new ListInterviewCommand(interviewList)),
                 Map.entry("update-date", new SetInterviewDeadlineCommand(parser, interviewList)),
                 Map.entry("add-interview", new AddInterviewCommand(parser, internshipList, interviewList)),
                 Map.entry("alias", new AddAliasCommand(parser, this)),
                 Map.entry("remove-alias", new RemoveAliasCommand(parser, this)),
                 Map.entry("mark", new MarkOfferCommand(parser, internshipList)),
-                Map.entry("delete", new DeleteInternshipCommand(parser, internshipList)),
+                Map.entry("delete", new DeleteInternshipCommand(parser, internshipList, interviewList)),
+                Map.entry("delete-interview", new DeleteInterviewCommand(parser, internshipList, interviewList)),
                 Map.entry("reject", new RejectOfferCommand(parser, internshipList)),
+                Map.entry("clear-rejected", new ClearRejectedCommand(internshipList, interviewList)),
+                Map.entry("search", new SearchInternshipCommand(parser, internshipList)),
                 Map.entry("search-interview", new SearchInterviewCommand(parser, interviewList)),
+                Map.entry("upcoming", new UpcomingCommand(parser, interviewList)),
                 Map.entry("undo", new UndoCommand(parser, this, internshipList, interviewList,
                         operationHistory)),
                 Map.entry("redo", new RedoCommand(parser, this, internshipList, interviewList,
@@ -57,14 +61,18 @@ public class Executor {
             throw new GoldenCompassException("Error: unknown command: " + inputAlias);
         }
         String commandWord = aliasMap.get(inputAlias);
-        Executable cmd = commands.get(commandWord);
+        Command cmd = commands.get(commandWord);
 
         if (cmd == null) {
             throw new GoldenCompassException("Error: unknown command: " + parser.getCommand());
         }
 
-        cmd.execute();
+        if (parser.isFlagExist("/help")) {
+            cmd.printHelp();
+            return;
+        }
 
+        cmd.execute();
     }
 
     public void addAlias(String command, String alias) throws GoldenCompassException {
@@ -98,7 +106,7 @@ public class Executor {
         }
 
         //alias does not exist
-        if(!aliasMap.containsKey(alias)) {
+        if (!aliasMap.containsKey(alias)) {
             throw new GoldenCompassException("Error: Alias: \"" + alias +"\" does not exist.");
         }
 

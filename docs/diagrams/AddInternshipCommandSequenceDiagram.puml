@@ -1,0 +1,48 @@
+@startuml
+hide footbox
+skinparam maxMessageSize 150
+
+participant ":AddInternshipCommand" as AddInternshipCommand #ADD1B2
+participant "parser:Parser" as Parser #ADD1B2
+participant "internshipList:InternshipList" as InternshipList #F498AD
+participant "newInternship:Internship" as Internship #F498AD
+participant "ui:Ui" as Ui #8CB6CE
+
+[-> AddInternshipCommand : execute()
+activate AddInternshipCommand
+
+AddInternshipCommand -> Parser : getParamsOf(parser.getCommand())
+activate Parser
+Parser --> AddInternshipCommand : addParams
+deactivate Parser
+
+AddInternshipCommand -> Parser : getParamsOf("/t")
+activate Parser
+Parser --> AddInternshipCommand : titleParams
+deactivate Parser
+
+note right of AddInternshipCommand
+  Validates company name,
+  flag, and title strings
+end note
+
+create Internship
+AddInternshipCommand -> Internship : Internship(title, companyName)
+activate Internship
+Internship --> AddInternshipCommand : newInternship
+deactivate Internship
+
+AddInternshipCommand -> InternshipList : add(newInternship)
+activate InternshipList
+InternshipList --> AddInternshipCommand
+deactivate InternshipList
+
+AddInternshipCommand -> Ui : print("Got it! I've added this internship...")
+activate Ui
+Ui --> AddInternshipCommand
+deactivate Ui
+
+[<-- AddInternshipCommand
+deactivate AddInternshipCommand
+
+@enduml

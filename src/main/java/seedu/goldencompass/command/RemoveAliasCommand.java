@@ -23,6 +23,16 @@ public class RemoveAliasCommand extends Command {
     }
 
     @Override
+    public String getCommandDescription() {
+        return "";
+    }
+
+    @Override
+    public String getFlagDescription() {
+        return "";
+    }
+
+    @Override
     public void execute() throws GoldenCompassException {
         if(checkHelpFlag(COMMAND_DESCRIPTION, FLAG_DESCRIPTION)) {
             return;

@@ -15,13 +15,110 @@ The following class diagram shows the key classes involved in internship managem
 Each `AddInternshipCommand` holds a reference to the `Parser` and the `InternshipList`.
 The command relies on the `Parser` to extract user inputs and writes the newly created `Internship` directly to the `InternshipList`.
 
+### The Parser Class
+
+The class `Parser` has an immutable class-level attribute `Set<String> FLAGSET` and 
+two mutable private attributes `String command, Map<String, List<String>> flagToParamMap`. 
+The essential method of `Parser` is `parse(String userInput)` which parses a string of user input 
+and stores the result into the attribute `flagToParamMap`. The keys of this map comprise the
+first word of the user input (also stored in `command`) and words that are identified as flags in 
+the `FLAGSET`. The value in this map corresponding to each key word is the parameter string 
+associated with that key, stored as a `List<String>`, where `List` is used to support duplicated flags.
+The class provides getters to get `String command` and `Map<String, List<String>> flagToParamMap`.
+
+More specifically, the parsing procedure works as follows:
+
+1. The input string is trimmed and split by whitespace into an array of words.
+
+2. The first word is treated as the command and stored in command.
+
+3. All occurrences of valid flags defined in `FLAGSET` are identified and their indices in the word array 
+are collected using `IntStream`.
+
+4. The indices are used to partition the word array into segments, where each segment corresponds to a key
+(command or flag) and its associated parameter string.
+
+5. Each segment is converted into a `Map.Entry<String, String>`, where the key is the command or flag and 
+the value is the concatenated parameter string.
+
+6. The entries are grouped using `Collectors.groupingBy `to form the final `flagToParamMap`, where 
+duplicated flags result in multiple parameter strings stored in a list.
+
+This design ensures that:
+
+- the command is always treated as a key in the map,
+
+- each recognized flag maps to its corresponding parameter string,
+
+- parameters can contain multiple words without ambiguity,
+
+- duplicated flags are supported naturally through List<String>.
+
+An example is shown below.
+
+```
+Input:
+add Google SWE Intern /d 2026-04-03 /t Interview /t Online
+
+Output:
+command = "add"
+
+flagToParamMap =
+{
+"add" -> ["Google SWE Intern"],
+"/d"  -> ["2026-04-03"],
+"/t"  -> ["Interview", "Online"]
+}
+
+```
+
+Noticeably, when the parameters of a flag or the command are empty, the value corresponding to the flag or command
+is a `List` of a single empty string, e.g.,
+
+```
+Input:
+upcoming
+
+Output:
+command = "upcoming"
+
+flagToParamMap =
+{
+"upcoming" -> [""]
+}
+
+```
+
+and when the user input is empty string,
+
+```
+Input:
+
+
+Output:
+command = ""
+
+flagToParamMap =
+{
+"" -> [""]
+}
+
+```
+
+`Parser` also has a method `public List<String> getParamsOf(String flag)`, which returns the value corresponding
+to the key `flag` in the `flagToParamMap`. Importantly, it returns `null` if `flag` does not exist in the key set
+of `flagToParamMap`. Thus, it is recommended to check whether this method returns `null`, in which case, if the `flag`
+is optional, the execution should skip, and if the `flag` is essential, a `GoldenCompassException` should be thrown.
+
+Below is the sequence diagram illustrating the `class Parser`:
+
+![Parser Sequence Diagram](diagrams/ParserSequenceDiagram.png)
+
 ### Add Internship Feature
 
 #### Overview
 
-The `add` command allows the user to create a new internship application in the tracker.
-The user specifies the company name and the role title, and the system creates an `Internship` object
-and adds it to the `InternshipList`.
+The `add` command allows the user to create a new internship application in the tracker. The user specifies the company name and the role title, and the system creates a new `Internship` object and appends it to the `InternshipList`.
 
 **Command format:** `add COMPANY_NAME /t ROLE_TITLE`
 
@@ -29,19 +126,51 @@ and adds it to the `InternshipList`.
 
 #### Implementation
 
-The feature is implemented in `AddInternshipCommand`, which implements the `Command` interface.
-When `execute()` is called, it performs the following steps:
+The feature is implemented in `AddInternshipCommand`, which extends the abstract `Command` class.
 
-1. Retrieves the company name parameter from the `Parser` using `getParamsOf("add")`.
-2. Retrieves the role title parameter from the `Parser` using `getParamsOf("/t")`.
-3. Validates that the company name parameter is present and not an empty string.
-4. Validates that the `/t` flag is present and that the title text is not empty.
-5. Throws a `GoldenCompassException` with an accumulated error message if any validation steps fail.
-6. Creates a new `Internship` object using the validated company name and title.
-7. Adds the newly created `Internship` to the `InternshipList`.
-8. Prints a confirmation message to the user via the `Ui`.
+When the user enters `add Grab /t Software Engineer`, the execution flow is as follows:
+
+1. The `Parser` parses the user input, extracting the command word ("add") and its associated parameters.
+2. The system looks up the corresponding command and executes `AddInternshipCommand`.
+3. `AddInternshipCommand` retrieves the company name parameter using `getParamsOf(parser.getCommand())` and the title parameter using `getParamsOf("/t")`.
+4. The command initializes a `StringBuilder` to act as an error message accumulator.
+5. The command sequentially checks for a missing company name, a missing `/t` flag, and an empty title string. If any checks fail, a specific error message is appended to the `StringBuilder`.
+6. If the `StringBuilder` is not empty after all checks, a single `GoldenCompassException` is thrown containing all accumulated error messages.
+7. If validation passes, a new `Internship` object is instantiated using the parsed company name and title.
+8. The command calls `internshipList.add(newInternship)` to store the application in memory.
+9. The command logs the successful creation and prints a confirmation message to the user via the `Ui`.
+
+The following class diagram shows the main structural components involved in the add internship feature:
+
+![Add Internship Class Diagram](diagrams/AddInternshipCommandClassDiagram.png)
+
+The following sequence diagram illustrates the execution flow when the user enters a valid add command:
 
 ![Add Internship Sequence Diagram](diagrams/AddInternshipCommandSequenceDiagram.png)
+
+#### Input Validation
+
+The command implements an accumulated validation strategy to ensure robustness:
+
+| Validation Layer | Description | Example Error Message |
+|-----------------|-------------|----------------------|
+| **Company Presence** | Verifies the company name parameter is not empty | "Company name cannot be empty!" |
+| **Flag Presence** | Verifies the `/t` flag was parsed successfully | "Invalid flag or missing title! Please use the '/t' flag for the role." |
+| **Title Presence** | Ensures the text following the `/t` flag is not blank | "Internship title cannot be empty!" |
+
+#### Defensive Programming Features
+
+The implementation includes several defensive programming measures:
+
+**1. Assertions**: Verify internal state invariants during command initialization.
+assert parser != null : "Parser passed to AddInternshipCommand cannot be null";
+assert internshipList != null : "InternshipList passed to AddInternshipCommand cannot be null";
+
+**2. Logging**: Track execution flow and record specific user syntax errors for debugging.
+logger.log(Level.INFO, "Starting execution of AddInternshipCommand...");
+logger.log(Level.WARNING, "Failed to add internship: Company name is missing.");
+
+**3. Error Accumulation**: Instead of failing at the first mistake, the command gathers all input errors into a `StringBuilder` to prevent unexpected partial crashes and provide comprehensive feedback.
 
 #### Design Considerations
 
@@ -50,12 +179,25 @@ When `execute()` is called, it performs the following steps:
 * **Alternative 1 (Current Implementation): Error Accumulation**
   * **Description:** The command checks all potential failure points (missing company name, missing `/t` flag, empty title) and collects all error messages into a single `StringBuilder`. If the builder is not empty at the end of the checks, it throws one consolidated `GoldenCompassException`.
   * **Pros:** Significantly improves User Experience (UX). If a user makes multiple syntax mistakes, they are informed of all of them at once, rather than having to fix one error just to be immediately hit by another.
-  * **Cons:** Slightly more verbose code, as it requires setting up a `StringBuilder` and using `if` blocks that don't immediately return.
+  * **Cons:** Slightly more verbose code, as it requires setting up a `StringBuilder` and using `if` blocks that do not immediately return.
 
 * **Alternative 2: Fail-Fast Validation**
   * **Description:** The command throws a `GoldenCompassException` immediately upon encountering the very first invalid input and halts execution.
   * **Pros:** Simpler and shorter code. Execution stops immediately, saving minor amounts of processing time.
   * **Cons:** Frustrating UX. A user who forgets both the company name and the `/t` flag will only see the "missing company name" error. After fixing it and pressing enter, they will be hit with the "missing flag" error, creating an annoying "whack-a-mole" experience.
+
+#### Test Coverage
+
+The feature is covered by comprehensive unit tests to ensure all edge cases are handled:
+
+| Test Case | Description | Expected Outcome |
+|-----------|-------------|------------------|
+| `execute_validInput_addsInternship` | Execute `add Grab /t SWE` | Internship added to list, list size increases by 1 |
+| `execute_missingCompany_throwsException` | Execute `add /t SWE` | Throws `Exception` with missing company message |
+| `execute_missingFlag_throwsException` | Execute `add Grab SWE` | Throws `Exception` with missing flag message |
+| `execute_missingTitle_throwsException` | Execute `add Grab /t` | Throws `Exception` with missing title message |
+| `execute_missingMultiple_throwsException` | Execute `add /t` | Throws `Exception` containing both missing company and missing title messages |
+
 
 ### Interview Management — Class Overview
 
@@ -72,27 +214,32 @@ Each `Interview` holds a reference to the `Internship` it is associated with.
 #### Overview
 
 The `add-interview` command allows the user to create an interview linked to an existing internship.
-The user specifies the 1-based index of the internship, and the system creates an `Interview` object
-referencing that `Internship` and adds it to the `InterviewList`.
+The user specifies the 1-based index of the internship and a date-time, and the system creates an
+`Interview` object referencing that `Internship` and adds it to the `InterviewList`.
 
-**Command format:** `add-interview INDEX`
+**Command format:** `add-interview INDEX /d DATE`
 
-**Example:** `add-interview 2` creates an interview for the 2nd internship in the list.
+**Example:** `add-interview 2 /d 2025-06-15 10:00` creates an interview on 15 Jun 2025 at 10:00
+for the 2nd internship in the list.
 
 #### Implementation
 
-The feature is implemented in `AddInterviewCommand`, which extends `CommandClass`.
+The feature is implemented in `AddInterviewCommand`, which extends `Command`.
 When `execute()` is called, it performs the following steps:
 
-1. Retrieves the index parameter from the `Parser` using `getParamsOf(COMMAND_WORD)`.
-2. Validates that the parameter is present and is a valid integer.
-3. Checks that the index is within the range `[1, internshipList.getSize()]`.
-4. Retrieves the `Internship` at the 0-based position `(index - 1)` from `InternshipList`.
-5. Creates a new `Interview` object linked to that `Internship`.
-6. Adds the `Interview` to the `InterviewList`.
-7. Prints a confirmation message to the user.
+1. Checks if the `/help` flag is present — if so, prints usage information and returns.
+2. Retrieves the index parameter from the `Parser` using `getParamsOf(COMMAND_WORD)`.
+3. Retrieves the date parameter from the `Parser` using `getParamsOf("/d")`.
+4. Validates that both parameters are present and non-empty.
+5. Parses the index as an integer and checks it is within the range `[1, internshipList.getSize()]`.
+6. Parses the date string into a `LocalDateTime` using the format `yyyy-MM-dd HH:mm`.
+7. Retrieves the `Internship` at the 0-based position `(index - 1)` from `InternshipList`.
+8. Creates a new `Interview` object linked to that `Internship` with the given date-time.
+9. Adds the `Interview` to the `InterviewList`.
+10. Prints a confirmation message to the user.
 
-The following sequence diagram illustrates the execution flow when the user enters `add-interview 2`:
+The following sequence diagram illustrates the execution flow when the user enters
+`add-interview 2 /d 2025-06-15 10:00`:
 
 ![Add Interview Sequence Diagram](diagrams/AddInterviewSequenceDiagram.png)
 
@@ -108,42 +255,45 @@ The following sequence diagram illustrates the execution flow when the user ente
     - Pros: Always reads the latest internship data.
     - Cons: Fragile if the internship list is reordered or items are deleted, since the stored index may become invalid.
 
-**Aspect: Whether Interview requires a date at creation**
+**Aspect: Date-time format**
 
-- **Alternative 1 (current choice):** Allow `Interview` to be created without a date (date defaults to `null`).
-    - Pros: More flexible — the user can add an interview first and set the deadline later via `set-deadline`.
-    - Cons: Need to handle the case where date is `null` when displaying.
+- **Alternative 1 (current choice):** Use `yyyy-MM-dd HH:mm` format with `LocalDateTime`.
+    - Pros: Includes both date and time, giving users precise scheduling control.
+    - Cons: Longer input required from the user.
 
-- **Alternative 2:** Require a date at creation time.
-    - Pros: Every interview always has a date, simplifying display logic.
-    - Cons: Less flexible — the user may not know the interview date yet when adding it.
+- **Alternative 2:** Use `yyyy-MM-dd` format with `LocalDate` (date only).
+    - Pros: Shorter input.
+    - Cons: Cannot differentiate between interviews on the same day at different times.
 
-### Set Interview Deadline Feature
+### Update Interview Date Feature
 
 #### Overview
 
-The `set-deadline` command allows the user to set or update the deadline date of an existing interview.
-The user specifies the 1-based index of the interview and a date in `yyyy-MM-dd` format.
+The `update-date` command allows the user to set or update the date and time of an existing interview.
+The user specifies the 1-based index of the interview and a date-time in `yyyy-MM-dd HH:mm` format.
 
-**Command format:** `set-deadline INDEX /d DATE`
+**Command format:** `update-date INDEX /d DATE`
 
-**Example:** `set-deadline 1 /d 2025-04-15` sets the deadline of the 1st interview to April 15, 2025.
+**Example:** `update-date 1 /d 2025-04-15 14:00` sets the date of the 1st interview to
+April 15, 2025 at 14:00.
 
 #### Implementation
 
-The feature is implemented in `SetInterviewDeadlineCommand`, which implements the `Command` interface.
+The feature is implemented in `SetInterviewDeadlineCommand`, which extends `Command`.
 When `execute()` is called, it performs the following steps:
 
-1. Retrieves the index parameter from the `Parser` using `getParamsOf(COMMAND_WORD)`.
-2. Retrieves the date parameter from the `Parser` using `getParamsOf("/d")`.
-3. Validates that both parameters are present and non-empty.
-4. Parses the index as an integer and checks it is within valid range using `interviewList.isValidIndex()`.
-5. Parses the date string into a `LocalDate` object.
-6. Retrieves the `Interview` at the 0-based position `(index - 1)` from `InterviewList`.
-7. Calls `interview.setDate(date)` to update the deadline.
-8. Prints a confirmation message to the user.
+1. Checks if the `/help` flag is present — if so, prints usage information and returns.
+2. Retrieves the index parameter from the `Parser` using `getParamsOf(COMMAND_WORD)`.
+3. Retrieves the date parameter from the `Parser` using `getParamsOf("/d")`.
+4. Validates that both parameters are present and non-empty.
+5. Parses the index as an integer and checks it is within valid range using `interviewList.isValidIndex()`.
+6. Parses the date string into a `LocalDateTime` using the format `yyyy-MM-dd HH:mm`.
+7. Sorts the interview list and retrieves the `Interview` at the 0-based position `(index - 1)`.
+8. Calls `interview.setDate(date)` to update the date-time.
+9. Prints a confirmation message to the user.
 
-The following sequence diagram illustrates the execution flow when the user enters `set-deadline 1 /d 2025-04-15`:
+The following sequence diagram illustrates the execution flow when the user enters
+`update-date 1 /d 2025-04-15 14:00`:
 
 ![Set Deadline Sequence Diagram](diagrams/SetDeadlineSequenceDiagram.png)
 
@@ -165,27 +315,125 @@ The following sequence diagram illustrates the execution flow when the user ente
     - Pros: Consistent with the existing flag-based command framework. Clear separation of arguments.
     - Cons: Slightly more verbose for the user.
 
-- **Alternative 2:** Accept the date as a positional argument (e.g., `set-deadline 1 2025-04-15`).
+- **Alternative 2:** Accept the date as a positional argument (e.g., `update-date 1 2025-04-15 14:00`).
     - Pros: Shorter command for the user.
     - Cons: Breaks the flag-based convention used by other commands, making the parser inconsistent.
 
-### Feature: Listing All Interviews
+### Search Interview Feature
 
 #### Overview
 
-The user can list all interviews in increasing order of dates such that the earliest interview is shown at the top.
+The `search-interview` command allows the user to search for interviews by company name, role,
+and/or date. Multiple flags narrow the results using AND logic. Text matching is case-insensitive
+substring matching, while date matching is an exact match on the date portion.
 
-**Command format:** `list-interview`
+**Command format:** `search-interview [/c COMPANY] [/t ROLE] [/d DATE]`
+
+**Example:** `search-interview /c Google /d 2025-06-15` finds all interviews at companies
+containing "Google" on 15 Jun 2025.
 
 #### Implementation
 
-The feature is implemented in `ListInterviewCommand`, the relationship of which to other classes is shown in the following class diagram 
+The feature is implemented in `SearchInterviewCommand`, which extends `Command`.
+When `execute()` is called, it performs the following steps:
 
-![List Interview Class Diagram](diagrams/ListInterviewClassDiagram.png)
+1. Checks if the `/help` flag is present — if so, prints usage information and returns.
+2. Retrieves the optional parameters for `/c`, `/t`, and `/d` from the `Parser`.
+3. Extracts each keyword, treating blank or missing values as `null`.
+4. Validates that at least one search flag is provided.
+5. If a `/d` value is provided, parses it into a `LocalDate` (format `yyyy-MM-dd`).
+6. Filters the interview list using `Interview.matches(company, title, date)`, which applies
+   AND logic across all non-null criteria.
+7. Prints the matching results, or a "no results" message if none match.
 
-The following sequence diagram illustrates `ListInterviewCommand::execute()`
+The filtering relies on the `matches()` method in `Interview`, which uses direct field access
+to `internship.companyName` and `internship.title` for case-insensitive substring matching,
+and compares dates via `dateTime.toLocalDate().equals(date)`.
 
-![List Interview Sequence Diagram](diagrams/ListInterviewSequenceDiagram.png)
+The following sequence diagram illustrates the execution flow when the user enters
+`search-interview /c Google`:
+
+![Search Interview Sequence Diagram](diagrams/SearchInterviewSequenceDiagram.png)
+
+#### Design Considerations
+
+**Aspect: Single filter vs. combined filters**
+
+- **Alternative 1 (current choice):** Support multiple optional flags with AND logic.
+    - Pros: Flexible — users can narrow results progressively. One command handles all search needs.
+    - Cons: Slightly more complex parsing and validation logic.
+
+- **Alternative 2:** Separate commands for each search type (e.g., `search-by-company`, `search-by-date`).
+    - Pros: Each command is simpler.
+    - Cons: More commands to learn. Cannot combine filters without chaining commands.
+
+**Aspect: Where to place the filtering logic**
+
+- **Alternative 1 (current choice):** Delegate filtering to `Interview.matches()`.
+    - Pros: Encapsulates matching logic in the domain object. The command class stays clean
+      and focused on orchestration.
+    - Cons: The `Interview` class takes on matching responsibility.
+
+- **Alternative 2:** Perform all filtering inline in the command class.
+    - Pros: All logic in one place.
+    - Cons: Harder to reuse the matching logic from other commands.
+
+### Clear Rejected Feature
+
+#### Overview
+
+The `clear-rejected` command removes all internships that have been marked as rejected from the
+tracker. This helps users declutter their list by removing entries they no longer need to track.
+
+**Command format:** `clear-rejected`
+
+**Example:** `clear-rejected` removes all rejected internships and prints a summary of what was removed.
+
+#### Implementation
+
+The feature is implemented in `ClearRejectedCommand`, which extends `Command`.
+When `execute()` is called, it performs the following steps:
+
+1. Retrieves the full internship list from `InternshipList`.
+2. Filters the list to find all internships where `isRejected()` returns `true`.
+3. If no rejected internships are found, prints a message and returns.
+4. Removes all rejected internships from the list using `removeAll()`.
+5. Prints a summary showing how many were cleared and their details.
+
+#### Design Considerations
+
+**Aspect: Clearing strategy**
+
+- **Alternative 1 (current choice):** Remove all rejected internships at once.
+    - Pros: Simple one-step cleanup. No need for the user to identify individual entries.
+    - Cons: No selective removal — it is all-or-nothing.
+
+- **Alternative 2:** Allow the user to specify which rejected internships to clear.
+    - Pros: More granular control.
+    - Cons: Adds unnecessary complexity — if the user wants to keep a rejected entry,
+      they likely would not have rejected it in the first place.
+
+### Feature: Listing Upcoming Interviews
+
+#### Overview
+
+The user can list upcoming interviews within a specific number of days.
+
+**Command format:** `upcoming [N]`, where `N` is an integer.
+
+This lists all upcoming interviews within the following `N` days. If the optional parameter `[N]` is omitted, a default 
+of `5` days will be used. That is, `upcoming` will list all upcoming interviews within the subsequent `5` days.
+
+Note: negative `N` is allowed but will always output `You don't have any upcoming interviews.`
+#### Implementation
+
+The feature is implemented in `UpcomingCommand`, the relationship of which to other classes is shown in the following class diagram 
+
+![Upcoming Command Class Diagram](diagrams/UpcomingCommandClassDiagram.png)
+
+The following sequence diagram illustrates a call to `execute()` of `UpcomingCommand`
+
+![Upcoming Command Sequence Diagram](diagrams/UpcomingCommandSequenceDiagram.png)
 
 ### Delete Internship Feature
 
@@ -302,127 +550,397 @@ The feature is covered by comprehensive unit tests in `DeleteInternshipCommandTe
 | `delete_indexOutOfBounds_throwsException` | Delete index larger than list size | Throws IndexOutOfBoundsException |
 | `delete_emptyList_throwsException` | Delete from empty list | Throws IndexOutOfBoundsException |
 
-#### Future Enhancements
+### Mark Offer Feature
+
+#### Overview
+
+The `mark` command allows the user to update the status of an existing internship application to indicate that an offer has been received. The user specifies the 1-based index of the internship in the current list, and the system updates its status to `OFFER` and immediately saves the change to the disk.
+
+**Command format:** `mark INDEX` (or `mark-offer INDEX`)
+
+**Example:** `mark 1` marks the 1st internship in the current list as having received an offer.
+
+#### Implementation
+
+The feature is implemented in `MarkOfferCommand`, which extends the abstract `Command` class.
+
+When the user enters `mark 1`, the execution flow is as follows:
+
+1. The `Parser` parses the user input, extracting the command word and the argument "1".
+2. The system looks up the corresponding command and executes `MarkOfferCommand`.
+3. `MarkOfferCommand` retrieves the index parameter from the `Parser` using `getParamsOf(parser.getCommand())`.
+4. The command validates that the parameter is present, is a valid integer, and falls within the valid bounds of the `InternshipList` (between 1 and `internshipList.getSize()`).
+5. The command retrieves the `Internship` at the 0-based position `(index - 1)` from the `InternshipList`.
+6. The command calls `internship.markAsOffer()` to update the internal state and UI tag of the internship.
+7. The command immediately calls `storage.save(internshipList)` to persist the updated status to `data/internships.txt`.
+8. The command logs the successful update and prints a congratulatory confirmation message to the user via the `Ui`.
+
+The following class diagram shows the main structural components involved in the mark offer feature:
+
+![Mark Offer Class Diagram](diagrams/MarkOfferCommandClassDiagram.png)
+
+The following sequence diagram illustrates the execution flow when the user enters `mark 1`:
+
+![Mark Offer Sequence Diagram](diagrams/MarkOfferCommandSequenceDiagram.png)
+
+#### Input Validation
+
+The command implements multiple layers of validation to ensure robustness:
+
+| Validation Layer | Description | Example Error Message |
+|-----------------|-------------|----------------------|
+| **Presence Check** | Verifies that an index was provided | "Please provide the index of the internship! (e.g., mark 1)" |
+| **Type Check** | Ensures the index is a valid integer | "The index must be a number! (e.g., mark 1)" |
+| **Range Check** | Confirms the index is within the list bounds | "Invalid index! Please check your internship list." |
+
+#### Defensive Programming Features
+
+The implementation includes several defensive programming measures:
+
+**1. Assertions**: Verify internal state invariants during command initialization.
+assert parser != null : "Parser passed to MarkOfferCommand cannot be null";
+assert internshipList != null : "InternshipList passed to MarkOfferCommand cannot be null";
+
+**2. Logging**: Track execution flow and potential user input errors for debugging.
+logger.log(Level.INFO, "Starting execution of MarkOfferCommand...");
+logger.log(Level.WARNING, "Failed to mark offer: Index out of bounds.");
+
+**3. Bounds Checking**: Validate array indices strictly before attempting access to prevent runtime crashes.
+if (index < 1 || index > internshipList.getSize()) {
+throw new GoldenCompassException("Invalid index!...");
+}
+
+**4. Graceful Exception Handling**: Catch specific parsing errors and translate them into user-friendly messages rather than letting the application crash.
+try {
+index = Integer.parseInt(params.get(0).trim());
+} catch (NumberFormatException e) {
+throw new GoldenCompassException("The index must be a number!...");
+}
+
+#### Design Considerations
+
+**Aspect: Data Persistence Strategy for State Changes**
+
+* **Alternative 1 (Current Implementation): Immediate Disk Write (Eager Saving)**
+  * **Description:** The command takes in the `InternshipStorage` object as a dependency and immediately calls `storage.save()` right after changing the internship's status in memory.
+  * **Pros:** Guarantees data safety. If the user unexpectedly closes the terminal, forces a quit, or the application crashes, the status change is already safely written to the text file.
+  * **Cons:** Slightly couples the command to the storage mechanism and incurs a minor performance hit due to disk I/O operations occurring on every single status update.
+
+* **Alternative 2: Deferred Disk Write (Save on Exit)**
+  * **Description:** The command only updates the status of the `Internship` object in the RAM (`InternshipList`). Writing to the disk is deferred until the user explicitly exits the application.
+  * **Pros:** Faster execution time and decouples the command classes from the storage mechanism.
+  * **Cons:** High risk of data loss. If the application crashes before exiting cleanly, the recorded offer status is permanently lost.
+
+**Aspect: Input Validation Strategy**
+
+* **Alternative 1 (Current Implementation): Step-by-Step Fail-Fast Validation**
+  * **Description:** The command independently checks for missing input, invalid formats, and out-of-bounds indices in sequence, throwing specific exceptions immediately.
+  * **Pros:** Excellent UX. The user receives precise, actionable feedback about exactly what part of their input was wrong.
+  * **Cons:** Slightly more verbose code within the `execute()` method.
+
+* **Alternative 2: Blanket Try-Catch Block**
+  * **Description:** The command attempts to parse and access the list directly, wrapping the logic in a single generic `try-catch` block.
+  * **Pros:** More compact code.
+  * **Cons:** Poor UX, as the user receives a generic "Invalid input" error regardless of the specific mistake made.
+
+#### Test Coverage
+
+The feature is covered by comprehensive unit tests to ensure all edge cases are handled:
+
+| Test Case | Description | Expected Outcome |
+|-----------|-------------|------------------|
+| `execute_validIndex_marksOfferAndSaves` | Mark index 1 in a populated list | Internship status updates to OFFER, storage saves successfully |
+| `execute_missingIndex_throwsException` | Execute `mark` with no arguments | Throws `GoldenCompassException` for missing index |
+| `execute_nonNumericIndex_throwsException` | Execute `mark abc` | Throws `GoldenCompassException` for invalid number format |
+| `execute_indexOutOfBounds_throwsException` | Execute `mark 99` on a small list | Throws `GoldenCompassException` for invalid bounds |
+| `execute_negativeIndex_throwsException` | Execute `mark -1` | Throws `GoldenCompassException` for invalid bounds |
+
+
+### Reject Offer Feature
+
+#### Overview
+
+The `reject` command allows the user to update the status of an existing internship application to indicate that the application has been rejected. The user specifies the 1-based index of the internship in the current list, and the system updates its status to `REJECTED`.
+
+**Command format:** `reject INDEX`
+
+**Example:** `reject 1` marks the 1st internship in the current list as rejected.
+
+#### Implementation
+
+The feature is implemented in `RejectOfferCommand`, which extends the abstract `Command` class.
+
+When the user enters `reject 1`, the execution flow is as follows:
+
+1. The `Parser` parses the user input, extracting the command word and the argument "1".
+2. The system looks up the corresponding command and executes `RejectOfferCommand`.
+3. `RejectOfferCommand` retrieves the index parameter from the `Parser` using `getParamsOf("reject")`.
+4. The command validates that the parameter is present, is a valid integer, and falls within the valid bounds of the `InternshipList` (between 1 and `internshipList.getSize()`).
+5. The command retrieves the `Internship` at the 0-based position `(index - 1)` from the `InternshipList`.
+6. The command calls `internship.markAsRejected()` to update the internal state and UI tag of the internship.
+7. The command logs the successful update and prints a confirmation message ("Rejection builds character! 💪") to the user via the inherited `ui` object.
+
+The following class diagram shows the main structural components involved in the reject offer feature:
+
+![Reject Offer Class Diagram](diagrams/RejectOfferCommandClassDiagram.png)
+
+The following sequence diagram illustrates the execution flow when the user enters `reject 1`:
+
+![Reject Offer Sequence Diagram](diagrams/RejectOfferCommandSequenceDiagram.png)
+
+#### Input Validation
+
+The command implements multiple layers of validation to ensure robustness:
+
+| Validation Layer | Description | Example Error Message |
+|-----------------|-------------|----------------------|
+| **Presence Check** | Verifies that an index was provided | "Please provide the index of the internship! (e.g., reject 1)" |
+| **Type Check** | Ensures the index is a valid integer | "The index must be a number! (e.g., reject 1)" |
+| **Range Check** | Confirms the index is within the list bounds | "Invalid index! Please check your internship list." |
+
+#### Defensive Programming Features
+
+The implementation includes several defensive programming measures:
+
+**1. Assertions**: Verify internal state invariants during command initialization.
+assert parser != null : "Parser passed to RejectCommand cannot be null";
+assert internshipList != null : "InternshipList passed to RejectCommand cannot be null";
+
+**2. Logging**: Track execution flow and potential user input errors for debugging.
+logger.log(Level.INFO, "Starting execution of RejectCommand...");
+logger.log(Level.WARNING, "Failed to reject: Index is not a number.");
+
+**3. Bounds Checking**: Validate array indices strictly before attempting access to prevent runtime crashes.
+if (index < 1 || index > internshipList.getSize()) {
+throw new GoldenCompassException("Invalid index! Please check your internship list.");
+}
+
+**4. Graceful Exception Handling**: Catch specific parsing errors and translate them into user-friendly messages rather than letting the application crash.
+try {
+index = Integer.parseInt(params.get(0).trim());
+} catch (NumberFormatException e) {
+throw new GoldenCompassException("The index must be a number!...");
+}
+
+#### Design Considerations
+
+**Aspect: Input Validation Strategy**
+
+* **Alternative 1 (Current Implementation): Step-by-Step Fail-Fast Validation**
+  * **Description:** The command independently checks for missing input, invalid formats, and out-of-bounds indices in sequence, throwing specific exceptions immediately.
+  * **Pros:** Excellent UX. The user receives precise, actionable feedback about exactly what part of their input was wrong. It safely prevents system crashes like `NumberFormatException` or `IndexOutOfBoundsException`.
+  * **Cons:** Slightly more verbose code within the `execute()` method due to the sequential `if` statements and `try-catch` blocks.
+
+* **Alternative 2: Blanket Try-Catch Block**
+  * **Description:** The command attempts to parse and access the list directly, wrapping the logic in a single generic `try-catch` block that catches standard Java exceptions (`Exception e`).
+  * **Pros:** More compact and concise code within the `execute()` method.
+  * **Cons:** Poor UX. The user receives a generic error like "Invalid input" regardless of whether they forgot to type a number, typed a letter instead of a number, or typed an index that was too large.
+
+#### Test Coverage
+
+The feature is covered by comprehensive unit tests to ensure all edge cases are handled:
+
+| Test Case | Description | Expected Outcome |
+|-----------|-------------|------------------|
+| `execute_validIndex_marksRejected` | Reject index 1 in a populated list | Internship status updates to REJECTED |
+| `execute_missingIndex_throwsException` | Execute `reject` with no arguments | Throws `GoldenCompassException` for missing index |
+| `execute_nonNumericIndex_throwsException` | Execute `reject abc` | Throws `GoldenCompassException` for invalid number format |
+| `execute_indexOutOfBounds_throwsException` | Execute `reject 99` on a small list | Throws `GoldenCompassException` for invalid bounds |
+| `execute_negativeIndex_throwsException` | Execute `reject -1` | Throws `GoldenCompassException` for invalid bounds |
+### Alias
+#### Overview 
+
+The `alias` command allows user to add an alias to the default set of command words, while the `remove-alias` command
+allows user to remove an existing alias.
+
+#### Command format
+
+`alias /c COMMAND /a ALIAS`
+
+`remove-alias ALIAS`
+
+#### Implementation
+
+These two commands uses `Map`. There is a `Map<String, String>` that maps the set of alias to the set of default command
+keyword. For example, alias `"ls"` is mapped to command `"list"`. The output of this map is then mapped to command 
+classes as explained above.
+
+`alias` would create a new mapping, while `remove-alias` would remove such a mapping. This is internally achieved
+via `executor.addAlias(commandWord, alias)` and `executor.removeAlias(alias)`.
+
+Defensive validation of the user input would be carried out before calling the above methods. This includes the 
+**number** of the parameters, and the expected **flags**. 
+
+This is add alias sequence diagram:
+
+![](diagrams/AddAliasDigram.png)
+
+This is remove alias sequence diagram:
+
+![](diagrams/RemoveAliasDigram.png)
+### Data History
+
+#### Overview
+
+The `undo` command allows user to undo an action that modifies the state of the app, i.e, the recorded data, while
+the `redo` command allows user to redo an action that has been undone by `undo`. 
+User can `undo` for a maximum of `10` times.
+
+#### Command format
+`undo`
+
+`redo`
+
+#### Implementation
+
+The mechanism uses the idea of a timeline. A copy of the data is "snapshot" and recorded by `OperationSnapshot` class. 
+A container class, `OperationHistory` would store this snapshot via stack. There are `2` stacks: **undo stack** 
+and **redo stack**. The undo stack's top is always the **current** data version. The redo stack's top is always the
+latest data version that has been **undone**.
+
+After each action (command) that is **undoable**, a snapshot would be taken, and pushed into undo stack. The redo
+stack would be **cleared** at the same time. This is because conflict of data history would arise when trying to redo 
+after new changes.
+
+To undo an action, the top snapshot in undo stack would be popped into the redo stack, and the new top in undo stack
+gets peeked by returning its reference. Then, the current data in the app would be replaced by the data copies in that
+reference.
+
+To redo an action, the top snapshot in redo stack is popped into the undo stack and its reference is also returned.
+The current data of the app would be replaced by the data copies in that reference.
+
+This is undo sequence diagram:
+![UndoSequenceDiagram.png](diagrams/UndoSequenceDiagram.png)
+
+This is redo sequence diagram:
+![RedoSequenceDigram.png](diagrams/RedoSequenceDigram.png)
+
+### Future Enhancements
 
 Potential improvements for future versions:
 
 1. **Batch deletion**: Support multiple indices (e.g., `delete 1,3,5`)
 2. **Range deletion**: Delete a range of internships (e.g., `delete 1-5`)
-3. **Undo capability**: Allow users to restore recently deleted internships
-4. **Confirmation prompt**: Ask for confirmation before deleting to prevent accidents
-5. **Archive feature**: Move deleted internships to an archive instead of permanent deletion
-        
-### Command Framework
-All command classes implement `Executable`, which provides `execute(Map)` and a default method `checkFlags()` to check the 
-validity of flags. 
+3. **Confirmation prompt**: Ask for confirmation before deleting to prevent accidents
+4. **Archive feature**: Move deleted internships to an archive instead of permanent deletion
 
-Each command class must provide a static `ArrayList<String>` of flags that the command recognizes.
 
-#### Command Format
-`keyword [P...] [F P...] [F] `<br> where `[]` is optional, `P` is a parameter word, `F` is a flag, and `...` means any number of .
-
-The first block of parameters have no flag because they belong to the default flag `/default` which every command should have.
-
-Duplicated flags are allowed.
-
-For example:<br>
-`add abc /a flag a0 /b /a flag a1` means `/default`'s parameter is `abc`, `/a`'s parameter is `flag a0, flag a1` and `/b` has no parameter.
-
-#### Keyword Mapping
-Each keyword is mapped to an instance of that command, while each keyword also has its own alias as defined by the user.<br> In general, each command can have 
-any number of keywords.
-
-For example: `add <-> AddCommand` `ad <-> AddCommand` where `ad` is an alias of `add`.
-
-#### Flags
-Each flag has the format: `/FLAG` where `FLAG` is to be replaced by the actual flag.
-
-Each command has its own recognizable flags.
-
-There is a global **set** that stores all recognizable flags of the app.
-
-The **constructor** of each command must update the set with its recognizable flags.
-
-#### Preparser
-Preparser only sees the **global** set of all flags. It would parse user input into `2` components: keyword and a Map.
-
-The Map maps each flag to a `List<String>` of its parameters.
-
-For example: `User input > add add abc /a flag a0 /b /a flag a1`<br>
-`keyword: add`<br>
-```
-Map:
-/default <-> [abc]
-/a <-> [flag a0, flag a1]
-/b <-> []
-```
-> **Note**
-> 
-> Preparser only keeps track of the global set of all flags.<br> 
-> So, it does not check if a command recognize every flag in the input. 
-
-#### Execute Command
-The interface `Executable` provides `execute(Map)`, so it must be **overridden** in each command class. <br>
-`execute(Map)` should takes in a map of flags to parameters.
-
-Since preparser does not validate command specific flags, in the implementation of `execute(Map)`, `checkFlags()` must be 
-called first before anything.
-
-### Storage — Component Overview
-
-The following class diagram shows the structure of the `Storage` component and how it interacts with the `Logic` and `Model` layers.
-
-![Storage Class Diagram](diagrams/StorageClassDiagram.png)
-
-The `Storage` component:
-* Saves `InternshipList`, `InterviewList`, and the `ALIAS_MAP` into separate text files.
-* Loads data from these files upon application startup.
-* Uses a "linked loading" approach: `InterviewStorage` references the `InternshipList` to rebuild the object associations between interviews and their respective companies using the `findInternshipByCompany` helper method.
-
-### Implementation: Persistence
+### Storage Component
 
 #### Overview
 
-The storage system is implemented through three main classes: `InternshipStorage`, `InterviewStorage`, and `AliasStorage`. These classes handle the conversion of Java objects into a pipe-delimited (`|`) text format to ensure data persists across sessions.
+The Storage component is responsible for persisting user data across application sessions. It reads data from the local hard drive when GoldenCompass boots up and continuously writes data back to the disk during execution. To maintain the Single Responsibility Principle, the component is divided into three distinct classes:
+* `InternshipStorage`: Manages the saving and loading of `Internship` objects.
+* `InterviewStorage`: Manages `Interview` schedules and links them to existing internships.
+* `AliasStorage`: Manages user-defined command shortcuts.
 
-**Data File Locations:**
-* `data/internships.txt`: Stores company names and job titles.
-* `data/interviews.txt`: Stores interview dates and the linked company names.
-* `data/aliases.txt`: Stores user-defined command shortcuts.
+#### Implementation
 
-#### Execution Flow
+The storage system is initialized inside the `GoldenCompass` main class.
 
-When the application starts, `GoldenCompass` initializes the storage classes and triggers the `load()` sequence in a specific order to maintain data integrity:
+**Loading Data (Application Startup):**
+When the application starts, data is loaded in a strict sequence to resolve dependencies:
+1. `InternshipStorage.load()` is called first. It reads `data/internships.txt` line by line and splits the string using the `" | "` delimiter.
+2. If a third column (status) is present, the parser uses a `switch` statement on the parsed string (`OFFER`, `REJECTED`, or `PENDING`).
+  - `case "OFFER"`: Calls `loadedInternship.markAsOffer()`.
+  - `case "REJECTED"`: Calls `loadedInternship.markAsRejected()`.
+  - `case "PENDING"`: Leaves the internship in its default initialization state.
+  - `default`: Logs a warning for an unknown status to handle potential file corruption.
+3. `InterviewStorage.load()` is called next. Since interviews are tied to specific internships, this class parses `data/interviews.txt`, extracts the company name, and uses `internshipList.findInternshipByCompany(companyName)` to link the newly loaded `Interview` back to its parent `Internship` object in memory.
+4. `AliasStorage.load()` reads `data/aliases.txt` and populates the `Executor`'s internal alias map.
 
-1.  **Internship Loading**: `InternshipStorage` reads `internships.txt` and populates the `InternshipList`.
-2.  **Interview Loading**: `InterviewStorage` reads `interviews.txt`. For each entry, it searches the `InternshipList` for the matching `Internship` object before adding the `Interview` to the `InterviewList`.
-3.  **Alias Loading**: `AliasStorage` reads `aliases.txt` and updates the `ALIAS_MAP` in the `Executor`.
+**Saving Data (Execution Loop):**
+GoldenCompass utilizes an **Eager Saving Strategy**. Inside the main `while (true)` loop in `GoldenCompass.run()`, the application calls the `save()` method on all three storage classes immediately after every user command is executed. During `InternshipStorage.save()`, the system checks `hasOffer()` and `isRejected()` to accurately write the correct status string back into the text file.
 
-The following sequence diagram illustrates the loading process during startup:
+#### Data Formats
 
-![Storage Loading Sequence Diagram](diagrams/StorageLoadingSequenceDiagram.png)
+Data is stored in custom-delimited text files using the `" | "` (space-pipe-space) separator. This format was chosen because it is simple to parse using `String.split()` and remains highly readable if the user opens the file in a standard text editor.
+
+**1. Internships (`data/internships.txt`)**
+Format: `TITLE | COMPANY_NAME | STATUS`
+* The `STATUS` column strictly maps to the application's internal state logic (`PENDING`, `OFFER`, or `REJECTED`).
+* Example: `Software Engineer | Google | OFFER`
+* Example: `Frontend Intern | Grab | PENDING`
+
+**2. Interviews (`data/interviews.txt`)**
+Format: `COMPANY_NAME | ISO_LOCAL_DATE_TIME`
+* Example: `Google | 2026-03-25T14:30:00`
+* Example: `Grab | null` *(If an interview is created but no date is set yet)*
+
+**3. Aliases (`data/aliases.txt`)**
+Format: `ALIAS_TRIGGER | ORIGINAL_COMMAND`
+* Example: `ls | list`
+* Example: `mk | mark`
+The following class diagram shows the main structural components involved in the Storage feature:
+
+![Storage Class Diagram](diagrams/StorageClassDiagram.png)
+
+The following sequence diagram illustrates the execution flow of the eager saving mechanism during the main application loop:
+
+![Storage Sequence Diagram](diagrams/StorageSequenceDiagram.png)
+
+#### Data Validation
+
+Instead of user input validation, the Storage component implements data validation when loading from the text files to prevent crashes from manually edited or corrupted files:
+
+| Validation Layer | Description | Handling Strategy |
+|-----------------|-------------|-------------------|
+| **Length Check** | Verifies a line splits into the correct number of parts via the `" | "` delimiter. | Skips the line and logs a warning if `parts.length` is invalid. |
+| **Empty Value Check** | Ensures parsed titles and company names are not empty strings. | Skips the line to prevent creating ghost internships. |
+| **Date Format Check** | Verifies interview dates conform to `LocalDateTime` ISO formatting. | Catches `DateTimeParseException`, logs a warning, but still loads the interview without a date. |
+
+#### Defensive Programming Features
+
+The implementation includes several defensive programming measures:
+
+**1. Assertions**: Verify internal state invariants before executing I/O operations.
+assert filePath != null && !filePath.trim().isEmpty() : "Storage file path cannot be null or empty";
+assert internshipList != null : "Cannot save a null InternshipList";
+
+**2. Logging**: Track file creation and data corruption for debugging.
+logger.log(Level.INFO, "Created missing data directory.");
+logger.log(Level.WARNING, "Skipped corrupted line: " + line);
+
+**3. Directory Auto-Creation**: The system proactively checks if the `data/` folder exists before attempting to write. If missing, it uses `parentDir.mkdirs()` to create it, preventing `FileNotFoundException`.
+
+**4. Graceful Exception Handling**: Standard `IOException` and `FileNotFoundException` errors are caught and handled. Instead of crashing the application, it alerts the user or starts with a fresh empty list.
 
 #### Design Considerations
 
-**Aspect: Data Format for Persistence**
+**Aspect: Saving Strategy**
 
-* **Alternative 1 (current choice):** Custom Pipe-Delimited Text Format (e.g., `Google | Software Engineer`).
-  * **Pros:** Human-readable, easy to debug by opening the file in a text editor, and lightweight without needing external libraries.
-  * **Cons:** Requires manual parsing logic and careful handling of the delimiter character if it appears in user input.
+* **Alternative 1 (Current Implementation): Eager Saving (Save on every loop)**
+  * **Description:** Inside `GoldenCompass.run()`, the application saves data to all three text files after every single command execution.
+  * **Pros:** Maximum data safety. If the user unexpectedly closes the terminal, experiences a power outage, or encounters a fatal runtime exception, no data is lost because the disk is always synchronized with the RAM.
+  * **Cons:** Higher disk I/O overhead, as the application rewrites the entire file even if a command didn't actually change any data (e.g., after a `list` command).
 
-* **Alternative 2:** JSON or XML.
-  * **Pros:** Standardized format, handles nested data structures easily.
-  * **Cons:** Increases project complexity and file size; requires adding external dependencies which may conflict with the project's "no-third-party-library" constraints.
+* **Alternative 2: Lazy Saving (Save on exit)**
+  * **Description:** The `save()` methods are only called once when the user types the `bye` command.
+  * **Pros:** Better performance due to minimized file I/O operations.
+  * **Cons:** High risk of data loss. If the application terminates abnormally, all progress made during that session is wiped out.
 
-**Aspect: Timing of Save Operations**
+**Aspect: Relational Data Mapping (Interviews to Internships)**
 
-* **Alternative 1 (current choice):** Save on Exit.
-  * **Pros:** Efficient; only performs Disk I/O operations once per session, reducing performance overhead.
-  * **Cons:** Risk of data loss if the application crashes or the terminal is force-closed without using the `bye` command.
+* **Alternative 1 (Current Implementation): Foreign Key Reference by Company Name**
+  * **Description:** `InterviewStorage` saves only the Company Name and the Date. Upon loading, it searches the previously loaded `InternshipList` for an exact company name match (`findInternshipByCompany`) to rebuild the object reference in memory.
+  * **Pros:** Prevents data duplication. Keeps the `interviews.txt` file clean and concise, adhering to the Single Source of Truth principle.
+  * **Cons:** Requires `InternshipList` to be fully loaded *before* `InterviewList` can be loaded.
 
-* **Alternative 2:** Auto-save after every modification.
-  * **Pros:** Maximum data safety; changes are committed immediately.
-  * **Cons:** High disk I/O overhead; might lead to minor lag during command execution if the data lists become very large.
+* **Alternative 2: Deep Copy Storage**
+  * **Description:** `InterviewStorage` saves all details of the parent `Internship` alongside the interview date.
+  * **Pros:** Easier to parse since `InterviewStorage` wouldn't need access to `InternshipList`.
+  * **Cons:** Violates the DRY (Don't Repeat Yourself) principle. If an internship status is updated, it would have to be updated in both files.
+
+#### Test Coverage
+
+The storage components are covered by unit tests to ensure file I/O reliability:
+
+| Test Case | Description | Expected Outcome |
+|-----------|-------------|------------------|
+| `save_validList_writesCorrectly` | Save a list with one item, then read the file manually | File contains the exact formatted string |
+| `load_missingFile_returnsEmptyList` | Attempt to load when `data/` does not exist | Returns empty list, creates directory |
+| `load_corruptedFile_skipsLines` | Load a file with missing `|` delimiters | Skips bad lines, loads valid lines |
+| `load_invalidDate_handlesGracefully` | Load interview with date `abc` | Interview loaded, date remains null |
 
 ## Product scope
 ### Target user profile
@@ -438,16 +956,66 @@ The following sequence diagram illustrates the loading process during startup:
 |Version| As a ... | I want to ... | So that I can ...|
 |--------|----------|---------------|------------------|
 |v1.0|new user|see usage instructions|refer to them when I forget how to use the application|
-|v2.0|user|find a to-do item by name|locate a to-do without having to go through the entire list|
+|v1.0|user|add an interview linked to an internship|track my upcoming interviews alongside my applications|
+|v1.0|user|set a date and time for an interview|remember when each interview is scheduled|
+|v2.0|user|search interviews by company, role, or date|quickly find specific interviews without scrolling the full list|
+|v2.0|user|clear all rejected internships at once|declutter my list and focus on active applications|
+|v2.0|user|update the date of an existing interview|correct or reschedule an interview without deleting and re-adding it|
 
 ## Non-Functional Requirements
 
-{Give non-functional requirements}
+1. Should work on any mainstream OS (Windows, macOS, Linux) as long as Java 17 or above is installed.
+2. A user with above-average typing speed should be able to accomplish most tasks faster than using a GUI-based application.
+3. The application should respond to any command within 1 second on a typical modern computer.
+4. Data files should be human-readable plain text so that advanced users can inspect or edit them manually.
 
 ## Glossary
 
-* *glossary item* - Definition
+* *Internship* - A tracked internship application, consisting of a company name and role title.
+* *Interview* - A scheduled interview linked to an internship, with an optional date and time.
+* *Flag* - A command parameter prefix starting with `/` (e.g., `/d`, `/c`, `/t`).
+* *Index* - A 1-based position number referring to an item in the displayed list.
 
 ## Instructions for manual testing
 
-{Give instructions on how to do a manual product testing e.g., how to load sample data to be used for testing}
+### Adding an interview
+
+1. Prerequisites: At least one internship exists. Run `add Google /t SWE` to create one.
+2. Test case: `add-interview 1 /d 2025-06-15 10:00`
+   Expected: Interview added for the 1st internship with the given date-time.
+3. Test case: `add-interview 0 /d 2025-06-15 10:00`
+   Expected: Error message indicating the index is out of range.
+4. Test case: `add-interview 1 /d bad-date`
+   Expected: Error message indicating invalid date format.
+5. Test case: `add-interview`
+   Expected: Error message asking for the index.
+
+### Updating interview date
+
+1. Prerequisites: At least one interview exists. Use `list-interview` to verify.
+2. Test case: `update-date 1 /d 2025-07-01 09:30`
+   Expected: Date of the 1st interview updated to the new date-time.
+3. Test case: `update-date 1 /d 2025-13-01 10:00`
+   Expected: Error message indicating invalid date format.
+4. Test case: `update-date 999 /d 2025-07-01 09:30`
+   Expected: Error message indicating the index is out of range.
+
+### Searching interviews
+
+1. Prerequisites: Multiple interviews exist with different companies and dates.
+2. Test case: `search-interview /c Google`
+   Expected: Lists all interviews whose company name contains "Google" (case-insensitive).
+3. Test case: `search-interview /t Engineer /d 2025-06-15`
+   Expected: Lists interviews matching both the role and date criteria.
+4. Test case: `search-interview /c NonExistentCompany`
+   Expected: Message indicating no interviews found.
+5. Test case: `search-interview`
+   Expected: Error message asking for at least one search flag.
+
+### Clearing rejected internships
+
+1. Prerequisites: Mark at least one internship as rejected using `reject INDEX`.
+2. Test case: `clear-rejected`
+   Expected: All rejected internships are removed. A summary is printed.
+3. Test case: Run `clear-rejected` again when no rejected internships remain.
+   Expected: Message indicating nothing to clear.

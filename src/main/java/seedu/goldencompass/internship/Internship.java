@@ -98,6 +98,18 @@ public class Internship {
     }
 
     /**
+     * Sets the interview for this internship.
+     *
+     * @param interview The interview to associate with this internship
+     */
+    public void setInterview(Interview interview) {
+        this.interview = interview;
+        if (interview != null) {
+            logger.info("Interview set for: " + companyName + " - " + title);
+        }
+    }
+
+    /**
      * Deletes the interview associated with this internship.
      */
     public void deleteInterview() {
@@ -123,6 +135,26 @@ public class Internship {
 
     public boolean isRejected() {
         return this.status == ApplicationStatus.REJECTED;
+    }
+
+    /**
+     * Returns {@code true} if this internship matches all non-null criteria.
+     * Text matching is case-insensitive substring matching.
+     *
+     * @param company the company name to match, or {@code null} to skip.
+     * @param title   the role/title to match, or {@code null} to skip.
+     * @return {@code true} if all non-null criteria match.
+     */
+    public boolean matches(String company, String title) {
+        if (company != null && !company.isEmpty()
+                && !this.companyName.toLowerCase().contains(company.toLowerCase())) {
+            return false;
+        }
+        if (title != null && !title.isEmpty()
+                && !this.title.toLowerCase().contains(title.toLowerCase())) {
+            return false;
+        }
+        return true;
     }
 
     @Override

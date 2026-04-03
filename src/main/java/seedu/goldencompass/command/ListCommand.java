@@ -3,6 +3,7 @@ package seedu.goldencompass.command;
 import seedu.goldencompass.exception.GoldenCompassException;
 import seedu.goldencompass.internship.Internship;
 import seedu.goldencompass.internship.InternshipList;
+import seedu.goldencompass.parser.Parser;
 
 import java.util.List;
 import java.util.logging.Logger;
@@ -24,7 +25,11 @@ public class ListCommand extends Command {
      *
      * @param internshipList The list of internships to be displayed
      */
-    public ListCommand(InternshipList internshipList) {
+    public ListCommand(Parser parser, InternshipList internshipList) {
+
+        // This gives access to checkHelpFlag()
+        super(parser);
+
         // Defensive check: internshipList cannot be null
         if (internshipList == null) {
             logger.severe("Attempted to create ListCommand with null InternshipList");
@@ -49,6 +54,7 @@ public class ListCommand extends Command {
      */
     @Override
     public void execute() throws GoldenCompassException {
+
         logger.info("Executing ListCommand");
 
         try {
@@ -102,5 +108,15 @@ public class ListCommand extends Command {
             logger.severe("Unexpected error in ListCommand: " + e.getMessage());
             throw new GoldenCompassException("Error displaying internships: " + e.getMessage());
         }
+    }
+
+    @Override
+    protected String getCommandDescription() {
+        return "Lists all internships in the tracker.";
+    }
+
+    @Override
+    protected String getFlagDescription() {
+        return "Format: list";
     }
 }

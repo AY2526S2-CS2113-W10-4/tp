@@ -1,0 +1,36 @@
+@startuml
+hide circle
+skinparam classAttributeIconSize 0
+skinparam class {
+    BackgroundColor #ADD1B2
+    ArrowColor #2A2A2A
+    BorderColor #2A2A2A
+}
+
+abstract class Command {
+  # parser: Parser
+  # ui: Ui
+  + execute() : void
+}
+
+class MarkOfferCommand {
+  - internshipList: InternshipList
+  - storage: InternshipStorage
+  + MarkOfferCommand(parser: Parser, internshipList: InternshipList, storage: InternshipStorage)
+  + execute() : void
+}
+
+class InternshipList {
+  + get(index: int) : Internship
+  + getSize() : int
+}
+
+class InternshipStorage {
+  + save(internshipList: InternshipList) : void
+}
+
+Command <|-- MarkOfferCommand
+MarkOfferCommand --> "1" InternshipList : updates >
+MarkOfferCommand --> "1" InternshipStorage : saves to >
+
+@enduml
