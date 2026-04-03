@@ -1,0 +1,34 @@
+@startuml
+hide circle
+skinparam classAttributeIconSize 0
+skinparam class {
+    BackgroundColor #ADD1B2
+    ArrowColor #2A2A2A
+    BorderColor #2A2A2A
+}
+
+abstract class Command {
+  # parser: Parser
+  # ui: Ui
+  + execute() : void
+}
+
+class RejectOfferCommand {
+  - internshipList: InternshipList
+  + RejectOfferCommand(parser: Parser, internshipList: InternshipList)
+  + execute() : void
+}
+
+class InternshipList {
+  + get(index: int) : Internship
+  + getSize() : int
+}
+
+class Internship {
+  + markAsRejected() : void
+}
+
+Command <|-- RejectOfferCommand
+RejectOfferCommand --> "1" InternshipList : updates >
+InternshipList o-- "*" Internship
+@enduml

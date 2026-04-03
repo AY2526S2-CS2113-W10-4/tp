@@ -1,0 +1,42 @@
+@startuml
+hide footbox
+skinparam maxMessageSize 150
+
+participant ":MarkOfferCommand" as MarkOfferCommand #ADD1B2
+participant "parser:Parser" as Parser #ADD1B2
+participant "internshipList:InternshipList" as InternshipList #F498AD
+participant "internship:Internship" as Internship #F498AD
+participant "ui:Ui" as Ui #8CB6CE
+
+[-> MarkOfferCommand : execute()
+activate MarkOfferCommand
+
+MarkOfferCommand -> Parser : getParamsOf(parser.getCommand())
+activate Parser
+Parser --> MarkOfferCommand : params
+deactivate Parser
+
+note right of MarkOfferCommand
+  Parses index and
+  validates bounds
+end note
+
+MarkOfferCommand -> InternshipList : get(index - 1)
+activate InternshipList
+InternshipList --> MarkOfferCommand : internship
+deactivate InternshipList
+
+MarkOfferCommand -> Internship : markAsOffer()
+activate Internship
+Internship --> MarkOfferCommand
+deactivate Internship
+
+MarkOfferCommand -> Ui : print("HUGE CONGRATS! 🥳...")
+activate Ui
+Ui --> MarkOfferCommand
+deactivate Ui
+
+[<-- MarkOfferCommand
+deactivate MarkOfferCommand
+
+@enduml

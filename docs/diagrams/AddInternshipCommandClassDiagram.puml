@@ -1,0 +1,34 @@
+@startuml
+hide circle
+skinparam classAttributeIconSize 0
+skinparam class {
+    BackgroundColor #ADD1B2
+    ArrowColor #2A2A2A
+    BorderColor #2A2A2A
+}
+
+abstract class Command {
+  # parser: Parser
+  # ui: Ui
+  + execute() : void
+}
+
+class AddInternshipCommand {
+  - internshipList: InternshipList
+  + AddInternshipCommand(parser: Parser, internshipList: InternshipList)
+  + execute() : void
+}
+
+class InternshipList {
+  + add(internship: Internship) : void
+}
+
+class Internship {
+  + Internship(title: String, companyName: String)
+}
+
+Command <|-- AddInternshipCommand
+AddInternshipCommand --> "1" InternshipList : appends to >
+AddInternshipCommand ..> Internship : creates >
+
+@enduml

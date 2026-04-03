@@ -118,9 +118,7 @@ Below is the sequence diagram illustrating the `class Parser`:
 
 #### Overview
 
-The `add` command allows the user to create a new internship application in the tracker.
-The user specifies the company name and the role title, and the system creates an `Internship` object
-and adds it to the `InternshipList`.
+The `add` command allows the user to create a new internship application in the tracker. The user specifies the company name and the role title, and the system creates a new `Internship` object and appends it to the `InternshipList`.
 
 **Command format:** `add COMPANY_NAME /t ROLE_TITLE`
 
@@ -128,19 +126,51 @@ and adds it to the `InternshipList`.
 
 #### Implementation
 
-The feature is implemented in `AddInternshipCommand`, which implements the `Command` interface.
-When `execute()` is called, it performs the following steps:
+The feature is implemented in `AddInternshipCommand`, which extends the abstract `Command` class.
 
-1. Retrieves the company name parameter from the `Parser` using `getParamsOf("add")`.
-2. Retrieves the role title parameter from the `Parser` using `getParamsOf("/t")`.
-3. Validates that the company name parameter is present and not an empty string.
-4. Validates that the `/t` flag is present and that the title text is not empty.
-5. Throws a `GoldenCompassException` with an accumulated error message if any validation steps fail.
-6. Creates a new `Internship` object using the validated company name and title.
-7. Adds the newly created `Internship` to the `InternshipList`.
-8. Prints a confirmation message to the user via the `Ui`.
+When the user enters `add Grab /t Software Engineer`, the execution flow is as follows:
+
+1. The `Parser` parses the user input, extracting the command word ("add") and its associated parameters.
+2. The system looks up the corresponding command and executes `AddInternshipCommand`.
+3. `AddInternshipCommand` retrieves the company name parameter using `getParamsOf(parser.getCommand())` and the title parameter using `getParamsOf("/t")`.
+4. The command initializes a `StringBuilder` to act as an error message accumulator.
+5. The command sequentially checks for a missing company name, a missing `/t` flag, and an empty title string. If any checks fail, a specific error message is appended to the `StringBuilder`.
+6. If the `StringBuilder` is not empty after all checks, a single `GoldenCompassException` is thrown containing all accumulated error messages.
+7. If validation passes, a new `Internship` object is instantiated using the parsed company name and title.
+8. The command calls `internshipList.add(newInternship)` to store the application in memory.
+9. The command logs the successful creation and prints a confirmation message to the user via the `Ui`.
+
+The following class diagram shows the main structural components involved in the add internship feature:
+
+![Add Internship Class Diagram](diagrams/AddInternshipCommandClassDiagram.png)
+
+The following sequence diagram illustrates the execution flow when the user enters a valid add command:
 
 ![Add Internship Sequence Diagram](diagrams/AddInternshipCommandSequenceDiagram.png)
+
+#### Input Validation
+
+The command implements an accumulated validation strategy to ensure robustness:
+
+| Validation Layer | Description | Example Error Message |
+|-----------------|-------------|----------------------|
+| **Company Presence** | Verifies the company name parameter is not empty | "Company name cannot be empty!" |
+| **Flag Presence** | Verifies the `/t` flag was parsed successfully | "Invalid flag or missing title! Please use the '/t' flag for the role." |
+| **Title Presence** | Ensures the text following the `/t` flag is not blank | "Internship title cannot be empty!" |
+
+#### Defensive Programming Features
+
+The implementation includes several defensive programming measures:
+
+**1. Assertions**: Verify internal state invariants during command initialization.
+assert parser != null : "Parser passed to AddInternshipCommand cannot be null";
+assert internshipList != null : "InternshipList passed to AddInternshipCommand cannot be null";
+
+**2. Logging**: Track execution flow and record specific user syntax errors for debugging.
+logger.log(Level.INFO, "Starting execution of AddInternshipCommand...");
+logger.log(Level.WARNING, "Failed to add internship: Company name is missing.");
+
+**3. Error Accumulation**: Instead of failing at the first mistake, the command gathers all input errors into a `StringBuilder` to prevent unexpected partial crashes and provide comprehensive feedback.
 
 #### Design Considerations
 
@@ -149,12 +179,25 @@ When `execute()` is called, it performs the following steps:
 * **Alternative 1 (Current Implementation): Error Accumulation**
   * **Description:** The command checks all potential failure points (missing company name, missing `/t` flag, empty title) and collects all error messages into a single `StringBuilder`. If the builder is not empty at the end of the checks, it throws one consolidated `GoldenCompassException`.
   * **Pros:** Significantly improves User Experience (UX). If a user makes multiple syntax mistakes, they are informed of all of them at once, rather than having to fix one error just to be immediately hit by another.
-  * **Cons:** Slightly more verbose code, as it requires setting up a `StringBuilder` and using `if` blocks that don't immediately return.
+  * **Cons:** Slightly more verbose code, as it requires setting up a `StringBuilder` and using `if` blocks that do not immediately return.
 
 * **Alternative 2: Fail-Fast Validation**
   * **Description:** The command throws a `GoldenCompassException` immediately upon encountering the very first invalid input and halts execution.
   * **Pros:** Simpler and shorter code. Execution stops immediately, saving minor amounts of processing time.
   * **Cons:** Frustrating UX. A user who forgets both the company name and the `/t` flag will only see the "missing company name" error. After fixing it and pressing enter, they will be hit with the "missing flag" error, creating an annoying "whack-a-mole" experience.
+
+#### Test Coverage
+
+The feature is covered by comprehensive unit tests to ensure all edge cases are handled:
+
+| Test Case | Description | Expected Outcome |
+|-----------|-------------|------------------|
+| `execute_validInput_addsInternship` | Execute `add Grab /t SWE` | Internship added to list, list size increases by 1 |
+| `execute_missingCompany_throwsException` | Execute `add /t SWE` | Throws `Exception` with missing company message |
+| `execute_missingFlag_throwsException` | Execute `add Grab SWE` | Throws `Exception` with missing flag message |
+| `execute_missingTitle_throwsException` | Execute `add Grab /t` | Throws `Exception` with missing title message |
+| `execute_missingMultiple_throwsException` | Execute `add /t` | Throws `Exception` containing both missing company and missing title messages |
+
 
 ### Interview Management — Class Overview
 
@@ -507,6 +550,203 @@ The feature is covered by comprehensive unit tests in `DeleteInternshipCommandTe
 | `delete_indexOutOfBounds_throwsException` | Delete index larger than list size | Throws IndexOutOfBoundsException |
 | `delete_emptyList_throwsException` | Delete from empty list | Throws IndexOutOfBoundsException |
 
+### Mark Offer Feature
+
+#### Overview
+
+The `mark` command allows the user to update the status of an existing internship application to indicate that an offer has been received. The user specifies the 1-based index of the internship in the current list, and the system updates its status to `OFFER` and immediately saves the change to the disk.
+
+**Command format:** `mark INDEX` (or `mark-offer INDEX`)
+
+**Example:** `mark 1` marks the 1st internship in the current list as having received an offer.
+
+#### Implementation
+
+The feature is implemented in `MarkOfferCommand`, which extends the abstract `Command` class.
+
+When the user enters `mark 1`, the execution flow is as follows:
+
+1. The `Parser` parses the user input, extracting the command word and the argument "1".
+2. The system looks up the corresponding command and executes `MarkOfferCommand`.
+3. `MarkOfferCommand` retrieves the index parameter from the `Parser` using `getParamsOf(parser.getCommand())`.
+4. The command validates that the parameter is present, is a valid integer, and falls within the valid bounds of the `InternshipList` (between 1 and `internshipList.getSize()`).
+5. The command retrieves the `Internship` at the 0-based position `(index - 1)` from the `InternshipList`.
+6. The command calls `internship.markAsOffer()` to update the internal state and UI tag of the internship.
+7. The command immediately calls `storage.save(internshipList)` to persist the updated status to `data/internships.txt`.
+8. The command logs the successful update and prints a congratulatory confirmation message to the user via the `Ui`.
+
+The following class diagram shows the main structural components involved in the mark offer feature:
+
+![Mark Offer Class Diagram](diagrams/MarkOfferCommandClassDiagram.png)
+
+The following sequence diagram illustrates the execution flow when the user enters `mark 1`:
+
+![Mark Offer Sequence Diagram](diagrams/MarkOfferCommandSequenceDiagram.png)
+
+#### Input Validation
+
+The command implements multiple layers of validation to ensure robustness:
+
+| Validation Layer | Description | Example Error Message |
+|-----------------|-------------|----------------------|
+| **Presence Check** | Verifies that an index was provided | "Please provide the index of the internship! (e.g., mark 1)" |
+| **Type Check** | Ensures the index is a valid integer | "The index must be a number! (e.g., mark 1)" |
+| **Range Check** | Confirms the index is within the list bounds | "Invalid index! Please check your internship list." |
+
+#### Defensive Programming Features
+
+The implementation includes several defensive programming measures:
+
+**1. Assertions**: Verify internal state invariants during command initialization.
+assert parser != null : "Parser passed to MarkOfferCommand cannot be null";
+assert internshipList != null : "InternshipList passed to MarkOfferCommand cannot be null";
+
+**2. Logging**: Track execution flow and potential user input errors for debugging.
+logger.log(Level.INFO, "Starting execution of MarkOfferCommand...");
+logger.log(Level.WARNING, "Failed to mark offer: Index out of bounds.");
+
+**3. Bounds Checking**: Validate array indices strictly before attempting access to prevent runtime crashes.
+if (index < 1 || index > internshipList.getSize()) {
+throw new GoldenCompassException("Invalid index!...");
+}
+
+**4. Graceful Exception Handling**: Catch specific parsing errors and translate them into user-friendly messages rather than letting the application crash.
+try {
+index = Integer.parseInt(params.get(0).trim());
+} catch (NumberFormatException e) {
+throw new GoldenCompassException("The index must be a number!...");
+}
+
+#### Design Considerations
+
+**Aspect: Data Persistence Strategy for State Changes**
+
+* **Alternative 1 (Current Implementation): Immediate Disk Write (Eager Saving)**
+  * **Description:** The command takes in the `InternshipStorage` object as a dependency and immediately calls `storage.save()` right after changing the internship's status in memory.
+  * **Pros:** Guarantees data safety. If the user unexpectedly closes the terminal, forces a quit, or the application crashes, the status change is already safely written to the text file.
+  * **Cons:** Slightly couples the command to the storage mechanism and incurs a minor performance hit due to disk I/O operations occurring on every single status update.
+
+* **Alternative 2: Deferred Disk Write (Save on Exit)**
+  * **Description:** The command only updates the status of the `Internship` object in the RAM (`InternshipList`). Writing to the disk is deferred until the user explicitly exits the application.
+  * **Pros:** Faster execution time and decouples the command classes from the storage mechanism.
+  * **Cons:** High risk of data loss. If the application crashes before exiting cleanly, the recorded offer status is permanently lost.
+
+**Aspect: Input Validation Strategy**
+
+* **Alternative 1 (Current Implementation): Step-by-Step Fail-Fast Validation**
+  * **Description:** The command independently checks for missing input, invalid formats, and out-of-bounds indices in sequence, throwing specific exceptions immediately.
+  * **Pros:** Excellent UX. The user receives precise, actionable feedback about exactly what part of their input was wrong.
+  * **Cons:** Slightly more verbose code within the `execute()` method.
+
+* **Alternative 2: Blanket Try-Catch Block**
+  * **Description:** The command attempts to parse and access the list directly, wrapping the logic in a single generic `try-catch` block.
+  * **Pros:** More compact code.
+  * **Cons:** Poor UX, as the user receives a generic "Invalid input" error regardless of the specific mistake made.
+
+#### Test Coverage
+
+The feature is covered by comprehensive unit tests to ensure all edge cases are handled:
+
+| Test Case | Description | Expected Outcome |
+|-----------|-------------|------------------|
+| `execute_validIndex_marksOfferAndSaves` | Mark index 1 in a populated list | Internship status updates to OFFER, storage saves successfully |
+| `execute_missingIndex_throwsException` | Execute `mark` with no arguments | Throws `GoldenCompassException` for missing index |
+| `execute_nonNumericIndex_throwsException` | Execute `mark abc` | Throws `GoldenCompassException` for invalid number format |
+| `execute_indexOutOfBounds_throwsException` | Execute `mark 99` on a small list | Throws `GoldenCompassException` for invalid bounds |
+| `execute_negativeIndex_throwsException` | Execute `mark -1` | Throws `GoldenCompassException` for invalid bounds |
+
+
+### Reject Offer Feature
+
+#### Overview
+
+The `reject` command allows the user to update the status of an existing internship application to indicate that the application has been rejected. The user specifies the 1-based index of the internship in the current list, and the system updates its status to `REJECTED`.
+
+**Command format:** `reject INDEX`
+
+**Example:** `reject 1` marks the 1st internship in the current list as rejected.
+
+#### Implementation
+
+The feature is implemented in `RejectOfferCommand`, which extends the abstract `Command` class.
+
+When the user enters `reject 1`, the execution flow is as follows:
+
+1. The `Parser` parses the user input, extracting the command word and the argument "1".
+2. The system looks up the corresponding command and executes `RejectOfferCommand`.
+3. `RejectOfferCommand` retrieves the index parameter from the `Parser` using `getParamsOf("reject")`.
+4. The command validates that the parameter is present, is a valid integer, and falls within the valid bounds of the `InternshipList` (between 1 and `internshipList.getSize()`).
+5. The command retrieves the `Internship` at the 0-based position `(index - 1)` from the `InternshipList`.
+6. The command calls `internship.markAsRejected()` to update the internal state and UI tag of the internship.
+7. The command logs the successful update and prints a confirmation message ("Rejection builds character! 💪") to the user via the inherited `ui` object.
+
+The following class diagram shows the main structural components involved in the reject offer feature:
+
+![Reject Offer Class Diagram](diagrams/RejectOfferCommandClassDiagram.png)
+
+The following sequence diagram illustrates the execution flow when the user enters `reject 1`:
+
+![Reject Offer Sequence Diagram](diagrams/RejectOfferCommandSequenceDiagram.png)
+
+#### Input Validation
+
+The command implements multiple layers of validation to ensure robustness:
+
+| Validation Layer | Description | Example Error Message |
+|-----------------|-------------|----------------------|
+| **Presence Check** | Verifies that an index was provided | "Please provide the index of the internship! (e.g., reject 1)" |
+| **Type Check** | Ensures the index is a valid integer | "The index must be a number! (e.g., reject 1)" |
+| **Range Check** | Confirms the index is within the list bounds | "Invalid index! Please check your internship list." |
+
+#### Defensive Programming Features
+
+The implementation includes several defensive programming measures:
+
+**1. Assertions**: Verify internal state invariants during command initialization.
+assert parser != null : "Parser passed to RejectCommand cannot be null";
+assert internshipList != null : "InternshipList passed to RejectCommand cannot be null";
+
+**2. Logging**: Track execution flow and potential user input errors for debugging.
+logger.log(Level.INFO, "Starting execution of RejectCommand...");
+logger.log(Level.WARNING, "Failed to reject: Index is not a number.");
+
+**3. Bounds Checking**: Validate array indices strictly before attempting access to prevent runtime crashes.
+if (index < 1 || index > internshipList.getSize()) {
+throw new GoldenCompassException("Invalid index! Please check your internship list.");
+}
+
+**4. Graceful Exception Handling**: Catch specific parsing errors and translate them into user-friendly messages rather than letting the application crash.
+try {
+index = Integer.parseInt(params.get(0).trim());
+} catch (NumberFormatException e) {
+throw new GoldenCompassException("The index must be a number!...");
+}
+
+#### Design Considerations
+
+**Aspect: Input Validation Strategy**
+
+* **Alternative 1 (Current Implementation): Step-by-Step Fail-Fast Validation**
+  * **Description:** The command independently checks for missing input, invalid formats, and out-of-bounds indices in sequence, throwing specific exceptions immediately.
+  * **Pros:** Excellent UX. The user receives precise, actionable feedback about exactly what part of their input was wrong. It safely prevents system crashes like `NumberFormatException` or `IndexOutOfBoundsException`.
+  * **Cons:** Slightly more verbose code within the `execute()` method due to the sequential `if` statements and `try-catch` blocks.
+
+* **Alternative 2: Blanket Try-Catch Block**
+  * **Description:** The command attempts to parse and access the list directly, wrapping the logic in a single generic `try-catch` block that catches standard Java exceptions (`Exception e`).
+  * **Pros:** More compact and concise code within the `execute()` method.
+  * **Cons:** Poor UX. The user receives a generic error like "Invalid input" regardless of whether they forgot to type a number, typed a letter instead of a number, or typed an index that was too large.
+
+#### Test Coverage
+
+The feature is covered by comprehensive unit tests to ensure all edge cases are handled:
+
+| Test Case | Description | Expected Outcome |
+|-----------|-------------|------------------|
+| `execute_validIndex_marksRejected` | Reject index 1 in a populated list | Internship status updates to REJECTED |
+| `execute_missingIndex_throwsException` | Execute `reject` with no arguments | Throws `GoldenCompassException` for missing index |
+| `execute_nonNumericIndex_throwsException` | Execute `reject abc` | Throws `GoldenCompassException` for invalid number format |
+| `execute_indexOutOfBounds_throwsException` | Execute `reject 99` on a small list | Throws `GoldenCompassException` for invalid bounds |
+| `execute_negativeIndex_throwsException` | Execute `reject -1` | Throws `GoldenCompassException` for invalid bounds |
 ### Alias
 #### Overview 
 
@@ -585,61 +825,122 @@ Potential improvements for future versions:
 4. **Archive feature**: Move deleted internships to an archive instead of permanent deletion
 
 
-### Storage — Component Overview
-
-The following class diagram shows the structure of the `Storage` component and how it interacts with the `Logic` and `Model` layers.
-
-![Storage Class Diagram](diagrams/StorageClassDiagram.png)
-
-The `Storage` component:
-* Saves `InternshipList`, `InterviewList`, and the `ALIAS_MAP` into separate text files.
-* Loads data from these files upon application startup.
-* Uses a "linked loading" approach: `InterviewStorage` references the `InternshipList` to rebuild the object associations between interviews and their respective companies using the `findInternshipByCompany` helper method.
-
-### Implementation: Persistence
+### Storage Component
 
 #### Overview
 
-The storage system is implemented through three main classes: `InternshipStorage`, `InterviewStorage`, and `AliasStorage`. These classes handle the conversion of Java objects into a pipe-delimited (`|`) text format to ensure data persists across sessions.
+The Storage component is responsible for persisting user data across application sessions. It reads data from the local hard drive when GoldenCompass boots up and continuously writes data back to the disk during execution. To maintain the Single Responsibility Principle, the component is divided into three distinct classes:
+* `InternshipStorage`: Manages the saving and loading of `Internship` objects.
+* `InterviewStorage`: Manages `Interview` schedules and links them to existing internships.
+* `AliasStorage`: Manages user-defined command shortcuts.
 
-**Data File Locations:**
-* `data/internships.txt`: Stores company names and job titles.
-* `data/interviews.txt`: Stores interview dates and the linked company names.
-* `data/aliases.txt`: Stores user-defined command shortcuts.
+#### Implementation
 
-#### Execution Flow
+The storage system is initialized inside the `GoldenCompass` main class.
 
-When the application starts, `GoldenCompass` initializes the storage classes and triggers the `load()` sequence in a specific order to maintain data integrity:
+**Loading Data (Application Startup):**
+When the application starts, data is loaded in a strict sequence to resolve dependencies:
+1. `InternshipStorage.load()` is called first. It reads `data/internships.txt` line by line and splits the string using the `" | "` delimiter.
+2. If a third column (status) is present, the parser uses a `switch` statement on the parsed string (`OFFER`, `REJECTED`, or `PENDING`).
+  - `case "OFFER"`: Calls `loadedInternship.markAsOffer()`.
+  - `case "REJECTED"`: Calls `loadedInternship.markAsRejected()`.
+  - `case "PENDING"`: Leaves the internship in its default initialization state.
+  - `default`: Logs a warning for an unknown status to handle potential file corruption.
+3. `InterviewStorage.load()` is called next. Since interviews are tied to specific internships, this class parses `data/interviews.txt`, extracts the company name, and uses `internshipList.findInternshipByCompany(companyName)` to link the newly loaded `Interview` back to its parent `Internship` object in memory.
+4. `AliasStorage.load()` reads `data/aliases.txt` and populates the `Executor`'s internal alias map.
 
-1.  **Internship Loading**: `InternshipStorage` reads `internships.txt` and populates the `InternshipList`.
-2.  **Interview Loading**: `InterviewStorage` reads `interviews.txt`. For each entry, it searches the `InternshipList` for the matching `Internship` object before adding the `Interview` to the `InterviewList`.
-3.  **Alias Loading**: `AliasStorage` reads `aliases.txt` and updates the `ALIAS_MAP` in the `Executor`.
+**Saving Data (Execution Loop):**
+GoldenCompass utilizes an **Eager Saving Strategy**. Inside the main `while (true)` loop in `GoldenCompass.run()`, the application calls the `save()` method on all three storage classes immediately after every user command is executed. During `InternshipStorage.save()`, the system checks `hasOffer()` and `isRejected()` to accurately write the correct status string back into the text file.
 
-The following sequence diagram illustrates the loading process during startup:
+#### Data Formats
 
-![Storage Loading Sequence Diagram](diagrams/StorageLoadingSequenceDiagram.png)
+Data is stored in custom-delimited text files using the `" | "` (space-pipe-space) separator. This format was chosen because it is simple to parse using `String.split()` and remains highly readable if the user opens the file in a standard text editor.
+
+**1. Internships (`data/internships.txt`)**
+Format: `TITLE | COMPANY_NAME | STATUS`
+* The `STATUS` column strictly maps to the application's internal state logic (`PENDING`, `OFFER`, or `REJECTED`).
+* Example: `Software Engineer | Google | OFFER`
+* Example: `Frontend Intern | Grab | PENDING`
+
+**2. Interviews (`data/interviews.txt`)**
+Format: `COMPANY_NAME | ISO_LOCAL_DATE_TIME`
+* Example: `Google | 2026-03-25T14:30:00`
+* Example: `Grab | null` *(If an interview is created but no date is set yet)*
+
+**3. Aliases (`data/aliases.txt`)**
+Format: `ALIAS_TRIGGER | ORIGINAL_COMMAND`
+* Example: `ls | list`
+* Example: `mk | mark`
+The following class diagram shows the main structural components involved in the Storage feature:
+
+![Storage Class Diagram](diagrams/StorageClassDiagram.png)
+
+The following sequence diagram illustrates the execution flow of the eager saving mechanism during the main application loop:
+
+![Storage Sequence Diagram](diagrams/StorageSequenceDiagram.png)
+
+#### Data Validation
+
+Instead of user input validation, the Storage component implements data validation when loading from the text files to prevent crashes from manually edited or corrupted files:
+
+| Validation Layer | Description | Handling Strategy |
+|-----------------|-------------|-------------------|
+| **Length Check** | Verifies a line splits into the correct number of parts via the `" | "` delimiter. | Skips the line and logs a warning if `parts.length` is invalid. |
+| **Empty Value Check** | Ensures parsed titles and company names are not empty strings. | Skips the line to prevent creating ghost internships. |
+| **Date Format Check** | Verifies interview dates conform to `LocalDateTime` ISO formatting. | Catches `DateTimeParseException`, logs a warning, but still loads the interview without a date. |
+
+#### Defensive Programming Features
+
+The implementation includes several defensive programming measures:
+
+**1. Assertions**: Verify internal state invariants before executing I/O operations.
+assert filePath != null && !filePath.trim().isEmpty() : "Storage file path cannot be null or empty";
+assert internshipList != null : "Cannot save a null InternshipList";
+
+**2. Logging**: Track file creation and data corruption for debugging.
+logger.log(Level.INFO, "Created missing data directory.");
+logger.log(Level.WARNING, "Skipped corrupted line: " + line);
+
+**3. Directory Auto-Creation**: The system proactively checks if the `data/` folder exists before attempting to write. If missing, it uses `parentDir.mkdirs()` to create it, preventing `FileNotFoundException`.
+
+**4. Graceful Exception Handling**: Standard `IOException` and `FileNotFoundException` errors are caught and handled. Instead of crashing the application, it alerts the user or starts with a fresh empty list.
 
 #### Design Considerations
 
-**Aspect: Data Format for Persistence**
+**Aspect: Saving Strategy**
 
-* **Alternative 1 (current choice):** Custom Pipe-Delimited Text Format (e.g., `Google | Software Engineer`).
-  * **Pros:** Human-readable, easy to debug by opening the file in a text editor, and lightweight without needing external libraries.
-  * **Cons:** Requires manual parsing logic and careful handling of the delimiter character if it appears in user input.
+* **Alternative 1 (Current Implementation): Eager Saving (Save on every loop)**
+  * **Description:** Inside `GoldenCompass.run()`, the application saves data to all three text files after every single command execution.
+  * **Pros:** Maximum data safety. If the user unexpectedly closes the terminal, experiences a power outage, or encounters a fatal runtime exception, no data is lost because the disk is always synchronized with the RAM.
+  * **Cons:** Higher disk I/O overhead, as the application rewrites the entire file even if a command didn't actually change any data (e.g., after a `list` command).
 
-* **Alternative 2:** JSON or XML.
-  * **Pros:** Standardized format, handles nested data structures easily.
-  * **Cons:** Increases project complexity and file size; requires adding external dependencies which may conflict with the project's "no-third-party-library" constraints.
+* **Alternative 2: Lazy Saving (Save on exit)**
+  * **Description:** The `save()` methods are only called once when the user types the `bye` command.
+  * **Pros:** Better performance due to minimized file I/O operations.
+  * **Cons:** High risk of data loss. If the application terminates abnormally, all progress made during that session is wiped out.
 
-**Aspect: Timing of Save Operations**
+**Aspect: Relational Data Mapping (Interviews to Internships)**
 
-* **Alternative 1 (current choice):** Save on Exit.
-  * **Pros:** Efficient; only performs Disk I/O operations once per session, reducing performance overhead.
-  * **Cons:** Risk of data loss if the application crashes or the terminal is force-closed without using the `bye` command.
+* **Alternative 1 (Current Implementation): Foreign Key Reference by Company Name**
+  * **Description:** `InterviewStorage` saves only the Company Name and the Date. Upon loading, it searches the previously loaded `InternshipList` for an exact company name match (`findInternshipByCompany`) to rebuild the object reference in memory.
+  * **Pros:** Prevents data duplication. Keeps the `interviews.txt` file clean and concise, adhering to the Single Source of Truth principle.
+  * **Cons:** Requires `InternshipList` to be fully loaded *before* `InterviewList` can be loaded.
 
-* **Alternative 2:** Auto-save after every modification.
-  * **Pros:** Maximum data safety; changes are committed immediately.
-  * **Cons:** High disk I/O overhead; might lead to minor lag during command execution if the data lists become very large.
+* **Alternative 2: Deep Copy Storage**
+  * **Description:** `InterviewStorage` saves all details of the parent `Internship` alongside the interview date.
+  * **Pros:** Easier to parse since `InterviewStorage` wouldn't need access to `InternshipList`.
+  * **Cons:** Violates the DRY (Don't Repeat Yourself) principle. If an internship status is updated, it would have to be updated in both files.
+
+#### Test Coverage
+
+The storage components are covered by unit tests to ensure file I/O reliability:
+
+| Test Case | Description | Expected Outcome |
+|-----------|-------------|------------------|
+| `save_validList_writesCorrectly` | Save a list with one item, then read the file manually | File contains the exact formatted string |
+| `load_missingFile_returnsEmptyList` | Attempt to load when `data/` does not exist | Returns empty list, creates directory |
+| `load_corruptedFile_skipsLines` | Load a file with missing `|` delimiters | Skips bad lines, loads valid lines |
+| `load_invalidDate_handlesGracefully` | Load interview with date `abc` | Interview loaded, date remains null |
 
 ## Product scope
 ### Target user profile
