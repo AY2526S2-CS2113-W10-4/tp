@@ -32,4 +32,5 @@ Given below are my contributions to the project.
     - Added a class diagram & a sequence diagram for `UpcomingCommand`
     [#118](https://github.com/AY2526S2-CS2113-W10-4/tp/pull/118)
 - **Community**:
-  - PRs reviewed (with non-trivial comments): [#71](https://github.com/AY2526S2-CS2113-W10-4/tp/pull/71)
+  - PRs reviewed (with non-trivial comments): [#61](https://github.com/AY2526S2-CS2113-W10-4/tp/pull/61), 
+  [#71](https://github.com/AY2526S2-CS2113-W10-4/tp/pull/71)
