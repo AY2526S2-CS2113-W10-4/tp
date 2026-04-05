@@ -25,7 +25,7 @@ public class Interview {
     }
 
     public Interview(Interview other) {
-        this.internship = other.internship;
+        this.internship = new Internship(other.internship);
         this.dateTime = other.dateTime;
     }
 
