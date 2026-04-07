@@ -22,12 +22,7 @@ public class Internship {
     // 2. Group all PRIVATE variables together
     private ApplicationStatus status;
 
-    public static Internship copyOf(Internship other) {
-        if(other == null) {
-            return null;
-        }
-        return new Internship(other);
-    }
+
 
     /**
      * Constructs a new Internship with the specified title and company.
@@ -86,6 +81,13 @@ public class Internship {
         this.hasApplied = other.hasApplied;
 
         this.status = other.status;
+    }
+
+    public static Internship copyOf(Internship other) {
+        if(other == null) {
+            return null;
+        }
+        return new Internship(other);
     }
 
     /**
