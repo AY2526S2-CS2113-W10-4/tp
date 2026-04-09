@@ -1,0 +1,64 @@
+@startuml
+hide circle
+skinparam classAttributeIconSize 0
+
+'class GoldenCompass {
+'    + run() : void
+'}
+
+class Executor {
+    - commands : Map<String, Command>
+    - aliasMap : Map<String, String>
+    + execute() : void
+    + addAlias(command : String, alias : String) : void
+    + removeAlias(alias : String) : void
+    + getAliasMap() : Map<String, String>
+}
+
+interface Executable <<Interface>> {
+    + execute() : void
+}
+
+abstract class Command {
+    - <u>FLAG_MISSING_MESSAGE : String
+    + Command()
+    + Command(Parser)
+    + execute() : void
+    # getCommandDescription() : String {abstract}
+    # getFlagDescription() : String {abstract}
+    # printHelp() : void
+}
+
+
+class Ui {
+    ~ in : Scanner
+    + greet() : void
+    + print(s : String) : void
+    + print(strings : String...) : void
+    + read() : String
+}
+
+class Parser {
+    - <u>FLAGSET : Set<String>
+    - flagToParamMap : Map<String, List<String>>
+    + parse(userInput : String) : void
+    + getCommand() : String
+    + getFlagToParamMap() : Map<String, List<String>>
+    + getParamsOf(flag : String) : List<String>
+    + isFlagExist(flag : String) : boolean
+}
+
+'GoldenCompass --> "1" Executor
+'GoldenCompass --> "1" InterviewList
+'GoldenCompass --> "1" Ui
+'GoldenCompass --> "1" Parser
+
+Executor -.> Command : executes
+Executor --> "1" Parser : stores user input data in
+
+Command -.|> Executable
+
+Command --> "1" Ui : to print
+Command --> "1" Parser : retrieves data from
+
+@enduml

@@ -1,21 +1,12 @@
 @startuml
+hide circle
+skinparam classAttributeIconSize 0
 
-class GoldenCompass {
-    + run() : void
-}
+'class GoldenCompass {
+'    + run() : void
+'}
 
-class Executor {
-    - commands : Map<String, Command>
-    - aliasMap : Map<String, String>
-    + execute() : void
-    + addAlias(command : String, alias : String) : void
-    + removeAlias(alias : String) : void
-    + getAliasMap() : Map<String, String>
-}
 
-interface Executable {
-    + execute() : void
-}
 
 abstract class Command {
     - <u>FLAG_MISSING_MESSAGE : String
@@ -54,7 +45,7 @@ class Internship {
     + Internship(title : String, companyName : String)
 }
 
-enum ApplicationStatus {
+enum ApplicationStatus <<enumeration>> {
     PENDING
     OFFER
     REJECTED
@@ -78,27 +69,23 @@ class Parser {
     + isFlagExist(flag : String) : boolean
 }
 
-GoldenCompass --> "1" Executor
-GoldenCompass --> "1" InterviewList
-GoldenCompass --> "1" Ui
-GoldenCompass --> "1" Parser
+'GoldenCompass --> "1" Executor
+'GoldenCompass --> "1" InterviewList
+'GoldenCompass --> "1" Ui
+'GoldenCompass --> "1" Parser
 
 Interview --> "1" Internship
 
 Internship --> "1" Interview
 Internship --> "1" ApplicationStatus
 
-Executor -.> Command
-Executor -.> UpcomingCommand
-Executor --> "1" Parser
 
-Command --.|> Executable
 UpcomingCommand --|> Command
 
-UpcomingCommand --> "1" InterviewList
-InterviewList o--> "*" Interview
+UpcomingCommand --> "1" InterviewList : filters according to parameter N
+InterviewList o--> "*" Interview : contains a list of
 
-Command --> "1" Ui
-Command --> "1" Parser
+Command --> "1" Ui : print to output
+Command --> "1" Parser : retrieves parameter N, if any
 
 @enduml
