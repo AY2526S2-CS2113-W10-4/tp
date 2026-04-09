@@ -1,12 +1,18 @@
-# Developer Guide
+# GoldenCompass Developer Guide
 
 ## Acknowledgements
+Our project, GoldenCompass, was built upon and inspired by several open-source projects, libraries, and resources. We would like to acknowledge the following:
 
-{list here sources of all reused/adapted ideas, code, documentation, and third-party libraries -- include links to the original source as well}
+### Core Frameworks and Templates
+Gradle: Used as the primary build automation tool for managing dependencies and generating the executable JAR file.
 
+JUnit 5: Used for comprehensive unit testing and ensuring the reliability of our internship and interview tracking logic.
+### Libraries and Plugins
+PlantUML: Used to generate the sequence and class diagrams throughout the Developer Guide to visualize the system's architecture.
+
+### Instructional Resources
+CS2113 Course Website: For providing the guidelines on software engineering principles, testing standards, and documentation formats used in this project.
 ## Design & implementation
-
-{Describe the design and implementation of the product. Use UML diagrams and short code snippets where applicable.}
 
 ### Internship Management — Class Overview
 
