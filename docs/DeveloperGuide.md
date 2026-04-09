@@ -1445,22 +1445,29 @@ The storage components are covered by unit tests to ensure file I/O reliability:
 ## Product scope
 ### Target user profile
 
-{Describe the target user profile}
+Year 2 computer engineering students applying for internship / EG3611A students (given 5-day deadline to accept offer, 
+managing jobs from both TalentConnect and LinkedIn)?
+
 
 ### Value proposition
 
-{Describe the value proposition: what problem does it solve?}
+Applying for internships often involves managing many applications at the same time, each with different roles, 
+deadlines, resume versions, and requirements. Students typically track this information using spreadsheets, notes, 
+or memory, which can become disorganized and error-prone as the number of applications increases.
+
 
 ## User Stories
 
-|Version| As a ... | I want to ... | So that I can ...|
-|--------|----------|---------------|------------------|
-|v1.0|new user|see usage instructions|refer to them when I forget how to use the application|
-|v1.0|user|add an interview linked to an internship|track my upcoming interviews alongside my applications|
-|v1.0|user|set a date and time for an interview|remember when each interview is scheduled|
-|v2.0|user|search interviews by company, role, or date|quickly find specific interviews without scrolling the full list|
-|v2.0|user|clear all rejected internships at once|declutter my list and focus on active applications|
-|v2.0|user|update the date of an existing interview|correct or reschedule an interview without deleting and re-adding it|
+| Version | As a ... | I want to ...                               | So that I can ...                                                    |
+|---------|----------|---------------------------------------------|----------------------------------------------------------------------|
+| v1.0    | new user | see usage instructions                      | refer to them when I forget how to use the application               |
+| v1.0    | user     | add an interview linked to an internship    | track my upcoming interviews alongside my applications               |
+| v1.0    | user     | set a date and time for an interview        | remember when each interview is scheduled                            |
+| v1.0    | user     | add and remove short alias for commands     | customize command words that are easy to remember                    |
+| v2.0    | user     | search interviews by company, role, or date | quickly find specific interviews without scrolling the full list     |
+| v2.0    | user     | clear all rejected internships at once      | declutter my list and focus on active applications                   |
+| v2.0    | user     | update the date of an existing interview    | correct or reschedule an interview without deleting and re-adding it |
+| v2.0    | user     | undo and redo certain operations            | correct mistakes in typing the commands                              |
 
 ## Non-Functional Requirements
 
