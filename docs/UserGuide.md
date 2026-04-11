@@ -45,9 +45,9 @@ Adds a new internship application to the tracker. By default, the status of a ne
 To maintain a clean and reliable tracker, the `add` command enforces the following rules:
 * **Length Limit:** Both the `COMPANY_NAME` and `TITLE` must be between 2 and 40 characters long.
 * **Valid Characters:** Only alphanumeric characters (letters and numbers), spaces, and commas `,` are permitted. Other special symbols (e.g., `|`, `@`, `!`) will be rejected.
-* **No Duplicates:** You cannot add an `Internship` if an identical entry (matching both company and title, ignoring uppercase/lowercase) already exists in your list.
+* **No Duplicates (Case-Insensitive):** You cannot add an `Internship` if an identical entry already exists in your list. The system ignores capitalization, meaning `GRAB` and `grab` are treated as the same company.
 
-**Examples:**
+* **Examples:**
 * `add Grab /t Software Engineer`
   Adds a Software Engineer role at Grab to your list.
 * `add Google /t Data Analyst`

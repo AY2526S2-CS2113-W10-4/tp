@@ -139,7 +139,7 @@ When the user enters `add Grab /t Software Engineer`, the execution flow is as f
 7. The command then performs deep validation to ensure both the company name and title are between 2 and 40 characters long, and contain only alphanumeric characters, spaces, or commas. Any violations are appended to the `StringBuilder`.
 8. If the `StringBuilder` is not empty after deep validation, a `GoldenCompassException` is thrown.
 9. If all validations pass, a new `Internship` object is instantiated using the parsed company name and title.
-10. The command iterates through the existing `InternshipList` using the overridden `equals()` method to ensure an identical internship does not already exist. If a duplicate is found, a `GoldenCompassException` is thrown.
+10. The command iterates through the existing `InternshipList` using the overridden `equals()` method to ensure an identical internship (case-insensitive) does not already exist. If a duplicate is found, a `GoldenCompassException` is thrown.
 11. The command calls `internshipList.add(newInternship)` to store the application in memory.
 12. The command logs the successful creation and prints a confirmation message to the user via the `Ui`.
 
@@ -155,14 +155,14 @@ The following sequence diagram illustrates the execution flow when the user ente
 
 The command implements an accumulated validation strategy alongside deep string inspection to ensure robustness:
 
-| Validation Layer | Description | Example Error Message |
-|-----------------|-------------|----------------------|
-| **Company Presence** | Verifies the company name parameter is not empty | "Company name cannot be empty!" |
-| **Flag Presence** | Verifies the `/t` flag was parsed successfully | "Invalid flag or missing title! Please use the '/t' flag for the role." |
-| **Title Presence** | Ensures the text following the `/t` flag is not blank | "Internship title cannot be empty!" |
-| **Length Validation** | Enforces minimum (2) and maximum (40) character limits | "Input exceeds maximum allowed length of 40 characters!" |
-| **Character Filtering** | Restricts input to alphanumeric characters, spaces, and commas | "Only alphanumeric characters and commas ',' are permitted." |
-| **Duplicate Prevention** | Checks existing entries using `equals()` to prevent identical internships | "Warning: This internship already exists in your list!" |
+| Validation Layer | Description                                                                | Example Error Message |
+|-----------------|----------------------------------------------------------------------------|----------------------|
+| **Company Presence** | Verifies the company name parameter is not empty                           | "Company name cannot be empty!" |
+| **Flag Presence** | Verifies the `/t` flag was parsed successfully                             | "Invalid flag or missing title! Please use the '/t' flag for the role." |
+| **Title Presence** | Ensures the text following the `/t` flag is not blank                      | "Internship title cannot be empty!" |
+| **Length Validation** | Enforces minimum (2) and maximum (40) character limits                     | "Input exceeds maximum allowed length of 40 characters!" |
+| **Character Filtering** | Restricts input to alphanumeric characters, spaces, and commas             | "Only alphanumeric characters and commas ',' are permitted." |
+| **Duplicate Prevention** | Checks existing entries using `equals()` to prevent identical internships (case-insensitive matching) | "Warning: This internship already exists in your list!" |
 
 #### Defensive Programming Features
 
