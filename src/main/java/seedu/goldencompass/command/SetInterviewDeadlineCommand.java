@@ -128,13 +128,11 @@ public class SetInterviewDeadlineCommand extends Command {
                             + "Please provide a future date.");
         }
 
-        List<Interview> sortedInterviews = interviewList.getInterviews().stream()
-                .sorted(Comparator.comparing(Interview::getDate))
-                .toList();
-        Interview interview = sortedInterviews.get(index - 1);
+        Interview interview = interviewList.get(index - 1);
         assert interview != null : "Retrieved interview should not be null";
 
         interview.setDate(date);
+        interviewList.getInterviews().sort(Comparator.comparing(Interview::getDate));
 
         logger.log(Level.INFO, "Successfully updated interview " + index + " to " + date);
         ui.print("Deadline set for interview " + index + ": " + date);
