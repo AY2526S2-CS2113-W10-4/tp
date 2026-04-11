@@ -195,6 +195,18 @@ logger.log(Level.WARNING, "Failed to add internship: Company name is missing.");
   * **Pros:** Simpler and shorter code. Execution stops immediately, saving minor amounts of processing time.
   * **Cons:** Frustrating UX. A user who forgets both the company name and the `/t` flag will only see the "missing company name" error. After fixing it and pressing enter, they will be hit with the "missing flag" error, creating an annoying "whack-a-mole" experience.
 
+**Aspect: Handling of Multiple Flag Instances**
+
+* **Alternative 1 (Current Implementation): Parameter Concatenation**
+  * **Description:** Instead of rejecting redundant flags, the command retrieves all parameters associated with the `/t` flag. It joins these values with a space to allow for multi-role entries within a single application tracker entry.
+  * **Pros:** Supports users applying for hybrid roles or multiple positions at the same company (e.g., `/t Backend /t DevOps`) without requiring multiple separate entries. Aligns with a flexible, keyboard-driven input philosophy.
+  * **Cons:** Can lead to "silent" data entry errors if a user accidentally includes a second `/t` flag with a typo, as the system does not provide a warning for duplicate flags.
+
+* **Alternative 2: Strict Single-Flag Enforcement**
+  * **Description:** The command verifies the number of `/t` parameters and throws a `GoldenCompassException` if more than one instance is detected.
+  * **Pros:** Prevents accidental data corruption and follows the principle of "fail-fast" validation for cleaner data entry.
+  * **Cons:** Less flexible; requires users applying for multiple roles to manually format their strings rather than using the natural flag-based separation.
+
 #### Test Coverage
 
 The feature is covered by comprehensive unit tests to ensure all edge cases and new constraints are handled:

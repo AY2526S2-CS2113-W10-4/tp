@@ -68,6 +68,11 @@ Warning: This internship already exists in your list!
 ```text
 Only alphanumeric characters and commas ',' are permitted.
 ```
+**Note on multi-role applications:**
+* GoldenCompass supports applications for multiple roles within the same company.
+* If you provide the `/t` flag multiple times, the system will combine them into a single entry.
+* **Example:** `add Grab /t Backend /t DevOps` will be recorded as `Grab - Backend DevOps`.
+* **Pro-tip:** This is great for tracking "Hybrid" roles where you'll be doing more than one thing!
 
 ### Adding an interview: `add-interview`
 
