@@ -44,10 +44,9 @@ public class RejectOfferCommand extends Command {
         logger.log(Level.INFO, "Starting execution of RejectCommand...");
 
         // Assuming your team's command word is "reject"
-        List<String> params = parser.getParamsOf("reject");
-
+        String param = parser.getDefaultParam();
         // 1. DEFENSIVE CHECK: Missing index
-        if (params == null || params.isEmpty() || params.get(0).isBlank()) {
+        if (param == null || param.isBlank()) {
             logger.log(Level.WARNING, "Failed to reject: Index is missing.");
             throw new GoldenCompassException("Please provide the index of the internship! (e.g., reject 1)");
         }
@@ -55,7 +54,7 @@ public class RejectOfferCommand extends Command {
         int index;
         // 2. DEFENSIVE CHECK: Not a number
         try {
-            index = Integer.parseInt(params.get(0).trim());
+            index = Integer.parseInt(param.trim());
         } catch (NumberFormatException e) {
             logger.log(Level.WARNING, "Failed to reject: Index is not a number.");
             throw new GoldenCompassException("The index must be a number! (e.g., reject 1)");
