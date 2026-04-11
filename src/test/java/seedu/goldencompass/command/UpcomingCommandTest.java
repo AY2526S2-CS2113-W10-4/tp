@@ -48,6 +48,7 @@ public class UpcomingCommandTest {
         upcomingCommand.execute();
         String output = outputStream.toString().trim();
 
+        assertTrue(output.contains("You have the following interviews in the upcoming 5 day(s):"));
         assertTrue(output.contains("Google - Software Engineer @ " + now.plusMinutes(1).format(formatter)));
         assertTrue(output.contains("Meta - Frontend Developer @ " + now.plusDays(3).format(formatter)));
         assertFalse(output.contains("Amazon - Backend Developer @ "));
@@ -82,21 +83,70 @@ public class UpcomingCommandTest {
 
     @Test
     public void execute_emptyFilteredList_printsNoUpcomingInterviewsMessage() throws GoldenCompassException {
-        interviewList.add(new Interview(new Internship("Software Engineer", "Google"), now.minusMinutes(1)));
+        interviewList.add(new Interview(new Internship("Software Engineer", "Google"), now.minusMinutes(5)));
         interviewList.add(new Interview(new Internship("Frontend Developer", "Meta"), now.minusDays(3)));
+        interviewList.add(new Interview(new Internship("Bus Driver", "NUS"), now.plusDays(2)));
 
         parser.parse("upcoming 1");
         upcomingCommand.execute();
         String output = outputStream.toString().trim();
 
-        assertEquals("You don't have any upcoming interviews.", output);
+        assertEquals("You don't have any interviews in the upcoming 1 day(s).", output);
     }
 
     @Test
-    public void upcoming_nonIntegerParameter_throwsException() throws GoldenCompassException {
+    public void execute_nonIntegerParameter_throwsException() throws GoldenCompassException {
         parser.parse("upcoming abc");
-        GoldenCompassException exception = assertThrows(GoldenCompassException.class, () -> upcomingCommand.execute());
-        assertEquals("The parameter of the upcoming command must be an integer", exception.getMessage());
+        GoldenCompassException exception1 = assertThrows(GoldenCompassException.class, () -> upcomingCommand.execute());
+        assertEquals("The parameter of the upcoming command must be a single integer.", exception1.getMessage());
+
+        parser.parse("upcoming 3 10");
+        GoldenCompassException exception2 = assertThrows(GoldenCompassException.class, () -> upcomingCommand.execute());
+        assertEquals("The parameter of the upcoming command must be a single integer.", exception2.getMessage());
+    }
+
+    @Test
+    public void execute_negativeParameter_printsPastInterviews() throws GoldenCompassException {
+        interviewList.add(new Interview(new Internship("Software Engineer", "Google"), now.minusMinutes(1)));
+        interviewList.add(new Interview(new Internship("Frontend Developer", "Meta"), now.minusDays(3)));
+
+        parser.parse("upcoming -1");
+        upcomingCommand.execute();
+        String output = outputStream.toString().trim();
+
+        assertTrue(output.contains("You have the following interviews in the upcoming -1 day(s):"));
+        assertTrue(output.contains("Google - Software Engineer @ " + now.minusMinutes(1).format(formatter)));
+        assertFalse(output.contains("Meta - Frontend Developer @ "));
+
+        parser.parse("upcoming -4");
+        upcomingCommand.execute();
+        output = outputStream.toString().trim();
+
+        assertTrue(output.contains("You have the following interviews in the upcoming -4 day(s):"));
+        assertTrue(output.contains("Google - Software Engineer @ " + now.minusMinutes(1).format(formatter)));
+        assertTrue(output.contains("Meta - Frontend Developer @ " + now.minusDays(3).format(formatter)));
+    }
+
+    @Test
+    public void getterForHelpMessages_help_printsHelpMessages() throws GoldenCompassException {
+        String commandDescription = upcomingCommand.getCommandDescription();
+        String flagDescription = upcomingCommand.getFlagDescription();
+
+        assertEquals(
+                "The command lists upcoming interviews within a specified number of days (inclusive of current date time).",
+                commandDescription);
+
+        String expected = String.join(System.lineSeparator(),
+                        "Command format:",
+                        "\tupcoming [days]",
+                        "If the optional parameter [days] is not supplied, a default of 5 days will be used.",
+                        "Example usage:",
+                        "\tupcoming -> shows interviews in the next 5 days",
+                        "\tupcoming 3 -> shows interviews in the next 3 days",
+                        "If the parameter [days] is a negative integer -N, then interviews in the past N days will be shown."
+        );
+
+        assertEquals(expected, flagDescription);
     }
 
 }
