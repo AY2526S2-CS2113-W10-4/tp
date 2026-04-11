@@ -4,7 +4,9 @@ participant ":Parser" as Parser
 participant ":Executor" as Exec
 participant ":AddInternshipCommand" as Cmd
 participant ":InternshipList" as List
-participant ":Internship" as Intern
+' 🛠️ CHANGED: Added participant for the existing internship to show the equals() comparison
+participant "existing:Internship" as ExistingIntern
+participant "newInternship:Internship" as Intern
 
 User -> Parser : "add Grab /t Software Engineer"
 activate Parser
@@ -25,13 +27,34 @@ activate Parser
 Parser --> Cmd : titleParams
 deactivate Parser
 
-note right of Cmd : Validates company name,\nflag, and title strings
+note right of Cmd : Validates presence, length,\nand valid characters
 
-alt missing company name or title
+alt invalid inputs
     Cmd -> User : throw GoldenCompassException
-else params valid
-    create "newInternship:Internship" as Intern
+else inputs valid
+    create Intern
     Cmd -> Intern : new Internship(title, companyName)
+
+    Cmd -> List : getSize()
+    activate List
+    List --> Cmd : size
+    deactivate List
+
+    loop i = 0 to size - 1
+        Cmd -> List : get(i)
+        activate List
+        List --> Cmd : existing
+        deactivate List
+
+        Cmd -> ExistingIntern : equals(newInternship)
+        activate ExistingIntern
+        ExistingIntern --> Cmd : isDuplicate
+        deactivate ExistingIntern
+
+        opt isDuplicate == true
+            Cmd -> User : throw GoldenCompassException
+        end
+    end
 
     Cmd -> List : add(newInternship)
     activate List

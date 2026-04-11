@@ -34,12 +34,18 @@ all from your terminal.
 
 ### Adding an internship application: `add`
 
-Adds a new internship application to the tracker. By default, the status of a newly added internship is set to `PENDING`.
+Adds a new internship application to the tracker. By default, the status of a newly added `Internship` is set to `PENDING`.
 
 **Format:** `add COMPANY_NAME /t TITLE`
 
 * `COMPANY_NAME` is the name of the company you are applying to.
 * The `/t` flag is strictly required and denotes the title of the role.
+
+**Input Constraints:**
+To maintain a clean and reliable tracker, the `add` command enforces the following rules:
+* **Length Limit:** Both the `COMPANY_NAME` and `TITLE` must be between 2 and 40 characters long.
+* **Valid Characters:** Only alphanumeric characters (letters and numbers), spaces, and commas `,` are permitted. Other special symbols (e.g., `|`, `@`, `!`) will be rejected.
+* **No Duplicates:** You cannot add an `Internship` if an identical entry (matching both company and title, ignoring uppercase/lowercase) already exists in your list.
 
 **Examples:**
 * `add Grab /t Software Engineer`
@@ -47,10 +53,20 @@ Adds a new internship application to the tracker. By default, the status of a ne
 * `add Google /t Data Analyst`
   Adds a Data Analyst role at Google to your list.
 
-**Expected Output:**
+**Expected Output (Success):**
 ```text
 Got it! I've added this internship to your compass:
   Grab - Software Engineer
+```
+
+**Expected Output (Error - Duplicate Entry):**
+```text
+Warning: This internship already exists in your list!
+```
+
+**Expected Output (Error - Invalid Characters):**
+```text
+Only alphanumeric characters and commas ',' are permitted.
 ```
 
 ### Adding an interview: `add-interview`

@@ -20,11 +20,14 @@ class AddInternshipCommand {
 }
 
 class InternshipList {
+  + getSize() : int
+  + get(index: int) : Internship
   + add(internship: Internship) : void
 }
 
 class Internship {
   + Internship(title: String, companyName: String)
+  + equals(obj: Object) : boolean
 }
 
 Command <|-- AddInternshipCommand

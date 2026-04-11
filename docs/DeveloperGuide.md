@@ -134,11 +134,14 @@ When the user enters `add Grab /t Software Engineer`, the execution flow is as f
 2. The system looks up the corresponding command and executes `AddInternshipCommand`.
 3. `AddInternshipCommand` retrieves the company name parameter using `getParamsOf(parser.getCommand())` and the title parameter using `getParamsOf("/t")`.
 4. The command initializes a `StringBuilder` to act as an error message accumulator.
-5. The command sequentially checks for a missing company name, a missing `/t` flag, and an empty title string. If any checks fail, a specific error message is appended to the `StringBuilder`.
-6. If the `StringBuilder` is not empty after all checks, a single `GoldenCompassException` is thrown containing all accumulated error messages.
-7. If validation passes, a new `Internship` object is instantiated using the parsed company name and title.
-8. The command calls `internshipList.add(newInternship)` to store the application in memory.
-9. The command logs the successful creation and prints a confirmation message to the user via the `Ui`.
+5. The command sequentially checks for basic presence: a missing company name, a missing `/t` flag, and an empty title string. If any checks fail, a specific error message is appended to the `StringBuilder`.
+6. If basic presence checks fail, a single `GoldenCompassException` is thrown immediately.
+7. The command then performs deep validation to ensure both the company name and title are between 2 and 40 characters long, and contain only alphanumeric characters, spaces, or commas. Any violations are appended to the `StringBuilder`.
+8. If the `StringBuilder` is not empty after deep validation, a `GoldenCompassException` is thrown.
+9. If all validations pass, a new `Internship` object is instantiated using the parsed company name and title.
+10. The command iterates through the existing `InternshipList` using the overridden `equals()` method to ensure an identical internship does not already exist. If a duplicate is found, a `GoldenCompassException` is thrown.
+11. The command calls `internshipList.add(newInternship)` to store the application in memory.
+12. The command logs the successful creation and prints a confirmation message to the user via the `Ui`.
 
 The following class diagram shows the main structural components involved in the add internship feature:
 
@@ -150,25 +153,32 @@ The following sequence diagram illustrates the execution flow when the user ente
 
 #### Input Validation
 
-The command implements an accumulated validation strategy to ensure robustness:
+The command implements an accumulated validation strategy alongside deep string inspection to ensure robustness:
 
 | Validation Layer | Description | Example Error Message |
 |-----------------|-------------|----------------------|
 | **Company Presence** | Verifies the company name parameter is not empty | "Company name cannot be empty!" |
 | **Flag Presence** | Verifies the `/t` flag was parsed successfully | "Invalid flag or missing title! Please use the '/t' flag for the role." |
 | **Title Presence** | Ensures the text following the `/t` flag is not blank | "Internship title cannot be empty!" |
+| **Length Validation** | Enforces minimum (2) and maximum (40) character limits | "Input exceeds maximum allowed length of 40 characters!" |
+| **Character Filtering** | Restricts input to alphanumeric characters, spaces, and commas | "Only alphanumeric characters and commas ',' are permitted." |
+| **Duplicate Prevention** | Checks existing entries using `equals()` to prevent identical internships | "Warning: This internship already exists in your list!" |
 
 #### Defensive Programming Features
 
 The implementation includes several defensive programming measures:
 
 **1. Assertions**: Verify internal state invariants during command initialization.
+```java
 assert parser != null : "Parser passed to AddInternshipCommand cannot be null";
 assert internshipList != null : "InternshipList passed to AddInternshipCommand cannot be null";
+```
 
 **2. Logging**: Track execution flow and record specific user syntax errors for debugging.
+```java
 logger.log(Level.INFO, "Starting execution of AddInternshipCommand...");
 logger.log(Level.WARNING, "Failed to add internship: Company name is missing.");
+```
 
 **3. Error Accumulation**: Instead of failing at the first mistake, the command gathers all input errors into a `StringBuilder` to prevent unexpected partial crashes and provide comprehensive feedback.
 
@@ -188,16 +198,19 @@ logger.log(Level.WARNING, "Failed to add internship: Company name is missing.");
 
 #### Test Coverage
 
-The feature is covered by comprehensive unit tests to ensure all edge cases are handled:
+The feature is covered by comprehensive unit tests to ensure all edge cases and new constraints are handled:
 
 | Test Case | Description | Expected Outcome |
 |-----------|-------------|------------------|
-| `execute_validInput_addsInternship` | Execute `add Grab /t SWE` | Internship added to list, list size increases by 1 |
-| `execute_missingCompany_throwsException` | Execute `add /t SWE` | Throws `Exception` with missing company message |
-| `execute_missingFlag_throwsException` | Execute `add Grab SWE` | Throws `Exception` with missing flag message |
-| `execute_missingTitle_throwsException` | Execute `add Grab /t` | Throws `Exception` with missing title message |
-| `execute_missingMultiple_throwsException` | Execute `add /t` | Throws `Exception` containing both missing company and missing title messages |
-
+| `execute_validInput_addsInternshipSuccessfully` | Execute `add Grab /t SWE` | Internship added to list, list size increases by 1 |
+| `execute_missingCompanyName_throwsException` | Execute `add /t SWE` | Throws `Exception` with missing company message |
+| `execute_invalidFlag_throwsException` | Execute `add Grab /c SWE` | Throws `Exception` with missing flag message |
+| `execute_emptyTitle_throwsException` | Execute `add Grab /t` | Throws `Exception` with missing title message |
+| `execute_bareAddCommand_throwsException` | Execute `add` | Throws `Exception` for completely bare command |
+| `execute_duplicateInternship_throwsException` | Execute `add Grab /t SWE` twice | Throws `Exception` warning about duplicate entry |
+| `execute_companyNameTooShort_throwsException` | Execute `add S /t SWE` | Throws `Exception` for failing minimum length constraint |
+| `execute_companyNameTooLong_throwsException` | Execute `add [41 chars] /t SWE` | Throws `Exception` for failing maximum length constraint |
+| `execute_invalidSpecialCharacters_throwsException` | Execute `add Meta \| Google /t SWE` | Throws `Exception` for containing invalid symbols |
 ### List Command
 
 #### Overview
