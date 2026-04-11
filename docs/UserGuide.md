@@ -32,6 +32,12 @@ all from your terminal.
 > - Parameters can be in any order.
 > - Indexes are **1-based** and refer to the position shown in the most recent list.
 
+### Exiting the program: `bye`
+
+Exits the program.
+
+**Format:** `bye`
+
 ### Adding an internship application: `add`
 
 Adds a new internship application to the tracker. By default, the status of a newly added internship is set to `PENDING`.
@@ -189,10 +195,10 @@ Example:
 ```
 list-interview
 Here are the interview invitations:
-NUS - Bus Driver @ 2026-03-25 11:00
-Meta - Frontend Developer @ 2026-03-25 14:00
-Google - Software Engineer @ 2026-03-27 10:00
-Amazon - Backend Developer @ 2026-04-01 09:00
+1. NUS - Bus Driver @ 2026-03-25 11:00
+2. Meta - Frontend Developer @ 2026-03-25 14:00
+3. Google - Software Engineer @ 2026-03-27 10:00
+4. Amazon - Backend Developer @ 2026-04-01 09:00
 ```
 If no interview has been added:
 ```
@@ -204,27 +210,35 @@ You don't have any interviews!
 
 Lists upcoming interviews within a specific number of days.
 
-Format: `upcoming [N]`, where `[N]` is an optional integer.
+Format: `upcoming [N]`, where `N` is an optional integer.
 
-- If no integer is supplied after `upcoming`, a default of `5` days will be used.
+- If no integer is supplied after `upcoming`, a default of `N=5` days will be used.
+- `N` can be negative, in which case, interviews of the past `|N|` days will be listed.
+- The filtering is inclusive of time boundaries for all integers `N`.
 
 Example:
 
 If now is `2026-03-25 12:00`
 ```
 upcoming
+You have the following interviews in the upcoming 5 day(s):
 Meta - Frontend Developer @ 2026-03-25 14:00
 Google - Software Engineer @ 2026-03-27 10:00
 upcoming 7
+You have the following interviews in the upcoming 7 day(s):
 Meta - Frontend Developer @ 2026-03-25 14:00
 Google - Software Engineer @ 2026-03-27 10:00
 Amazon - Backend Developer @ 2026-04-01 09:00
+upcoming -1
+You have the following interviews in the upcoming -1 day(s):
+NUS - Bus Driver @ 2026-03-25 11:00
 ```
-If now is `2026-03-19 12:00`:
+If now is `2026-03-19 11:00`:
 ```
 upcoming
-You don't have any upcoming interviews.
+You don't have any interviews in the upcoming 5 day(s).
 upcoming 6
+You have the following interviews in the upcoming 6 day(s):
 NUS - Bus Driver @ 2026-03-25 11:00
 ```
 
@@ -390,3 +404,4 @@ same location on the other computer.
 | Redo a command                                | Yes (by`undo`) | `redo`                                              | `redo`                                |
 | Mark internship application as offer received | Yes            | `mark INDEX`                                        | `mark 4`                              |
 | Mark internship application as rejected       | Yes            | `reject INDEX`                                      | `reject 4`                            |
+| Exit the program                              | No             | `bye`                                               | `bye`                                 |

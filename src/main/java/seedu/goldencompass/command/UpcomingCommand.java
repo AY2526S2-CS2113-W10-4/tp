@@ -7,6 +7,7 @@ import seedu.goldencompass.parser.Parser;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -25,6 +26,7 @@ import java.util.logging.Logger;
  * <ul>
  *     <li>upcoming → shows interviews in the next 5 days</li>
  *     <li>upcoming 3 → shows interviews in the next 3 days</li>
+ *     <li>upcoming -2 → shows interviews in the past 2 days</li>
  * </ul>
  * </p>
  */
@@ -33,12 +35,16 @@ public class UpcomingCommand extends Command {
     private static final Logger logger = Logger.getLogger(UpcomingCommand.class.getName());
     private static final int DEFAULT_DAYS = 5;
     private static final String COMMAND_DESCRIPTION =
-            "The command lists upcoming interviews within a specified number of days.";
-    private static final String FORMAT_DESCRIPTION = "Command format: upcoming [days]" + System.lineSeparator()
-            + "If the optional parameter [days] is not supplied, a default of 5 days will be used."
-            + System.lineSeparator() + "Example usage:" + System.lineSeparator()
-            + "\tupcoming → shows interviews in the next 5 days" + System.lineSeparator()
-            + "\tupcoming 3 → shows interviews in the next 3 days";
+            "The command lists upcoming interviews within a specified number of days (inclusive of current date time).";
+    private static final String FORMAT_DESCRIPTION = String.join(System.lineSeparator(),
+            "Command format:",
+            "\tupcoming [days]",
+            "If the optional parameter [days] is not supplied, a default of 5 days will be used.",
+            "Example usage:",
+            "\tupcoming -> shows interviews in the next 5 days",
+            "\tupcoming 3 -> shows interviews in the next 3 days",
+            "If the parameter [days] is a negative integer -N, then interviews in the past N days will be shown."
+    );
 
     private final InterviewList interviewList;
 
@@ -72,16 +78,25 @@ public class UpcomingCommand extends Command {
                 logger.log(Level.INFO, "UpcomingCommand parameter days set to: {0}", days);
             } catch (NumberFormatException e) {
                 logger.log(Level.WARNING, "Invalid upcoming parameter: {0}", param);
-                throw new GoldenCompassException("The parameter of the upcoming command must be an integer");
+                throw new GoldenCompassException("The parameter of the upcoming command must be a single integer.");
             }
         } else {
             logger.log(Level.INFO, "No parameter provided. Using default days: {0}", DEFAULT_DAYS);
         }
 
-        LocalDateTime now = LocalDateTime.now(ZoneId.systemDefault());
-        LocalDateTime limit = now.plusDays(days);
+        LocalDateTime now = LocalDateTime.now(ZoneId.systemDefault()).truncatedTo(ChronoUnit.MINUTES);
+        LocalDateTime start;
+        LocalDateTime end;
 
-        logger.log(Level.INFO, "Filtering interviews from {0} to {1}", new Object[]{now, limit});
+        if (days >= 0) {
+            start = now;
+            end = now.plusDays(days);
+        } else {
+            start = now.plusDays(days);
+            end = now;
+        }
+
+        logger.log(Level.INFO, "Filtering interviews from {0} to {1}", new Object[]{start, end});
 
         List<Interview> interviews = interviewList.getInterviews();
 
@@ -92,17 +107,18 @@ public class UpcomingCommand extends Command {
                                                            assert i != null : "Interview should not be null";
                                                            assert i.getDate() != null :
                                                                    "Interview date should not be null";
-                                                           return !i.getDate().isBefore(now);
+                                                           return !i.getDate().isBefore(start);
                                                        })
-                                                       .filter(i -> !i.getDate().isAfter(limit))
+                                                       .filter(i -> !i.getDate().isAfter(end))
                                                        .toList();
 
         assert filteredInterviews.size() <= interviews.size() :
                 "Filtered list cannot be larger than original list";
 
         if (filteredInterviews.isEmpty()) {
-            ui.print("You don't have any upcoming interviews.");
+            ui.print("You don't have any interviews in the upcoming " + days + " day(s).");
         } else {
+            ui.print("You have the following interviews in the upcoming " + days + " day(s):");
             filteredInterviews.forEach(i -> ui.print(i.toString()));
         }
 
