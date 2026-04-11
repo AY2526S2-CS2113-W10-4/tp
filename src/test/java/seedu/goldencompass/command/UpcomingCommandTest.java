@@ -83,8 +83,7 @@ public class UpcomingCommandTest {
 
     @Test
     public void execute_emptyFilteredList_printsNoUpcomingInterviewsMessage() throws GoldenCompassException {
-        interviewList.add(new Interview(new Internship("Software Engineer", "Google"), now.minusMinutes(5)));
-        interviewList.add(new Interview(new Internship("Frontend Developer", "Meta"), now.minusDays(3)));
+        interviewList.add(new Interview(new Internship("Software Engineer", "Google"), now.minusMinutes(1)));
         interviewList.add(new Interview(new Internship("Bus Driver", "NUS"), now.plusDays(2)));
 
         parser.parse("upcoming 1");

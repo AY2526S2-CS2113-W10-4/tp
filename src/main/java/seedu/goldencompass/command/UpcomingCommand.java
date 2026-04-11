@@ -7,6 +7,7 @@ import seedu.goldencompass.parser.Parser;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -83,15 +84,15 @@ public class UpcomingCommand extends Command {
             logger.log(Level.INFO, "No parameter provided. Using default days: {0}", DEFAULT_DAYS);
         }
 
-        LocalDateTime now = LocalDateTime.now(ZoneId.systemDefault());
+        LocalDateTime now = LocalDateTime.now(ZoneId.systemDefault()).truncatedTo(ChronoUnit.MINUTES);
         LocalDateTime start;
         LocalDateTime end;
 
         if (days >= 0) {
-            start = now.minusMinutes(1);
+            start = now;
             end = now.plusDays(days);
         } else {
-            start = now.plusDays(days).minusMinutes(1);
+            start = now.plusDays(days);
             end = now;
         }
 

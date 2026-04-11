@@ -46,24 +46,21 @@ activate UC
 
 UC -> Sys: LocalDateTime.now()
 activate Sys
+Sys --> UC:
+deactivate Sys
+UC -> Sys: truncatedTo(ChronoUnit.MINUTES)
+activate Sys
 Sys --> UC: now
 deactivate Sys
 
 alt days >= 0
-UC -> Sys: now.minusMinutes(1)
-activate Sys
-Sys --> UC: start
-deactivate Sys
+UC -> UC: start = now
 UC -> Sys: now.plusDays(days)
 activate Sys
 Sys --> UC: end
 deactivate Sys
 else days < 0
 UC -> Sys: now.plusDays(days)
-activate Sys
-Sys --> UC
-deactivate Sys
-UC -> Sys: minusMinutes(1)
 activate Sys
 Sys --> UC: start
 deactivate Sys

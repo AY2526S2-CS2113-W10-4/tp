@@ -954,14 +954,6 @@ This lists all upcoming interviews within the following `N` days if `N` is posit
 `|N|` days if `N` is negative. If the optional parameter `[N]` is omitted, a default 
 of `5` days will be used. That is, `upcoming` will list all upcoming interviews within the subsequent `5` days.
 
-- The integer `N` always specifies a closed time interval `[lower bound, upper bound]`. The command actually filters
-for the interval `[lower bound - 1 minute, upper bound]`. This is because if the system time the user sees on their 
-laptop is `yyyy-MM-dd HH:mm`, then the actual time actually passes `yyyy-MM-dd HH:mm` by a few seconds or at least
-microseconds. The system dateTime read is the exact actual time that contains the seconds and microseconds. Therefore, 
-in order for the time interval to be inclusive of time boundaries from the user's point of view, the `lower bound`, which
-is, for positive `N` the actual exact system time and for negative `N` the actual exact system time minus `|N|` days, 
-needs to be 1 minute earlier.
-
 #### Implementation
 
 The feature is implemented in `UpcomingCommand`, the relationship of which to other classes is shown in the following class diagram 
