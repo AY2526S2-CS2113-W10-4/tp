@@ -84,7 +84,8 @@ public class UpcomingCommand extends Command {
         }
 
         LocalDateTime now = LocalDateTime.now(ZoneId.systemDefault());
-        LocalDateTime start, end;
+        LocalDateTime start;
+        LocalDateTime end;
 
         if (days >= 0) {
             start = now.minusMinutes(1);
