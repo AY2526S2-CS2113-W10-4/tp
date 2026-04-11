@@ -1,4 +1,5 @@
 @startuml
+title Sequence Diagram for Parser
 
 actor User
 participant GoldenCompass
@@ -103,20 +104,10 @@ activate Parser
 Parser --> GoldenCompass : flagToParamMap
 deactivate Parser
 
-alt flag string exists in user input
     GoldenCompass -> Parser : getParamsOf(flag)
     activate Parser
-    Parser --> GoldenCompass : List<String>
+    Parser --> GoldenCompass : List<String>/null
     deactivate Parser
-else flag string not found in user input
-    GoldenCompass -> Parser : getParamsOf(flag)
-    activate Parser
-    Parser -> GoldenCompassException : throw
-    activate GoldenCompassException
-    GoldenCompassException --> GoldenCompass : GoldenCompassException("The flag is not found in the user input.")
-    deactivate GoldenCompassException
-    deactivate Parser
-end
 
 GoldenCompass -> Parser : isFlagExist(flag string)
 activate Parser
