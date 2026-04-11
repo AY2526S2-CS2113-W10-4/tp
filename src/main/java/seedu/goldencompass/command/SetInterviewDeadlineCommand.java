@@ -8,6 +8,7 @@ import seedu.goldencompass.parser.Parser;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.time.format.ResolverStyle;
 import java.util.Comparator;
 import java.util.List;
 import java.util.logging.Level;
@@ -101,14 +102,21 @@ public class SetInterviewDeadlineCommand extends Command {
 
         assert interviewList.isValidIndex(index) : "Index should be valid after validation";
 
-        LocalDateTime date;
-        try {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-            date = LocalDateTime.parse(dateParam, formatter);
-        } catch (DateTimeParseException e) {
+        if (!dateParam.matches("\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}")) {
             logger.log(Level.WARNING, "Failed to update date: invalid date format.");
             throw new GoldenCompassException(
                     "Error: Invalid date format, expected yyyy-MM-dd HH:mm, got: " + dateParam);
+        }
+
+        LocalDateTime date;
+        try {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm")
+                    .withResolverStyle(ResolverStyle.STRICT);
+            date = LocalDateTime.parse(dateParam, formatter);
+        } catch (DateTimeParseException e) {
+            logger.log(Level.WARNING, "Failed to update date: date is not a valid calendar date.");
+            throw new GoldenCompassException(
+                    "Error: " + dateParam + " is not a valid date.");
         }
 
         assert date != null : "Parsed date should not be null";

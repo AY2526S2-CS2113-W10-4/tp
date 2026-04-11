@@ -131,4 +131,15 @@ public class SetInterviewDeadlineCommandTest {
                     + "Please provide a future date.", e.getMessage());
         }
     }
+
+    @Test
+    public void execute_invalidCalendarDate_exceptionThrown() throws GoldenCompassException {
+        parser.parse("update-date 1 /d 2099-02-30 10:00");
+        try {
+            setDeadlineCommand.execute();
+            fail();
+        } catch (GoldenCompassException e) {
+            assertEquals("Error: 2099-02-30 10:00 is not a valid date.", e.getMessage());
+        }
+    }
 }
