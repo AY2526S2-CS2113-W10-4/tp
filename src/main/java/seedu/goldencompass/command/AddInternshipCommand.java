@@ -91,7 +91,7 @@ public class AddInternshipCommand extends Command {
         }
 
         if (!companyName.matches("^[a-zA-Z0-9\\s,]+$") || !title.matches("^[a-zA-Z0-9\\s,]+$")) {
-            errorMessage.append("Special characters are not allowed. Only alphanumeric characters and commas ',' are permitted.\n");
+            errorMessage.append("Only alphanumeric characters and commas ',' are permitted.\n");
         }
 
         if (!errorMessage.isEmpty()) {
