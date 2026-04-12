@@ -26,12 +26,13 @@ public class RejectOfferCommand extends Command {
 
     @Override
     public String getCommandDescription() {
-        return "";
+        return "Marks an existing internship application as [REJECTED].\n"
+                + "Format: reject INDEX";
     }
 
     @Override
     public String getFlagDescription() {
-        return "";
+        return "This command does not take any flags.";
     }
 
     /**
@@ -72,8 +73,11 @@ public class RejectOfferCommand extends Command {
         // Get the internship (0-indexed)
         Internship internship = internshipList.get(index - 1);
 
-        // Mark it as rejected!
-        internship.markAsRejected();
+        try {
+            internship.markAsRejected();
+        } catch (IllegalStateException e) {
+            throw new GoldenCompassException(e.getMessage());
+        }
 
         logger.log(Level.INFO, "Successfully marked internship as rejected.");
 

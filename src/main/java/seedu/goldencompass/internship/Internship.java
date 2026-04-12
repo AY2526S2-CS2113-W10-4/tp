@@ -144,10 +144,19 @@ public class Internship {
     }
 
     public void markAsOffer() {
+        if (this.hasOffer()) {
+            throw new IllegalStateException("Error: This internship is already marked as OFFER RECEIVED!");
+        }
+        if (this.isRejected()) {
+            throw new IllegalStateException("Error: You cannot mark an internship that has already been rejected!");
+        }
         this.status = ApplicationStatus.OFFER;
     }
 
     public void markAsRejected() {
+        if (this.isRejected()) {
+            throw new IllegalStateException("Error: This internship has already been rejected!");
+        }
         this.status = ApplicationStatus.REJECTED;
     }
 

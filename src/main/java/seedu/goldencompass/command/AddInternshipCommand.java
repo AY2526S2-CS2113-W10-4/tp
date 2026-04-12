@@ -29,12 +29,15 @@ public class AddInternshipCommand extends Command {
 
     @Override
     public String getCommandDescription() {
-        return "";
+        return "Adds a new internship application to your tracker.\n"
+                + "Format: add COMPANY_NAME /t TITLE";
     }
 
     @Override
     public String getFlagDescription() {
-        return "";
+        return "Flags:\n"
+                + "  /t : Specifies the job title for the internship (Required).\n"
+                + "Example: add Grab /t Software Engineer";
     }
     /**
      * Executes the command to add a new internship to the tracker.
