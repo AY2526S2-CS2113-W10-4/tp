@@ -1,5 +1,9 @@
 package seedu.goldencompass.storage;
 
+import seedu.goldencompass.command.Executor;
+import seedu.goldencompass.exception.GoldenCompassException;
+import seedu.goldencompass.ui.Ui;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -14,11 +18,19 @@ public class AliasStorage {
     }
 
     public void save(Map<String, String> aliasMap) {
-        try (FileWriter fw = new FileWriter(filePath)) {
-            for (Map.Entry<String, String> entry : aliasMap.entrySet()) {
-                // Only save custom aliases (where key != value)
-                if (!entry.getKey().equals(entry.getValue())) {
-                    fw.write(entry.getKey() + " | " + entry.getValue() + System.lineSeparator());
+        try {
+            File f = new File(filePath);
+            File parentDir = f.getParentFile();
+
+            if (parentDir != null && !parentDir.exists()) {
+                parentDir.mkdirs();
+            }
+
+            try (FileWriter fw = new FileWriter(f)) {
+                for (Map.Entry<String, String> entry : aliasMap.entrySet()) {
+                    if (!entry.getKey().equals(entry.getValue())) {
+                        fw.write(entry.getKey() + " | " + entry.getValue() + System.lineSeparator());
+                    }
                 }
             }
         } catch (IOException e) {
@@ -26,21 +38,51 @@ public class AliasStorage {
         }
     }
 
-    public void load(Map<String, String> aliasMap) {
+    public void load(Executor executor) {
         File f = new File(filePath);
         if (!f.exists()) {
             return;
         }
 
+        StringBuilder errorLog = new StringBuilder();
+        boolean requiresCleanup = false;
+
         try (Scanner s = new Scanner(f)) {
             while (s.hasNext()) {
-                String[] parts = s.nextLine().split(" \\| ");
+                String line = s.nextLine();
+                if (line.trim().isEmpty()) {
+                    continue;
+                }
+
+                String[] parts = line.split("\\s*\\|\\s*");
+
                 if (parts.length == 2) {
-                    aliasMap.put(parts[0], parts[1]);
+                    String alias = parts[0];
+                    String command = parts[1];
+
+                    try {
+                        executor.addAlias(command, alias);
+                    } catch (GoldenCompassException e) {
+                        errorLog.append("Warning: Could not load alias [")
+                                .append(line).append("] -> ").append(e.getMessage()).append("\n");
+                        requiresCleanup = true;
+                    }
+                } else {
+                    errorLog.append("Warning: Corrupted alias skipped and cleaned: [")
+                            .append(line).append("]\n");
+                    requiresCleanup = true;
                 }
             }
         } catch (IOException e) {
             System.out.println("Error loading aliases.");
+        }
+
+        if (errorLog.length() > 0) {
+            new Ui().print(errorLog.toString().trim());
+        }
+
+        if (requiresCleanup) {
+            save(executor.getAliasMap());
         }
     }
 }

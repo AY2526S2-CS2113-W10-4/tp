@@ -45,7 +45,7 @@ public class GoldenCompass {
         executor = new Executor(parser, internships, interviews, operationHistory);
         this.interviewStorage.load(interviews, internships);
         this.aliasStorage = new AliasStorage("data/aliases.txt");
-        this.aliasStorage.load(executor.getAliasMap());
+        this.aliasStorage.load(executor);
     }
 
     public static void main(String[] args) throws IOException, GoldenCompassException {
