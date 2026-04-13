@@ -378,7 +378,7 @@ GoldenCompass saves your data to your hard disk automatically after any command 
 
 Your tracker's data is safely stored in the `data/` folder in the same directory as the application.
 
-**1. Internship Data (`data/internships.txt`)**
+### 1. Internship Data (`data/internships.txt`)
 Your internship applications are saved in the following format:
 `TITLE | COMPANY_NAME | STATUS`
 
@@ -386,6 +386,9 @@ Your internship applications are saved in the following format:
 * **Updating Status:** When you use commands like `mark` or `reject` to update an internship application, the new status seamlessly overwrites the old one on the exact same line. It will not create a new or duplicate entry.
     * *Example:* If you receive an offer from Grab, the saved file updates to `Software Engineer | Grab | OFFER`. If you eventually decide to decline it and use the `reject` command, that exact line updates to `Software Engineer | Grab | REJECTED`.
 * **Deleting Data:** If you remove an internship using the `delete` or `clear-rejected` commands, that specific application is completely erased from the text file.
+* **Manual File Editing:** While `internships.txt` is stored in plain text, manual modifications are **strictly discouraged**.
+* **Integrity Requirement:** To ensure application stability, the file must maintain a unique 1-to-1 mapping for internships. Manually introducing duplicate lines (identical `TITLE | COMPANY_NAME` combinations) violates the system's data integrity constraints and may lead to **unpredictable behavior or startup failures**.
+* **Best Practice:** Always use the `add-internship` and `delete-internship` commands within the GoldenCompass interface to ensure your data remains synchronized and valid.
 
 ### 2. Interview Data (`data/interviews.txt`)
 
@@ -393,21 +396,25 @@ Your scheduled interviews are saved in the following format:
 `COMPANY_NAME | ROLE | DATE_AND_TIME`
 
 * **Date Format:** The date and time are saved in the standard ISO-8601 format (e.g., `2026-08-07T16:00`).
-* **Strict Data Validation:** Every interview must have a valid date.
-    * **Corrupted Dates:** If the date field is missing, written as `null`, or formatted incorrectly, the application will display an **Error** message and skip loading that specific interview to prevent system crashes.
-    * **Duplicate Entries:** If the interviews.txt file contains multiple entries for the same internship role, the application will display a **Warning**. Only the first valid entry is loaded; redundant duplicates are automatically cleaned (deleted) from the text file the next time the application saves.
 * **Automatic Sorting:** The application automatically sorts your interviews chronologically. The interview happening the soonest will always be stored and displayed at the top of the list.
 * **Updating Dates:** If you use the `update-date` command to reschedule an interview, the new date and time will overwrite the old one on the exact same line. It will not create a new or duplicate entry.
 * **Deleting Data:** If you cancel an interview using the `delete-interview` command, that specific interview entry is completely erased from the text file.
-**3. Alias Data (`data/aliases.txt`)**
+* **Strict Data Validation:** To maintain system integrity, every interview must have a valid, parsable date.
+    * **Corrupted Dates:** If a date field is missing, written as `null`, or formatted incorrectly, the application will display an **Error** message and skip loading that specific entry. This prevents system crashes and ensures only valid data is processed.
+    * **Duplicate Entries:** If the `interviews.txt` file contains multiple entries for the same internship role, the application will display a **Warning**. Only the first valid entry is loaded into memory; redundant duplicates are automatically "cleaned" (deleted) from the text file the next time the application saves.
+* **Manual File Editing:** While the file is human-readable, manual edits are **strictly discouraged**.
+* **Best Practice:** Use the `add-interview` `update-date` and `delete-interview` commands to manage your schedule safely without risking data corruption.
+
+### 3. Alias Data (`data/aliases.txt`)
 Your custom command shortcuts are saved in the following format:
 `ALIAS | ORIGINAL_COMMAND`
 
 * **Multiple Shortcuts:** GoldenCompass supports multiple aliases for a single command. If you create a new alias for a command that already has one, a new line will be added to the file instead of overwriting the previous shortcut.
     * *Example:* If you have `ls | list` and you add `l | list`, both will be saved as separate lines, allowing you to use either `ls` or `l` to view your internships.
 * **Deleting Data:** If you remove a shortcut using the `remove-alias` command, that specific alias mapping is completely erased from the text file.
+* **Manual File Editing:** While the `aliases.txt` file is human-readable, manual edits are **strictly discouraged**.
+* **Best Practice:** Use the `alias` command to manage your aliases safely without risking data corruption.
 
-> **Caution:** While you can open and read these text files, it is highly recommended not to manually edit them. If you do, please ensure you strictly follow the exact formatting above. Incorrect formatting, missing data, or missing ` | ` separators will cause the application to skip loading those specific lines to prevent crashing.
 
 ## FAQ
 
