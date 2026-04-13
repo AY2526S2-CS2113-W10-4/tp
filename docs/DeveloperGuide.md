@@ -1019,6 +1019,13 @@ This lists all upcoming interviews within the following `N` days if `N` is posit
 `|N|` days if `N` is negative. If the optional parameter `[N]` is omitted, a default 
 of `5` days will be used. That is, `upcoming` will list all upcoming interviews within the subsequent `5` days.
 
+Although a negative integer parameter `N` is allowed, it is unlikely the user will need to see what are the past
+interviews, and even if they do they could simply use `list-interview` to list all interviews in chronological 
+order. Thus, the supply of a negative integer `N` after `upcoming` is considered an exception, and just handled as such.
+In essence, a negative `N` is not the intended usage of the command, and listing interviews in the past
+`|N|` days if `N` is negative, is not a subfeature of the command, but an exception handling, which may happen to be
+useful for the user.
+
 #### Implementation
 
 The feature is implemented in `UpcomingCommand`, the relationship of which to other classes is shown in the following class diagram 
