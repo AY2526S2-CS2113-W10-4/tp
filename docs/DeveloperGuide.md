@@ -1496,6 +1496,10 @@ Format: `TITLE | COMPANY_NAME | STATUS`
 Format: `COMPANY_NAME | ROLE | ISO_LOCAL_DATE_TIME`
 * **Note**: The date must follow the ISO-8601 format (e.g., `2026-08-07T16:00`). The application no longer accepts `null` as a valid date string in storage.
 
+**3. Alias (`data/interviews.txt`)**
+Format: `ALIAS | COMMAND`
+
+
 #### Data Validation
 
 The Storage component implements proactive validation to protect the application's internal state:
