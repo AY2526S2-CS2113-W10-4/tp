@@ -4,6 +4,7 @@ import seedu.goldencompass.internship.Interview;
 import seedu.goldencompass.internship.InterviewList;
 import seedu.goldencompass.internship.Internship;
 import seedu.goldencompass.internship.InternshipList;
+import seedu.goldencompass.ui.Ui;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -35,10 +36,11 @@ public class InterviewStorage {
             FileWriter fw = new FileWriter(filePath);
 
             for (Interview i : interviewList.getInterviews()) {
-                // Fixed: Using getCompanyName() from your Internship class
                 String company = i.getInternship().getCompanyName();
+                String role = i.getInternship().getTitle();
                 String date = (i.getDate() != null) ? i.getDate().toString() : "null";
-                fw.write(company + " | " + date + System.lineSeparator());
+
+                fw.write(company + " | " + role + " | " + date + System.lineSeparator());
             }
             fw.close();
         } catch (IOException e) {
@@ -47,7 +49,7 @@ public class InterviewStorage {
     }
 
     /**
-     * Loads interviews and reconnects them to existing internships in the list.
+     * Loads interviews and reconnects them to existing internships.
      */
     public void load(InterviewList interviewList, InternshipList internshipList) {
         File f = new File(filePath);
@@ -55,34 +57,55 @@ public class InterviewStorage {
             return;
         }
 
+        StringBuilder errorLog = new StringBuilder();
+
         try (Scanner s = new Scanner(f)) {
             while (s.hasNext()) {
                 String line = s.nextLine();
                 String[] parts = line.split(" \\| ");
-                if (parts.length < 2) {
+
+                if (parts.length < 3) {
+                    errorLog.append("Error: Corrupted format in interviews.txt. Skipping: [")
+                            .append(line).append("]\n");
                     continue;
                 }
 
                 String companyName = parts[0];
-                String dateStr = parts[1];
+                String role = parts[1];
+                String dateStr = parts[2];
 
-                // Find the parent internship by name
-                Internship linkedInternship = internshipList.findInternshipByCompany(companyName);
+                Internship linkedInternship = internshipList.findInternshipByCompanyAndRole(companyName, role);
 
                 if (linkedInternship != null) {
-                    Interview interview = new Interview(linkedInternship);
-                    if (!dateStr.equals("null")) {
-                        try {
-                            interview.setDate(LocalDateTime.parse(dateStr));
-                        } catch (DateTimeParseException e) {
-                            logger.warning("Invalid date format for: " + companyName);
-                        }
+                    if (linkedInternship.getInterview() != null) {
+                        errorLog.append("Warning: Duplicate interview for ").append(companyName)
+                                .append(" (").append(role).append(") skipped and cleaned.\n");
+                        continue;
                     }
-                    interviewList.add(interview);
+
+                    // Strict date parsing
+                    try {
+                        LocalDateTime parsedDate = LocalDateTime.parse(dateStr);
+                        Interview interview = new Interview(linkedInternship);
+                        interview.setDate(parsedDate);
+                        interviewList.add(interview);
+                    } catch (DateTimeParseException e) {
+                        errorLog.append("Error: Date corrupted ('").append(dateStr)
+                                .append("') for ").append(companyName)
+                                .append(" (").append(role).append("). Skipping.\n");
+                    }
+                } else {
+                    errorLog.append("Error: No matching internship found for ")
+                            .append(companyName).append(" (").append(role)
+                            .append("). Skipping interview.\n");
                 }
             }
         } catch (IOException e) {
             logger.log(Level.WARNING, "Could not load interviews from " + filePath);
+        }
+
+        if (errorLog.length() > 0) {
+            new Ui().print(errorLog.toString().trim());
         }
     }
 }
