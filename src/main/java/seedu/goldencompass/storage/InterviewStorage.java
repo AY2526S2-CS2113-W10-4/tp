@@ -61,16 +61,14 @@ public class InterviewStorage {
                 String line = s.nextLine();
                 String[] parts = line.split(" \\| ");
 
-                // CHANGED: We now expect 3 parts (Company, Role, Date)
                 if (parts.length < 3) {
                     continue;
                 }
 
                 String companyName = parts[0];
-                String role = parts[1]; // ADDED: Extract the role
-                String dateStr = parts[2]; // CHANGED: Date is now at index 2
+                String role = parts[1];
+                String dateStr = parts[2];
 
-                // CHANGED: Use a new composite search method (see Step 3 below)
                 Internship linkedInternship = internshipList.findInternshipByCompanyAndRole(companyName, role);
 
                 if (linkedInternship != null) {
