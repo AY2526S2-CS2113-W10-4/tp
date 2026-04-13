@@ -27,26 +27,29 @@ Given below are my contributions to the project.
 - **Feature:** Local Storage Architecture (`InternshipStorage`, `InterviewStorage`, `AliasStorage`) [PR#61](https://github.com/AY2526S2-CS2113-W10-4/tp/pull/61)
     - **What it does:** Automatically saves and loads all internship data, interview schedules, and command aliases to the local hard drive.
     - **Justification:** Guarantees data persistence across sessions, which is a mandatory requirement for a reliable, real-world tracking tool.
-    - **Highlights:** Engineered an "Eager Saving" mechanism that triggers after every command to ensure zero data loss. Implemented complex relational object reconstruction to dynamically link loaded interviews back to their parent internships in memory. Built in high fault-tolerance to safely skip corrupted file lines and auto-create missing directories without crashing the app.
+    - **Highlights:** Engineered an "Eager Saving" mechanism that triggers after every command to ensure zero data loss. Implemented complex relational object reconstruction to dynamically link loaded interviews back to their parent internships in memory. 
 
 ### Project Management:
 * Managed project releases and tracked feature deliverables for the `v1.0` and `v2.0` milestones on GitHub.
 * Managed issue tracking and maintained project traceability by systematically linking Pull Requests (PRs) to their corresponding issues.
+* Released JAR file, UG and DG for `v2.0.1`.
 
 ### Enhancements to Existing Features:
 * **OOP Refactoring [PR#81](https://github.com/AY2526S2-CS2113-W10-4/tp/pull/81):** Refactored the `add` and `mark` commands to inherit from a centralized `CommandClass.java`, enforcing polymorphism and reducing code duplication. 
 * **Defensive Programming [PR#58](https://github.com/AY2526S2-CS2113-W10-4/tp/pull/58):** Integrated Java `assert` statements and system logging (`java.util.logging`) across core operations to enforce runtime invariants and enhance the application's fault tolerance. 
 * **State Logic Optimization [PR#87](https://github.com/AY2526S2-CS2113-W10-4/tp/pull/87):** Restructured the internship status handling by introducing a distinct `PENDING` state and replacing nested conditionals with a `switch` statement, streamlining state transitions and improving parser readability. 
-
+* **Debugging [PR#203](https://github.com/AY2526S2-CS2113-W10-4/tp/pull/203), [PR#205](https://github.com/AY2526S2-CS2113-W10-4/tp/pull/205), [PR#209](https://github.com/AY2526S2-CS2113-W10-4/tp/pull/209):** Fixed issues reported for `add`, `mark`, and `reject` commands.
+* **Corrupted Data Handling [PR#217](https://github.com/AY2526S2-CS2113-W10-4/tp/pull/217), [PR#226](https://github.com/AY2526S2-CS2113-W10-4/tp/pull/226), [PR#228](https://github.com/AY2526S2-CS2113-W10-4/tp/pull/228):** Developed a self-healing storage system that uses regex validation to skip corrupted entries and prevent crashes. Includes automated data cleanup and batch error reporting to maintain state integrity during manual file edits.
 ### Documentation:
 
-* **User Guide [PR#128](https://github.com/AY2526S2-CS2113-W10-4/tp/pull/128):**
+* **User Guide [PR#128](https://github.com/AY2526S2-CS2113-W10-4/tp/pull/128), [PR#140](https://github.com/AY2526S2-CS2113-W10-4/tp/pull/140), [PR#204](https://github.com/AY2526S2-CS2113-W10-4/tp/pull/204), [PR#229](https://github.com/AY2526S2-CS2113-W10-4/tp/pull/229):**
     * Added documentation for the core features `add`, `mark`, and `reject`.
-    * Wrote the comprehensive `Saving the Data` section, detailing the backend file architecture, update behaviors, and ISO-8601 formatting to ensure peer testers understand the application's persistent state.
-* **Developer Guide [PR#60](https://github.com/AY2526S2-CS2113-W10-4/tp/pull/60) [PR#62](https://github.com/AY2526S2-CS2113-W10-4/tp/pull/62) [PR#121](https://github.com/AY2526S2-CS2113-W10-4/tp/pull/121):**
+    * Wrote the comprehensive `Storage Component` section, detailing the backend file architecture, update behaviors, and ISO-8601 formatting to ensure peer testers understand the application's persistent state.
+* **Developer Guide [PR#60](https://github.com/AY2526S2-CS2113-W10-4/tp/pull/60), [PR#62](https://github.com/AY2526S2-CS2113-W10-4/tp/pull/62), [PR#121](https://github.com/AY2526S2-CS2113-W10-4/tp/pull/121), [PR#157](https://github.com/AY2526S2-CS2113-W10-4/tp/pull/157):**
     * Added implementation details, design considerations, and test coverage for the `add` `mark` `reject` command, including all the corresponding `ClassDiagram` and `SequenceDiagram`.
     * Documented the complete architecture of the `Storage` component, explaining the eager saving execution flow and relational mapping strategies. Designed and added the `StorageClassDiagram` and `StorageSequenceDiagram`.
 
 ### Community:
-* Team PRs reviewed (with non-trivial review comments): [PR#124](https://github.com/AY2526S2-CS2113-W10-4/tp/pull/124#pullrequestreview-4056818424), [PR#127](https://github.com/AY2526S2-CS2113-W10-4/tp/pull/127#pullrequestreview-4056854521)
+* Team PRs reviewed (with non-trivial review comments): [PR#124](https://github.com/AY2526S2-CS2113-W10-4/tp/pull/124#pullrequestreview-4056818424), [PR#127](https://github.com/AY2526S2-CS2113-W10-4/tp/pull/127#pullrequestreview-4056854521), [PR#131](https://github.com/AY2526S2-CS2113-W10-4/tp/pull/131), [PR#139](https://github.com/AY2526S2-CS2113-W10-4/tp/pull/139), [PR#154](https://github.com/AY2526S2-CS2113-W10-4/tp/pull/154), [PR#156](https://github.com/AY2526S2-CS2113-W10-4/tp/pull/156), [PR#216](https://github.com/AY2526S2-CS2113-W10-4/tp/pull/216), [PR#219](https://github.com/AY2526S2-CS2113-W10-4/tp/pull/219) 
 * Reviewed other team's Developer Guide [(link)](https://github.com/NUS-CS2113-AY2526-S2/tp/pull/11#pullrequestreview-4045030275). 
+* Reported bugs for another team [(link)](https://github.com/NUS-CS2113-AY2526-S2/ped-xiranhu/issues).
