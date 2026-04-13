@@ -79,6 +79,12 @@ public class Executor {
         cmd.execute();
     }
 
+    /**
+     * Adds an alias to the command
+     * @param command a string
+     * @param alias a string
+     * @throws GoldenCompassException if error occurs when trying to add
+     */
     public void addAlias(String command, String alias) throws GoldenCompassException {
         command = command.trim();
         alias = alias.trim();
@@ -112,6 +118,11 @@ public class Executor {
         }
     }
 
+    /**
+     * Remove the input alias
+     * @param alias a string
+     * @throws GoldenCompassException error occurs when trying to remove.
+     */
     public void removeAlias(String alias) throws GoldenCompassException{
         alias = alias.trim();
 
@@ -141,11 +152,20 @@ public class Executor {
         return aliasMap;
     }
 
+    /**
+     * Replace the alias map with the input
+     * @param newAliasMap a Map
+     */
     public void setAliasMap(Map<String, String> newAliasMap) {
         aliasMap.clear();
         aliasMap.putAll(newAliasMap);
     }
 
+    /**
+     * Returns true if the command is undoable
+     * @param command command
+     * @return true if the command is undoable
+     */
     public boolean isUndoable(String command) {
         return undoable.contains(command);
     }

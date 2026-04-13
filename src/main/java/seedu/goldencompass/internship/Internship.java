@@ -83,6 +83,11 @@ public class Internship {
         this.status = other.status;
     }
 
+    /**
+     * Get a copy of the input {@code Internship}
+     * @param other an Internship
+     * @return an Internship object or null if other is null.
+     */
     public static Internship copyOf(Internship other) {
         if (other == null) {
             return null;
