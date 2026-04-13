@@ -27,9 +27,13 @@ public class InternshipStorage {
     public void save(InternshipList internshipList) {
         try {
             File f = new File(filePath);
-            if (!f.getParentFile().exists()) {
-                f.getParentFile().mkdirs();
+            File parentDir = f.getParentFile(); // Safely extract the parent directory
+
+            // Only try to create the folder if a folder was actually specified in the path
+            if (parentDir != null && !parentDir.exists()) {
+                parentDir.mkdirs();
             }
+
             FileWriter fw = new FileWriter(filePath);
 
             for (Internship intern : internshipList.getInternships()) {
