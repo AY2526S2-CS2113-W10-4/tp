@@ -13,19 +13,22 @@ loop while application is running
 
     GC -> InternStorage : save(internshipList)
     activate InternStorage
-    InternStorage -> InternStorage : Write formatting logic
+    InternStorage -> InternStorage : Check/Create "data/" directory
+    InternStorage -> InternStorage : Format and write internships
     InternStorage --> GC
     deactivate InternStorage
 
     GC -> InterviewStorage : save(interviewList)
     activate InterviewStorage
-    InterviewStorage -> InterviewStorage : Write formatting logic\n(Extracts Company & Role)
+    InterviewStorage -> InterviewStorage : Check/Create "data/" directory
+    InterviewStorage -> InterviewStorage : Format and write interviews\n(Links Company & Role)
     InterviewStorage --> GC
-    deactivate InterviewStorage
+    deactivate InternStorage
 
     GC -> AliasStorage : save(aliasMap)
     activate AliasStorage
-    AliasStorage -> AliasStorage : Write formatting logic
+    AliasStorage -> AliasStorage : Check/Create "data/" directory
+    AliasStorage -> AliasStorage : Format and write custom aliases
     AliasStorage --> GC
     deactivate AliasStorage
 

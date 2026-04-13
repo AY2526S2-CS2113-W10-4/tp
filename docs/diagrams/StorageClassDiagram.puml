@@ -25,12 +25,20 @@ class InterviewStorage {
 
 class AliasStorage {
   - filePath: String
-  + load(aliasMap: Map<String, String>) : void
+  + load(executor: Executor) : void
   + save(aliasMap: Map<String, String>) : void
 }
 
 class InternshipList {
   + findInternshipByCompanyAndRole(companyName: String, role: String) : Internship
+}
+
+class InterviewList {
+}
+
+class Executor {
+  + addAlias(command: String, alias: String) : void
+  + getAliasMap() : Map<String, String>
 }
 
 GoldenCompass --> "1" InternshipStorage
@@ -40,5 +48,5 @@ GoldenCompass --> "1" AliasStorage
 InternshipStorage ..> "uses" InternshipList
 InterviewStorage ..> "uses" InternshipList
 InterviewStorage ..> "uses" InterviewList
-AliasStorage ..> "uses" Map
+AliasStorage ..> "uses" Executor
 @enduml
