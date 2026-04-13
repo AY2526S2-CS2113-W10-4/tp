@@ -37,7 +37,6 @@ public class InternshipStorageTest {
 
     @Test
     public void saveAndLoad_withStatuses_success() {
-        // 1. Create three different types of internships
         Internship offerIntern = new Internship("Software Engineer", "Grab");
         offerIntern.markAsOffer();
 
@@ -50,41 +49,14 @@ public class InternshipStorageTest {
         internshipList.add(rejectedIntern);
         internshipList.add(pendingIntern);
 
-        // 2. Save and Reload
         internshipStorage.save(internshipList);
         ArrayList<Internship> loadedList = internshipStorage.load();
 
-        // 3. Assertions
         assertEquals(3, loadedList.size());
-
-        // Check the Offer
         assertTrue(loadedList.get(0).hasOffer());
-        assertFalse(loadedList.get(0).isRejected());
-
-        // Check the Rejection
         assertTrue(loadedList.get(1).isRejected());
-        assertFalse(loadedList.get(1).hasOffer());
-
-        // Check the Pending one
         assertFalse(loadedList.get(2).hasOffer());
         assertFalse(loadedList.get(2).isRejected());
-    }
-
-    @Test
-    public void load_legacyTwoColumnFormat_loadsAsPending() throws IOException {
-        // Manually create an OLD style file (only 2 columns)
-        File testFile = new File(TEST_FILE_PATH);
-        FileWriter fw = new FileWriter(testFile);
-        fw.write("Old Role | Old Company\n");
-        fw.close();
-
-        ArrayList<Internship> loadedList = internshipStorage.load();
-
-        // Should still load fine, just with no offer/rejection status
-        assertEquals(1, loadedList.size());
-        assertEquals("Old Role", loadedList.get(0).getTitle());
-        assertFalse(loadedList.get(0).hasOffer());
-        assertFalse(loadedList.get(0).isRejected());
     }
 
     @Test
@@ -95,19 +67,52 @@ public class InternshipStorageTest {
     }
 
     @Test
-    public void load_corruptedFile_skipsCorruptedLines() throws IOException {
+    public void load_corruptedAndShortLines_skipsInvalidEntries() throws IOException {
         File testFile = new File(TEST_FILE_PATH);
         testFile.createNewFile();
         FileWriter fw = new FileWriter(testFile);
         fw.write("Valid Title | Valid Company | OFFER\n");
-        fw.write("Corrupted line with no pipes\n"); // Should be skipped
+        fw.write("Old Role | Old Company\n"); // ✨ Skipped: Only 2 parts (Legacy no longer supported)
+        fw.write("A | B | PENDING\n"); // Skipped: Strings less than 2 characters
         fw.write("Another Title | Another Company | REJECTED\n");
         fw.close();
 
         ArrayList<Internship> loadedList = internshipStorage.load();
 
-        assertEquals(2, loadedList.size());
+        assertEquals(2, loadedList.size(), "Should have skipped the corrupted, legacy, and short lines");
         assertTrue(loadedList.get(0).hasOffer());
         assertTrue(loadedList.get(1).isRejected());
+    }
+
+    @Test
+    public void load_duplicateEntries_keepsFirstAndSkipsRest() throws IOException {
+        File testFile = new File(TEST_FILE_PATH);
+        testFile.createNewFile();
+        FileWriter fw = new FileWriter(testFile);
+        fw.write("Software Engineer | Google | PENDING\n");
+        fw.write("Software Engineer | Google | OFFER\n"); // Duplicate, should be skipped
+        fw.close();
+
+        ArrayList<Internship> loadedList = internshipStorage.load();
+
+        assertEquals(1, loadedList.size(), "Should only load the first unique internship");
+        assertEquals("Software Engineer", loadedList.get(0).getTitle());
+        assertFalse(loadedList.get(0).hasOffer(), "Should be PENDING, as the duplicate OFFER was skipped");
+    }
+
+    @Test
+    public void load_irregularSpacing_parsesCorrectly() throws IOException {
+        File testFile = new File(TEST_FILE_PATH);
+        testFile.createNewFile();
+        FileWriter fw = new FileWriter(testFile);
+        fw.write("Backend Dev|Netflix|OFFER\n");
+        fw.close();
+
+        ArrayList<Internship> loadedList = internshipStorage.load();
+
+        assertEquals(1, loadedList.size());
+        assertEquals("Backend Dev", loadedList.get(0).getTitle());
+        assertEquals("Netflix", loadedList.get(0).getCompanyName());
+        assertTrue(loadedList.get(0).hasOffer());
     }
 }
