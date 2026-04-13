@@ -57,14 +57,16 @@ public class InterviewStorage {
             return;
         }
 
+        StringBuilder errorLog = new StringBuilder();
+
         try (Scanner s = new Scanner(f)) {
             while (s.hasNext()) {
                 String line = s.nextLine();
                 String[] parts = line.split(" \\| ");
 
                 if (parts.length < 3) {
-                    new Ui().print("Error: Corrupted format in interviews.txt. "
-                            + "Skipping line: [" + line + "]");
+                    errorLog.append("Error: Corrupted format in interviews.txt. Skipping: [")
+                            .append(line).append("]\n");
                     continue;
                 }
 
@@ -75,38 +77,35 @@ public class InterviewStorage {
                 Internship linkedInternship = internshipList.findInternshipByCompanyAndRole(companyName, role);
 
                 if (linkedInternship != null) {
-                    // Check for corrupted dates first
-                    LocalDateTime parsedDate;
+                    if (linkedInternship.getInterview() != null) {
+                        errorLog.append("Warning: Duplicate interview for ").append(companyName)
+                                .append(" (").append(role).append(") skipped and cleaned.\n");
+                        continue;
+                    }
+
+                    // Strict date parsing
                     try {
-                        parsedDate = LocalDateTime.parse(dateStr);
+                        LocalDateTime parsedDate = LocalDateTime.parse(dateStr);
+                        Interview interview = new Interview(linkedInternship);
+                        interview.setDate(parsedDate);
+                        interviewList.add(interview);
                     } catch (DateTimeParseException e) {
-                        new Ui().print("Error: Date is corrupted ('" + dateStr + "') for "
-                                + companyName + " (" + role + "). Skipping.");
-                        continue;
+                        errorLog.append("Error: Date corrupted ('").append(dateStr)
+                                .append("') for ").append(companyName)
+                                .append(" (").append(role).append("). Skipping.\n");
                     }
-
-                    // Check for duplicates
-                    boolean isDuplicate = false;
-                    for (Interview existing : interviewList.getInterviews()) {
-                        if (existing.getInternship().equals(linkedInternship)) {
-                            isDuplicate = true;
-                            break;
-                        }
-                    }
-
-                    if (isDuplicate) {
-                        new Ui().print("Warning: Duplicate interview for " + companyName
-                                + " (" + role + ") skipped and will be cleaned.");
-                        continue;
-                    }
-
-                    Interview interview = new Interview(linkedInternship);
-                    interview.setDate(parsedDate);
-                    interviewList.add(interview);
+                } else {
+                    errorLog.append("Error: No matching internship found for ")
+                            .append(companyName).append(" (").append(role)
+                            .append("). Skipping interview.\n");
                 }
             }
         } catch (IOException e) {
             logger.log(Level.WARNING, "Could not load interviews from " + filePath);
+        }
+
+        if (errorLog.length() > 0) {
+            new Ui().print(errorLog.toString().trim());
         }
     }
 }
