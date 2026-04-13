@@ -1472,111 +1472,73 @@ The Storage component is responsible for persisting user data across application
 The storage system is initialized inside the `GoldenCompass` main class.
 
 **Loading Data (Application Startup):**
-When the application starts, data is loaded in a strict sequence to resolve dependencies:
-1. `InternshipStorage.load()` is called first. It reads `data/internships.txt` line by line and splits the string using the `" | "` delimiter.
-2. If a third column (status) is present, the parser uses a `switch` statement on the parsed string (`OFFER`, `REJECTED`, or `PENDING`).
-- `case "OFFER"`: Calls `loadedInternship.markAsOffer()`.
-- `case "REJECTED"`: Calls `loadedInternship.markAsRejected()`.
-- `case "PENDING"`: Leaves the internship in its default initialization state.
-- `default`: Logs a warning for an unknown status to handle potential file corruption.
-3. `InterviewStorage.load()` is called next. Since interviews are tied to specific internships, this class parses `data/interviews.txt`, extracts the company name and role, and uses the composite key search `internshipList.findInternshipByCompanyAndRole(companyName, role)` to accurately link the newly loaded `Interview` back to its exact parent `Internship` object in memory.
-4. `AliasStorage.load()` reads `data/aliases.txt` and populates the `Executor`'s internal alias map.
+Data is loaded in a strict sequence to resolve dependencies and ensure data integrity:
+1. `InternshipStorage.load()` is called first to populate the `InternshipList`.
+2. `InterviewStorage.load()` is called next. Since interviews are tied to specific internships, it uses the composite key search `internshipList.findInternshipByCompanyAndRole(companyName, role)` to link the loaded `Interview` back to its exact parent object.
+3. **Strict Validation Logic**: During the `InterviewStorage` load process, each entry undergoes a tiered validation check:
+    - **Format Check**: If a line is missing parts, it is skipped and an **Error** is reported.
+    - **Date Validation**: It attempts to parse the date. If the string is `"null"` or invalid, a **Red Error** is displayed via the UI, and the entry is skipped entirely.
+    - **Duplicate Detection**: If an interview already exists for that specific role, a **Yellow Warning** is displayed, and the redundant entry is skipped.
+4. `AliasStorage.load()` populates the internal shortcut map.
 
 **Saving Data (Execution Loop):**
-GoldenCompass utilizes an **Eager Saving Strategy**. Inside the main `while (true)` loop in `GoldenCompass.run()`, the application calls the `save()` method on all three storage classes immediately after every user command is executed. During `InternshipStorage.save()`, the system checks `hasOffer()` and `isRejected()` to accurately write the correct status string back into the text file.
+GoldenCompass utilizes an **Eager Saving Strategy**. The application calls `save()` on all storage classes immediately after every user command. This creates a **Self-Healing** data system: because corrupted or duplicate lines are skipped during the `load()` process, the subsequent `save()` call overwrites the text file with only the clean, validated data currently in memory.
 
 #### Data Formats
 
-Data is stored in custom-delimited text files using the `" | "` (space-pipe-space) separator. This format was chosen because it is simple to parse using `String.split()` and remains highly readable if the user opens the file in a standard text editor.
+Data is stored in custom-delimited text files using the `" | "` separator for human readability and simple parsing.
 
 **1. Internships (`data/internships.txt`)**
 Format: `TITLE | COMPANY_NAME | STATUS`
-* The `STATUS` column strictly maps to the application's internal state logic (`PENDING`, `OFFER`, or `REJECTED`).
-* Example: `Software Engineer | Google | OFFER`
-* Example: `Frontend Intern | Grab | PENDING`
+* `STATUS` strictly maps to `PENDING`, `OFFER`, or `REJECTED`.
 
 **2. Interviews (`data/interviews.txt`)**
 Format: `COMPANY_NAME | ROLE | ISO_LOCAL_DATE_TIME`
-* Example: `Google | Software Engineer | 2026-03-25T14:30:00`
-* Example: `Grab | Data Analyst | null` *(If an interview is created but no date is set yet)*
-
-**3. Aliases (`data/aliases.txt`)**
-Format: `ALIAS_TRIGGER | ORIGINAL_COMMAND`
-* Example: `ls | list`
-* Example: `mk | mark`
-
-The following class diagram shows the main structural components involved in the Storage feature:
-
-![Storage Class Diagram](diagrams/StorageClassDiagram.png)
-
-The following sequence diagram illustrates the execution flow of the eager saving mechanism during the main application loop:
-
-![Storage Sequence Diagram](diagrams/StorageSequenceDiagram.png)
+* **Note**: The date must follow the ISO-8601 format (e.g., `2026-08-07T16:00`). The application no longer accepts `null` as a valid date string in storage.
 
 #### Data Validation
 
-Instead of user input validation, the Storage component implements data validation when loading from the text files to prevent crashes from manually edited or corrupted files:
+The Storage component implements proactive validation to protect the application's internal state:
 
 | Validation Layer | Description | Handling Strategy |
 |-----------------|-------------|-------------------|
-| **Length Check** | Verifies a line splits into the correct number of parts via the `" | "` delimiter. | Skips the line and logs a warning if `parts.length` is invalid. |
-| **Empty Value Check** | Ensures parsed titles and company names are not empty strings. | Skips the line to prevent creating ghost internships. |
-| **Date Format Check** | Verifies interview dates conform to `LocalDateTime` ISO formatting. | Catches `DateTimeParseException`, logs a warning, but still loads the interview without a date. |
-| **Null Date Check** | Verifies if the saved date string is explicitly `"null"`. | Skips date parsing entirely and safely initializes the `Interview` without a date to be handled by `nullsLast` sorting. |
+| **Length Check** | Verifies a line splits into the correct number of parts. | **Error**: Prints corrupted line to UI and skips. |
+| **Date Parsing** | Verifies dates conform to ISO formatting. **"null" is rejected.** | **Error**: Catches `DateTimeParseException`, prints error to UI, and skips the entire entry. |
+| **Duplicate Check** | Ensures only one interview exists for a unique Company + Role. | **Warning**: Prints warning to UI and skips line. Redundancy is cleaned on the next save. |
+| **Empty Value Check** | Ensures parsed titles and company names are not empty. | **Error**: Skips line to prevent "ghost" internships. |
 
 #### Defensive Programming Features
 
-The implementation includes several defensive programming measures:
-
-**1. Assertions**: Verify internal state invariants before executing I/O operations.
-assert filePath != null && !filePath.trim().isEmpty() : "Storage file path cannot be null or empty";
-assert internshipList != null : "Cannot save a null InternshipList";
-
-**2. Logging**: Track file creation and data corruption for debugging.
-logger.log(Level.INFO, "Created missing data directory.");
-logger.log(Level.WARNING, "Skipped corrupted line: " + line);
-
-**3. Directory Auto-Creation**: The system proactively checks if the `data/` folder exists before attempting to write. If missing, it uses `parentDir.mkdirs()` to create it, preventing `FileNotFoundException`.
-
-**4. Graceful Exception Handling**: Standard `IOException` and `FileNotFoundException` errors are caught and handled. Instead of crashing the application, it alerts the user or starts with a fresh empty list.
+1. **Assertions**: Internal invariants (like non-null file paths) are verified before I/O.
+2. **UI Feedback**: Uses the `Ui` class to provide color-coded feedback (Red for data loss, Yellow for redundancy) if a file is tampered with.
+3. **Directory Auto-Creation**: Uses `mkdirs()` to create the `data/` directory if it is missing, preventing `IOException`.
+4. **Graceful Skip**: The use of `continue` ensures a single corrupted line does not prevent the rest of the valid data from loading.
 
 #### Design Considerations
 
 **Aspect: Saving Strategy**
 
-* **Alternative 1 (Current Implementation): Eager Saving (Save on every loop)**
-    * **Description:** Inside `GoldenCompass.run()`, the application saves data to all three text files after every single command execution.
-    * **Pros:** Maximum data safety. If the user unexpectedly closes the terminal, experiences a power outage, or encounters a fatal runtime exception, no data is lost because the disk is always synchronized with the RAM.
-    * **Cons:** Higher disk I/O overhead, as the application rewrites the entire file even if a command didn't actually change any data (e.g., after a `list` command).
+* **Alternative 1 (Current Implementation): Eager Saving**
+    * **Pros**: Maximum data safety. Disk is always synchronized. Automatically cleans corrupted lines.
+    * **Cons**: Higher disk I/O overhead.
 
-* **Alternative 2: Lazy Saving (Save on exit)**
-    * **Description:** The `save()` methods are only called once when the user types the `bye` command.
-    * **Pros:** Better performance due to minimized file I/O operations.
-    * **Cons:** High risk of data loss. If the application terminates abnormally, all progress made during that session is wiped out.
+**Aspect: Date Strictness**
 
-**Aspect: Relational Data Mapping (Interviews to Internships)**
-
-* **Alternative 1 (Current Implementation): Composite Key Reference (Company Name + Role)**
-    * **Description:** `InterviewStorage` saves both the Company Name and Role alongside the interview date. Upon loading, it searches the previously loaded `InternshipList` for an exact match of *both* fields (`findInternshipByCompanyAndRole`) to rebuild the object reference in memory.
-    * **Pros:** Prevents data duplication while accurately mapping interviews even when a user applies to multiple distinct roles at the exact same company. Keeps `interviews.txt` clean and adheres to the Single Source of Truth principle.
-    * **Cons:** Requires `InternshipList` to be fully loaded *before* `InterviewList` can be loaded.
-
-* **Alternative 2: Deep Copy Storage**
-    * **Description:** `InterviewStorage` saves all details of the parent `Internship` alongside the interview date.
-    * **Pros:** Easier to parse since `InterviewStorage` wouldn't need access to `InternshipList`.
-    * **Cons:** Violates the DRY (Don't Repeat Yourself) principle. If an internship status is updated, it would have to be updated in both files.
+* **Alternative 1 (Current Implementation): Strict Parsing (No Nulls)**
+    * **Description**: Every interview must have a valid date to exist in the system.
+    * **Pros**: Prevents `NullPointerException` and ensures the chronological sorting logic (`nullsLast`) is strictly for runtime use rather than storage placeholders.
+    * **Cons**: Users cannot manually add an interview to the text file without a confirmed date.
 
 #### Test Coverage
 
-The storage components are covered by unit tests to ensure file I/O reliability:
-
 | Test Case                            | Description                                                 | Expected Outcome |
 |--------------------------------------|-------------------------------------------------------------|------------------|
-| `save_validList_writesCorrectly`     | Save a list with one item, then read the file manually      | File contains the exact formatted string |
-| `save_multipleRoles_mapsCorrectly`   | Save two interviews for different roles at the same company | Both interviews are independently linked to the correct roles |
+| `load_corruptedFile_reportsError` | Load a line with missing columns                            | UI prints error, line skipped |
+| `load_invalidDate_skipsEntry`        | Load interview with date `null` or `gibberish`              | UI prints error, interview NOT added to list |
+| `load_duplicateEntry_warnsUser`      | Load file with two identical interview lines                | UI prints warning, redundant line cleaned on save |
 | `load_missingFile_returnsEmptyList`  | Attempt to load when `data/` does not exist                 | Returns empty list, creates directory |
-| `load_corruptedFile_skipsLines` | Load a file with missing delimiters                         | Skips bad lines, loads valid lines |
-| `load_invalidDate_handlesGracefully` | Load interview with date `abc`                              | Interview loaded, date remains null |
+
+
 
 ## Product scope
 ### Target user profile

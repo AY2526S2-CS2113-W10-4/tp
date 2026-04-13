@@ -387,16 +387,18 @@ Your internship applications are saved in the following format:
     * *Example:* If you receive an offer from Grab, the saved file updates to `Software Engineer | Grab | OFFER`. If you eventually decide to decline it and use the `reject` command, that exact line updates to `Software Engineer | Grab | REJECTED`.
 * **Deleting Data:** If you remove an internship using the `delete` or `clear-rejected` commands, that specific application is completely erased from the text file.
 
-**2. Interview Data (`data/interviews.txt`)**
+### 2. Interview Data (`data/interviews.txt`)
+
 Your scheduled interviews are saved in the following format:
 `COMPANY_NAME | ROLE | DATE_AND_TIME`
 
-* **Date Format:** The date and time are saved in the standard ISO-8601 format (e.g., `2026-08-07T16:00`), where the `T` acts as a standard separator between the calendar date and the clock time. If an interview has no date set yet, it will be safely saved as `null` and displayed as "No date set" in the app.
-* **Automatic Sorting:** The application automatically sorts your interviews chronologically. The interview happening the soonest will always be stored and displayed at the top of the list. Any interviews marked as `null` ("No date set") are automatically sorted to the very bottom.
+* **Date Format:** The date and time are saved in the standard ISO-8601 format (e.g., `2026-08-07T16:00`).
+* **Strict Data Validation:** Every interview must have a valid date.
+    * **Corrupted Dates:** If the date field is missing, written as `null`, or formatted incorrectly, the application will display an **Error** message and skip loading that specific interview to prevent system crashes.
+    * **Duplicate Entries:** If the interviews.txt file contains multiple entries for the same internship role, the application will display a **Warning**. Only the first valid entry is loaded; redundant duplicates are automatically cleaned (deleted) from the text file the next time the application saves.
+* **Automatic Sorting:** The application automatically sorts your interviews chronologically. The interview happening the soonest will always be stored and displayed at the top of the list.
 * **Updating Dates:** If you use the `update-date` command to reschedule an interview, the new date and time will overwrite the old one on the exact same line. It will not create a new or duplicate entry.
-    * *Example:* If your file shows `Grab | Software Engineer | 2026-08-07T16:00` and you postpone the interview to the next day, the line updates directly to `Grab | Software Engineer | 2026-08-08T16:00`.
 * **Deleting Data:** If you cancel an interview using the `delete-interview` command, that specific interview entry is completely erased from the text file.
-
 **3. Alias Data (`data/aliases.txt`)**
 Your custom command shortcuts are saved in the following format:
 `ALIAS | ORIGINAL_COMMAND`
