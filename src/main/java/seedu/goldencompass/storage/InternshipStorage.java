@@ -21,15 +21,11 @@ public class InternshipStorage {
         this.filePath = filePath;
     }
 
-    /**
-     * Saves the current list of internships to the hard drive.
-     */
     public void save(InternshipList internshipList) {
         try {
             File f = new File(filePath);
-            File parentDir = f.getParentFile(); // Safely extract the parent directory
+            File parentDir = f.getParentFile();
 
-            // Only try to create the folder if a folder was actually specified in the path
             if (parentDir != null && !parentDir.exists()) {
                 parentDir.mkdirs();
             }
@@ -52,10 +48,6 @@ public class InternshipStorage {
         }
     }
 
-    /**
-     * Loads the internships from the text file into an ArrayList.
-     * Prevents duplicates, handles legacy formats, and skips corrupted lines.
-     */
     public ArrayList<Internship> load() {
         ArrayList<Internship> loadedList = new ArrayList<>();
         File f = new File(filePath);
@@ -75,8 +67,7 @@ public class InternshipStorage {
 
                 String[] parts = line.split("\\s*\\|\\s*");
 
-                // 1. Strict length check (supports legacy 2-column format)
-                if (parts.length < 2) {
+                if (parts.length != 3) {
                     errorLog.append("Error: Corrupted format in internships.txt. Skipping: [")
                             .append(line).append("]\n");
                     continue;
@@ -84,15 +75,16 @@ public class InternshipStorage {
 
                 String title = parts[0].trim();
                 String company = parts[1].trim();
+                String status = parts[2].trim().toUpperCase();
 
-                // 2. Strict length validation (Must be at least 2 characters)
+                // Check for strings less than 2 characters
                 if (title.length() < 2 || company.length() < 2) {
                     errorLog.append("Error: Title or company name too short (must be >= 2 chars). Skipping: [")
                             .append(line).append("]\n");
                     continue;
                 }
 
-                // 3. Duplicate Check: Prevent crashes from manual file edits
+                // Duplicate Check
                 boolean isDuplicate = false;
                 for (Internship existing : loadedList) {
                     if (existing.getTitle().equals(title) && existing.getCompanyName().equals(company)) {
@@ -107,11 +99,7 @@ public class InternshipStorage {
                     continue;
                 }
 
-                // 4. Create the internship
                 Internship loadedInternship = new Internship(title, company);
-
-                // 5. Update the status (Defaults to PENDING for legacy files)
-                String status = (parts.length >= 3) ? parts[2].trim().toUpperCase() : "PENDING";
 
                 switch (status) {
                 case "OFFER":
@@ -134,7 +122,6 @@ public class InternshipStorage {
             logger.log(Level.WARNING, "Could not load internships from " + filePath);
         }
 
-        // 6. Print all errors and warnings at once to the UI
         if (errorLog.length() > 0) {
             new Ui().print(errorLog.toString().trim());
         }

@@ -60,22 +60,6 @@ public class InternshipStorageTest {
     }
 
     @Test
-    public void load_legacyTwoColumnFormat_loadsAsPending() throws IOException {
-        File testFile = new File(TEST_FILE_PATH);
-        FileWriter fw = new FileWriter(testFile);
-        fw.write("Old Role | Old Company\n");
-        fw.close();
-
-        ArrayList<Internship> loadedList = internshipStorage.load();
-
-        assertEquals(1, loadedList.size());
-        assertEquals("Old Role", loadedList.get(0).getTitle());
-        assertEquals("Old Company", loadedList.get(0).getCompanyName());
-        assertFalse(loadedList.get(0).hasOffer());
-        assertFalse(loadedList.get(0).isRejected());
-    }
-
-    @Test
     public void load_emptyFile_returnsEmptyList() {
         internshipStorage.save(internshipList);
         ArrayList<Internship> loadedList = internshipStorage.load();
@@ -88,14 +72,14 @@ public class InternshipStorageTest {
         testFile.createNewFile();
         FileWriter fw = new FileWriter(testFile);
         fw.write("Valid Title | Valid Company | OFFER\n");
-        fw.write("Corrupted line with no pipes\n"); // Skipped: No delimiters
-        fw.write("A | B | PENDING\n"); // ✨ Skipped: Strings less than 2 characters
+        fw.write("Old Role | Old Company\n"); // ✨ Skipped: Only 2 parts (Legacy no longer supported)
+        fw.write("A | B | PENDING\n"); // Skipped: Strings less than 2 characters
         fw.write("Another Title | Another Company | REJECTED\n");
         fw.close();
 
         ArrayList<Internship> loadedList = internshipStorage.load();
 
-        assertEquals(2, loadedList.size(), "Should have skipped the corrupted and short lines");
+        assertEquals(2, loadedList.size(), "Should have skipped the corrupted, legacy, and short lines");
         assertTrue(loadedList.get(0).hasOffer());
         assertTrue(loadedList.get(1).isRejected());
     }
@@ -106,7 +90,7 @@ public class InternshipStorageTest {
         testFile.createNewFile();
         FileWriter fw = new FileWriter(testFile);
         fw.write("Software Engineer | Google | PENDING\n");
-        fw.write("Software Engineer | Google | OFFER\n"); // ✨ Duplicate, should be skipped
+        fw.write("Software Engineer | Google | OFFER\n"); // Duplicate, should be skipped
         fw.close();
 
         ArrayList<Internship> loadedList = internshipStorage.load();
@@ -121,7 +105,6 @@ public class InternshipStorageTest {
         File testFile = new File(TEST_FILE_PATH);
         testFile.createNewFile();
         FileWriter fw = new FileWriter(testFile);
-        // ✨ No spaces around the pipes, testing our new regex logic
         fw.write("Backend Dev|Netflix|OFFER\n");
         fw.close();
 
