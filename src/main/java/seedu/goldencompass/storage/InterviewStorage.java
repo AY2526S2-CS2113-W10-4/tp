@@ -4,6 +4,7 @@ import seedu.goldencompass.internship.Interview;
 import seedu.goldencompass.internship.InterviewList;
 import seedu.goldencompass.internship.Internship;
 import seedu.goldencompass.internship.InternshipList;
+import seedu.goldencompass.ui.Ui;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -50,6 +51,9 @@ public class InterviewStorage {
     /**
      * Loads interviews and reconnects them to existing internships in the list.
      */
+    /**
+     * Loads interviews and reconnects them to existing internships in the list.
+     */
     public void load(InterviewList interviewList, InternshipList internshipList) {
         File f = new File(filePath);
         if (!f.exists()) {
@@ -62,6 +66,7 @@ public class InterviewStorage {
                 String[] parts = line.split(" \\| ");
 
                 if (parts.length < 3) {
+                    new Ui().print("Error: Corrupted format in interviews.txt. Skipping line: [" + line + "]");
                     continue;
                 }
 
@@ -72,14 +77,30 @@ public class InterviewStorage {
                 Internship linkedInternship = internshipList.findInternshipByCompanyAndRole(companyName, role);
 
                 if (linkedInternship != null) {
-                    Interview interview = new Interview(linkedInternship);
-                    if (!dateStr.equals("null")) {
-                        try {
-                            interview.setDate(LocalDateTime.parse(dateStr));
-                        } catch (DateTimeParseException e) {
-                            logger.warning("Invalid date format for: " + companyName);
+                    LocalDateTime parsedDate;
+                    try {
+                        parsedDate = LocalDateTime.parse(dateStr);
+                    } catch (DateTimeParseException e) {
+                        new Ui().print("Error: Date is corrupted ('" + dateStr + "') for " + companyName + " (" + role + "). Skipping this interview.");
+                        logger.warning("Invalid date format: " + dateStr + " for company: " + companyName);
+                        continue;
+                    }
+
+                    boolean isDuplicate = false;
+                    for (Interview existing : interviewList.getInterviews()) {
+                        if (existing.getInternship().equals(linkedInternship)) {
+                            isDuplicate = true;
+                            break;
                         }
                     }
+
+                    if (isDuplicate) {
+                        new Ui().print("Warning: Duplicate interview for " + companyName + " (" + role + ") skipped and will be cleaned.");
+                        continue;
+                    }
+
+                    Interview interview = new Interview(linkedInternship);
+                    interview.setDate(parsedDate);
                     interviewList.add(interview);
                 }
             }
