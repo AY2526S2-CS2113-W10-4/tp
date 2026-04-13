@@ -16,7 +16,7 @@ CS2113 Course Website: For providing the guidelines on software engineering prin
 
 ### Architecture
 
-![Architecture](diagrams/Architecture-GoldenCompass.png)
+![Architecture](diagrams/Architecture.png)
 
 ### Parser component
 
@@ -114,7 +114,7 @@ of `flagToParamMap`. Thus, it is recommended to call the method `isFlagExist()` 
 in the user input. If it returns `false`, then the execution of a command should skip or throw a 
 `GoldenCompassException` depending on whether the flag is essential for the command.
 
-Below is the sequence diagram illustrating the `class Parser`:
+Below is the sequence diagram illustrating the methods of `Parser`:
 
 ![Parser Sequence Diagram](diagrams/ParserSequenceDiagram.png)
 
