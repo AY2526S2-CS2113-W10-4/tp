@@ -141,8 +141,8 @@ Format: `add-interview INDEX /d DATE`
 - Use `add-interview /help` to see usage information.
 
 Examples:
-- `add-interview 1 /d 2025-06-15 10:00`
-- `add-interview 3 /d 2025-07-01 14:30`
+- `add-interview 1 /d 2027-06-15 10:00`
+- `add-interview 3 /d 2027-07-01 14:30`
 
 ### Updating interview date: `update-date`
 
@@ -161,8 +161,8 @@ Format: `update-date INDEX /d DATE`
 - Use `update-date /help` to see usage information.
 
 Examples:
-- `update-date 1 /d 2025-06-20 09:00`
-- `update-date 2 /d 2025-08-01 15:00`
+- `update-date 1 /d 2027-06-20 09:00`
+- `update-date 2 /d 2027-08-01 15:00`
 
 ### Listing all internships: `list`
 

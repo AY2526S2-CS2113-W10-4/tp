@@ -870,8 +870,8 @@ and a date-time in `yyyy-MM-dd HH:mm` format.
 
 **Command format:** `update-date INDEX /d DATE`
 
-**Example:** `update-date 1 /d 2025-04-15 14:00` sets the date of the 1st interview to
-April 15, 2025 at 14:00.
+**Example:** `update-date 1 /d 2027-04-15 14:00` sets the date of the 1st interview to
+April 15, 2027 at 14:00.
 
 #### Implementation
 
@@ -887,16 +887,14 @@ When `execute()` is called, it performs the following steps:
    The time is in 24-hour format (`HH` is `00`–`23`), and impossible calendar dates such
    as `2026-02-30` or `2026-13-01` are rejected instead of being silently adjusted.
 6. Rejects dates that are in the past.
-7. Retrieves the `Interview` directly from `InterviewList` at the 0-based position
-   `(index - 1)`. This matches the ordering shown by `list-interview`, so the index the
-   user sees always refers to the same interview.
-8. Calls `interview.setDate(date)` to update the date-time.
-9. Re-sorts the underlying `InterviewList` by date so subsequent `list-interview` calls
-   remain in ascending date order after the mutation.
-10. Prints a confirmation message to the user.
+7. Calls `interviewList.setDateFor(index - 1, date)`, which retrieves the `Interview`
+   at the 0-based position `(index - 1)`, updates its date-time, and re-sorts the
+   backing list by date — keeping the ordering consistent with what `list-interview`
+   displays.
+8. Prints a confirmation message to the user.
 
 The following sequence diagram illustrates the execution flow when the user enters
-`update-date 1 /d 2025-04-15 14:00`:
+`update-date 1 /d 2027-04-15 14:00`:
 
 ![Set Deadline Sequence Diagram](diagrams/SetDeadlineSequenceDiagram.png)
 
