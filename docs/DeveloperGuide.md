@@ -7,7 +7,7 @@
   - [Parser](#the-parser-component)
   - [Executor & Command](#the-executor--command-component)
   - [Storage](#the-storage-component)
-- [Implementation](#implementation)
+- [Implementation](#implementation-1)
   - [Internship Management Overview](#internship-management--class-overview)
   - [Add internship feature](#add-internship-feature)
   - [List internships](#list-command)
@@ -31,6 +31,7 @@
 - [Non-Functional Requirements](#non-functional-requirements)
 - [Glossary](#glossary)
 - [Instructions for Manual Testing](#instructions-for-manual-testing)
+
 ---
 
 
@@ -1670,7 +1671,7 @@ or memory, which can become disorganized and error-prone as the number of applic
 * *Flag* - A command parameter prefix starting with `/` (e.g., `/d`, `/c`, `/t`).
 * *Index* - A 1-based position number referring to an item in the displayed list.
 
-## Instructions for manual testing
+## Instructions for Manual Testing
 
 ### Adding an internship
 
