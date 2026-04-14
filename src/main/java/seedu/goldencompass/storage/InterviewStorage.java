@@ -65,7 +65,7 @@ public class InterviewStorage {
                 String[] parts = line.split(" \\| ");
 
                 if (parts.length < 3) {
-                    errorLog.append("Error: Corrupted format in interviews.txt. Skipping: [")
+                    errorLog.append("Warning: Corrupted format in interviews.txt. Skipping and cleaning: [")
                             .append(line).append("]\n");
                     continue;
                 }
@@ -90,14 +90,14 @@ public class InterviewStorage {
                         interview.setDate(parsedDate);
                         interviewList.add(interview);
                     } catch (DateTimeParseException e) {
-                        errorLog.append("Error: Date corrupted ('").append(dateStr)
+                        errorLog.append("Warning: Date corrupted ('").append(dateStr)
                                 .append("') for ").append(companyName)
-                                .append(" (").append(role).append("). Skipping.\n");
+                                .append(" (").append(role).append("). Skipping and cleaning.\n");
                     }
                 } else {
-                    errorLog.append("Error: No matching internship found for ")
+                    errorLog.append("Warning: No matching internship found for ")
                             .append(companyName).append(" (").append(role)
-                            .append("). Skipping interview.\n");
+                            .append("). Skipping and cleaning interview.\n");
                 }
             }
         } catch (IOException e) {
