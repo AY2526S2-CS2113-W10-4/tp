@@ -7,7 +7,7 @@
   - [Parser](#the-parser-component)
   - [Executor & Command](#the-executor--command-component)
   - [Storage](#the-storage-component)
-- [Implementation](#implementation)
+- [Implementation](#implementation-1)
   - [Internship Management Overview](#internship-management--class-overview)
   - [Add internship feature](#add-internship-feature)
   - [List internships](#list-command)
