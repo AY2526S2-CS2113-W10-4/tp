@@ -860,7 +860,7 @@ logger.log(Level.WARNING, "Failed to add interview: internship already has an in
 | `execute_invalidMonth_exceptionThrown` | Use `2099-13-09 10:00` (month out of range) | Throws with "is not a valid date" |
 | `execute_dayOutOfRangeForMonth_exceptionThrown` | Use `2099-04-31 10:00` (April has 30 days) | Throws with "is not a valid date" |
 
-### Update Interview Date Feature
+### Update Interview Date
 
 #### Overview
 
