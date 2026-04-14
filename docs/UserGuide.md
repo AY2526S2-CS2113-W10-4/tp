@@ -449,7 +449,7 @@ GoldenCompass features a robust, self-healing storage system to protect your dat
 2. **Duplicate Prevention:** If you accidentally paste the same data multiple times, the system will detect the duplicate, load only the first instance, and ignore the rest.
 3. **Ghost Link Protection:** If an interview is listed in `interviews.txt`, but the corresponding internship no longer exists in `internships.txt`, the "ghost" interview will be safely skipped.
 4. **Validation Check:** Any custom aliases manually entered that point to invalid commands will be blocked from loading.
-5. **Auto-Cleaning:** Any corrupted lines, duplicates, or invalid entries detected during startup will trigger a warning message detailing the exact errors. The system will then **automatically clean and overwrite** the text file to restore it to a healthy state.
+5. **Auto-Cleaning:** Any corrupted lines, duplicates, or invalid entries detected during startup will trigger a warning message detailing the exact errors. The system will then **automatically clean and overwrite** the text file to restore it to a healthy state. However, the sanitized data is only saved back to the text file after you execute your first active command (e.g., `list`, `add`). If you launch the application and immediately exit using the `bye` command without doing anything else, the text file on your hard drive will remain uncleaned until your next active session.
 
 ## FAQ
 
