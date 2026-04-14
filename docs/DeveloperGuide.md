@@ -1,5 +1,39 @@
 # GoldenCompass Developer Guide
 
+## Table of Contents
+- [Acknowledgements](#acknowledgements)
+- [Design](#design)
+  - [Architecture](#architecture)
+  - [Parser](#the-parser-component)
+  - [Executor & Command](#the-executor--command-component)
+  - [Storage](#the-storage-component)
+- [Implementation](#implementation)
+  - [Internship Management Overview](#internship-management--class-overview)
+  - [Add internship feature](#add-internship-feature)
+  - [List internships](#list-command)
+  - [Search internships](#search-internship-command)
+  - [Delete Internship Command](#delete-internship-command)
+  - [Interview Management Overview](#interview-management--class-overview)
+  - [Add interview feature](#add-interview-feature)
+  - [Update interview date](#update-interview-date-feature)
+  - [Search interviews](#search-interview-feature)
+  - [List all interviews](#list-all-interviews)
+  - [List upcoming interviews](#list-upcoming-interviews)
+  - [Delete interview command](#delete-interview-command)
+  - [Mark Offer Command](#mark-offer-command)
+  - [Reject Offer Command](#reject-offer-command)
+  - [Clear Rejected Feature](#clear-rejected-feature)
+  - [Alias](#alias)
+  - [Data History](#data-history)
+  - [Feature Enhancements](#future-enhancements)
+- [Product Scope](#product-scope)
+- [User Stories](#user-stories)
+- [Non-Functional Requirements](#non-functional-requirements)
+- [Glossary](#glossary)
+- [Instructions for Manual Testing](#instructions-for-manual-testing)
+---
+
+
 ## Acknowledgements
 Our project, GoldenCompass, was built upon and inspired by several open-source projects, libraries, and resources. We would like to acknowledge the following:
 
@@ -18,7 +52,7 @@ CS2113 Course Website: For providing the guidelines on software engineering prin
 
 ![Architecture](diagrams/Architecture.png)
 
-### Parser component
+### The Parser Component
 
 The class `Parser` has an immutable class-level attribute `Set<String> FLAGSET` and
 two mutable private attributes `String command, Map<String, List<String>> flagToParamMap`.
@@ -118,9 +152,122 @@ Below is the sequence diagram illustrating the methods of `Parser`:
 
 ![Parser Sequence Diagram](diagrams/ParserSequenceDiagram.png)
 
-### Executor & Command component
+### The Executor & Command Component
 
 ![Executor and Command Class Diagram](diagrams/ExecutorClassDiagram.png)
+
+### The Storage Component
+
+#### Overview
+
+The Storage component is responsible for persisting user data across application sessions. It reads data from the local hard drive when GoldenCompass boots up and continuously writes data back to the disk during execution. To maintain the Single Responsibility Principle and implement robust **Self-Healing Data** architecture, the component is divided into three distinct classes:
+* `InternshipStorage`: Manages the saving and loading of `Internship` objects.
+* `InterviewStorage`: Manages `Interview` schedules and links them to existing internships.
+* `AliasStorage`: Manages user-defined command shortcuts and integrates with the command `Executor` for validation.
+
+#### Implementation
+
+The storage system is initialized inside the `GoldenCompass` main class.
+
+**Loading Data (Application Startup):**
+When the application starts, data is loaded in a strict sequence to resolve dependencies and sanitize inputs:
+1. `InternshipStorage.load()` is called first. It reads `data/internships.txt` line by line and parses strings using a flexible regex delimiter (`\\s*\\|\\s*`). It strictly enforces a 3-column format and skips duplicates or ghost entries (strings `< 2` characters).
+2. The parser evaluates the third column (status) using a `switch` statement:
+    - `case "OFFER"`: Calls `loadedInternship.markAsOffer()`.
+    - `case "REJECTED"`: Calls `loadedInternship.markAsRejected()`.
+    - `case "PENDING"`: Leaves the internship in its default initialization state.
+    - `default`: Defaults to `PENDING` and logs a warning to the UI for unknown statuses.
+3. `InterviewStorage.load()` is called next. It extracts the company name and role, and uses the composite key search `internshipList.findInternshipByCompanyAndRole(companyName, role)` to accurately link the newly loaded `Interview` back to its exact parent `Internship` object in memory. "Ghost" interviews with no matching internship are safely discarded.
+4. `AliasStorage.load(Executor executor)` is called last. Instead of blindly loading data, it delegates validation to the `Executor` via `executor.addAlias()`. If the executor throws a `GoldenCompassException` (e.g., trying to alias a non-existent command), the alias is rejected.
+
+**Saving Data (Execution Loop & Auto-Cleanup):**
+GoldenCompass utilizes an **Eager Saving Strategy**. Inside the main `while (true)` loop in `GoldenCompass.run()`, the application calls the `save()` method immediately after every user command is executed. Additionally, if the `Storage` classes detect corrupted lines during the initial `load()` phase, they flag the file for **Auto-Cleanup**, immediately calling `save()` to overwrite the file with the sanitized memory state, thus deleting the corrupted text.
+
+#### Data Formats
+
+Data is stored in custom-delimited text files. The delimiter is a pipe `|` surrounded by optional spaces. This format was chosen because it is simple to parse and remains highly readable if the user opens the file in a standard text editor.
+
+**1. Internships (`data/internships.txt`)**
+Format: `TITLE | COMPANY | STATUS`
+* The `STATUS` column strictly maps to the application's internal state logic (`PENDING`, `OFFER`, or `REJECTED`).
+* Example: `Software Engineer | Google | OFFER`
+* Example: `Frontend Intern | Grab | PENDING`
+
+**2. Interviews (`data/interviews.txt`)**
+Format: `COMPANY | TITLE | ISO_LOCAL_DATE_TIME`
+* Example: `Google | Software Engineer | 2026-03-25T14:30:00`
+
+**3. Aliases (`data/aliases.txt`)**
+Format: `ALIAS | COMMAND`
+* Example: `ls | list`
+* Example: `mk | mark`
+
+The following class diagram shows the main structural components involved in the Storage feature:
+
+![Storage Class Diagram](diagrams/StorageClassDiagram.png)
+
+The following sequence diagram illustrates the execution flow of the eager saving mechanism during the main application loop:
+
+![Storage Sequence Diagram](diagrams/StorageSequenceDiagram.png)
+
+#### Data Validation
+
+Instead of assuming perfect file integrity, the Storage component implements deep data validation when loading from text files to prevent crashes from manually edited or corrupted files:
+
+| Validation Layer | Description | Handling Strategy |
+|-----------------|-------------|-------------------|
+| **Regex Delimiter Check** | Uses `split("\\s*\\|\\s*")` to tolerate user spacing errors (e.g., `A|B` vs `A | B`). | Correctly splits values regardless of adjacent whitespace. |
+| **Strict Format Length** | Verifies a line splits into exactly the required number of parts (e.g., 3 for internships). | Skips the line and appends a warning to the UI error log. |
+| **Ghost/Short String Check** | Ensures parsed titles and company names are `>= 2` characters. | Skips the line to prevent creating empty "ghost" entries. |
+| **Duplicate Sweeping** | Scans the currently loaded list to verify the `Company + Role` combo doesn't already exist. | Keeps the first instance, skips subsequent duplicates, and logs a warning. |
+| **Command Validation** | `AliasStorage` attempts to add the alias via the `Executor`. | Catches `GoldenCompassException` for invalid commands and skips the alias. |
+
+#### Defensive Programming Features
+
+The implementation includes several defensive programming measures:
+
+**1. UI Error Aggregation**: Instead of spamming the console with disjointed warnings, load errors are collected in a `StringBuilder` and passed to the `Ui` component as a single, formatted warning block, improving user experience.
+**2. Null-Safe Directory Auto-Creation**: The system proactively checks if the `data/` folder exists using `File#getParentFile()`. It includes a strict null-check (`parentDir != null && !parentDir.exists()`) before calling `mkdirs()` to prevent `NullPointerException` across different OS file-system roots.
+**3. Assertions**: Verify internal state invariants before executing I/O operations (e.g., `assert filePath != null : "File path cannot be null"`).
+**4. Graceful Date Handling**: Malformed ISO-8601 dates in `interviews.txt` are caught via `DateTimeParseException` and safely discarded without interrupting the overall loading sequence.
+
+#### Design Considerations
+
+**Aspect: Handling Corrupted File Data (Self-Healing vs. Abort)**
+
+* **Alternative 1 (Current Implementation): Self-Healing & Aggregated Reporting**
+    * **Description:** The parser skips corrupted lines, loads valid lines, aggregates error messages to show the user, and immediately overwrites the corrupted file with the sanitized state (`requiresCleanup` flag).
+    * **Pros:** Exceptionally robust. The application never crashes due to bad data, the user is informed of exactly what was skipped, and the corrupted file is automatically fixed.
+    * **Cons:** Slightly more complex loader logic.
+
+* **Alternative 2: Silent Deletion**
+    * **Description:** Skip corrupted lines without informing the user.
+    * **Pros:** Simple code.
+    * **Cons:** Bad UX. The user might make a typo in `aliases.txt` and wonder why their command isn't working, not realizing the application silently deleted it.
+
+* **Alternative 3: Strict Abort**
+    * **Description:** Throw a fatal exception and refuse to start the app if any line is corrupted.
+    * **Pros:** Ensures 100% data integrity.
+    * **Cons:** Unacceptable for a consumer-facing app. One accidental keystroke in a `.txt` file shouldn't permanently brick the application.
+
+**Aspect: Relational Data Mapping (Interviews to Internships)**
+
+* **Alternative 1 (Current Implementation): Composite Key Reference**
+    * **Description:** `InterviewStorage` saves both Company Name and Role. Upon loading, it searches the previously loaded `InternshipList` for an exact match (`findInternshipByCompanyAndRole`) to rebuild the object reference in memory.
+    * **Pros:** Prevents data duplication while accurately mapping interviews even when a user applies to multiple distinct roles at the exact same company. Adheres to the Single Source of Truth principle.
+    * **Cons:** Requires `InternshipList` to be fully loaded *before* `InterviewList` can be loaded.
+
+#### Test Coverage
+
+The storage components are covered by extensive unit tests to ensure file I/O reliability against edge cases:
+
+| Test Case                            | Description                                                 | Expected Outcome |
+|--------------------------------------|-------------------------------------------------------------|------------------|
+| `load_corruptedAndShortLines_skipsInvalidEntries` | Load file with missing delimiters and strings < 2 chars | Skips invalid lines, loads valid lines |
+| `load_duplicateEntries_keepsFirstAndSkipsRest` | Load file with identical `Company + Role` lines manually copy-pasted | Loads the first instance, safely ignores the duplicate |
+| `load_irregularSpacing_parsesCorrectly` | Load file with no spaces around pipes (`A|B|C`) | Regex perfectly parses the data into 3 parts |
+| `load_validAndCorruptedAliases_loadsOnlyValid` | Load alias pointing to a fake command (e.g., `invalid_alias \| fake`) | Executor rejects the bad alias via exception, only valid aliases map |
+| `save_multipleRoles_mapsCorrectly`   | Save two interviews for different roles at the same company | Both interviews are independently linked to the correct roles |
 
 ## Implementation
 
@@ -932,81 +1079,18 @@ logger.log(Level.INFO, "Search found " + results.size() + " result(s).");
 | `execute_invalidDateFormat_exceptionThrown` | Use `not-a-date` for `/d` | Throws `GoldenCompassException` |
 | `execute_emptyList_printsNoResults` | Search on empty interview list | Prints "No interviews found" |
 
-### Clear Rejected Feature
+
+### List all interviews
 
 #### Overview
 
-The `clear-rejected` command removes all internships that have been marked as rejected from the
-tracker, along with their associated interviews. This helps users declutter their list by
-removing entries they no longer need to track, while preventing orphaned interview records.
+Lists all interviews in chronological order.
 
-**Command format:** `clear-rejected`
-
-**Example:** `clear-rejected` removes all rejected internships and prints a summary of what was removed.
+**Command format:** `list-interview`.
 
 #### Implementation
 
-The feature is implemented in `ClearRejectedCommand`, which extends `Command`.
-When `execute()` is called, it performs the following steps:
-
-1. Retrieves the full internship list from `InternshipList`.
-2. Filters the list using Java streams to find all internships where `isRejected()` returns `true`.
-3. If no rejected internships are found, prints a message and returns.
-4. For each rejected internship that has an associated interview, deletes the interview
-   from `InterviewList` using `deleteByInternship()`.
-5. Removes all rejected internships from the list using `removeAll()`.
-6. Prints a summary showing how many were cleared and their details.
-
-The following sequence diagram illustrates the execution flow when the user enters
-`clear-rejected`:
-
-![Clear Rejected Sequence Diagram](diagrams/ClearRejectedSequenceDiagram.png)
-
-#### Defensive Programming Features
-
-**1. Assertions**: Verify internal state invariants during execution.
-```java
-assert internshipList != null : "InternshipList should not be null";
-assert interviewList != null : "InterviewList should not be null";
-```
-
-**2. Logging**: Track the number of entries cleared and interview deletions.
-```java
-logger.log(Level.INFO, "Found " + rejected.size() + " rejected internship(s) to clear.");
-logger.log(Level.INFO, "Deleted associated interview for: " + internship.getCompanyName());
-```
-
-#### Design Considerations
-
-**Aspect: Clearing strategy**
-
-- **Alternative 1 (current choice):** Remove all rejected internships at once.
-    - Pros: Simple one-step cleanup. No need for the user to identify individual entries.
-    - Cons: No selective removal — it is all-or-nothing.
-
-- **Alternative 2:** Allow the user to specify which rejected internships to clear.
-    - Pros: More granular control.
-    - Cons: Adds unnecessary complexity — if the user wants to keep a rejected entry,
-      they likely would not have rejected it in the first place.
-
-**Aspect: Handling associated interviews**
-
-- **Alternative 1 (current choice):** Automatically delete associated interviews when clearing rejected internships.
-    - Pros: Prevents orphaned interview records. Maintains data consistency without user intervention.
-    - Cons: User cannot keep the interview while removing the internship (unlikely use case).
-
-- **Alternative 2:** Only delete the internship, leave interviews.
-    - Pros: Simpler implementation.
-    - Cons: Orphaned interviews with no parent internship cause confusion and potential errors.
-
-#### Test Coverage
-
-| Test Case | Description | Expected Outcome |
-|-----------|-------------|------------------|
-| `execute_noRejected_printsNoRejected` | Clear with no rejected entries | List unchanged, message printed |
-| `execute_allRejected_clearsAll` | All internships are rejected | List becomes empty |
-| `execute_someRejected_clearsOnlyRejected` | Mix of rejected and non-rejected | Only rejected entries removed |
-| `execute_emptyList_printsNoRejected` | Clear on empty list | No error, message printed |
+The implementation is nothing but a for loop since the list of interviews are always maintained in chronological order.
 
 ### List upcoming interviews
 
@@ -1380,6 +1464,83 @@ The feature is covered by comprehensive unit tests to ensure all edge cases are 
 | `execute_alreadyRejected_throwsException` | Execute `reject 1` on an already rejected internship | Throws `Exception` to prevent duplicate state transition |
 | `execute_hasOffer_marksRejectSuccessfully` | Execute `reject 1` on an internship marked as OFFER | Internship status updates to REJECTED successfully |
 
+### Clear Rejected Feature
+
+#### Overview
+
+The `clear-rejected` command removes all internships that have been marked as rejected from the
+tracker, along with their associated interviews. This helps users declutter their list by
+removing entries they no longer need to track, while preventing orphaned interview records.
+
+**Command format:** `clear-rejected`
+
+**Example:** `clear-rejected` removes all rejected internships and prints a summary of what was removed.
+
+#### Implementation
+
+The feature is implemented in `ClearRejectedCommand`, which extends `Command`.
+When `execute()` is called, it performs the following steps:
+
+1. Retrieves the full internship list from `InternshipList`.
+2. Filters the list using Java streams to find all internships where `isRejected()` returns `true`.
+3. If no rejected internships are found, prints a message and returns.
+4. For each rejected internship that has an associated interview, deletes the interview
+   from `InterviewList` using `deleteByInternship()`.
+5. Removes all rejected internships from the list using `removeAll()`.
+6. Prints a summary showing how many were cleared and their details.
+
+The following sequence diagram illustrates the execution flow when the user enters
+`clear-rejected`:
+
+![Clear Rejected Sequence Diagram](diagrams/ClearRejectedSequenceDiagram.png)
+
+#### Defensive Programming Features
+
+**1. Assertions**: Verify internal state invariants during execution.
+```java
+assert internshipList != null : "InternshipList should not be null";
+assert interviewList != null : "InterviewList should not be null";
+```
+
+**2. Logging**: Track the number of entries cleared and interview deletions.
+```java
+logger.log(Level.INFO, "Found " + rejected.size() + " rejected internship(s) to clear.");
+logger.log(Level.INFO, "Deleted associated interview for: " + internship.getCompanyName());
+```
+
+#### Design Considerations
+
+**Aspect: Clearing strategy**
+
+- **Alternative 1 (current choice):** Remove all rejected internships at once.
+    - Pros: Simple one-step cleanup. No need for the user to identify individual entries.
+    - Cons: No selective removal — it is all-or-nothing.
+
+- **Alternative 2:** Allow the user to specify which rejected internships to clear.
+    - Pros: More granular control.
+    - Cons: Adds unnecessary complexity — if the user wants to keep a rejected entry,
+      they likely would not have rejected it in the first place.
+
+**Aspect: Handling associated interviews**
+
+- **Alternative 1 (current choice):** Automatically delete associated interviews when clearing rejected internships.
+    - Pros: Prevents orphaned interview records. Maintains data consistency without user intervention.
+    - Cons: User cannot keep the interview while removing the internship (unlikely use case).
+
+- **Alternative 2:** Only delete the internship, leave interviews.
+    - Pros: Simpler implementation.
+    - Cons: Orphaned interviews with no parent internship cause confusion and potential errors.
+
+#### Test Coverage
+
+| Test Case | Description | Expected Outcome |
+|-----------|-------------|------------------|
+| `execute_noRejected_printsNoRejected` | Clear with no rejected entries | List unchanged, message printed |
+| `execute_allRejected_clearsAll` | All internships are rejected | List becomes empty |
+| `execute_someRejected_clearsOnlyRejected` | Mix of rejected and non-rejected | Only rejected entries removed |
+| `execute_emptyList_printsNoRejected` | Clear on empty list | No error, message printed |
+
+
 ### Alias
 #### Overview 
 
@@ -1458,118 +1619,7 @@ Potential improvements for future versions:
 4. **Archive feature**: Move deleted internships to an archive instead of permanent deletion
 
 
-### Storage Component
 
-#### Overview
-
-The Storage component is responsible for persisting user data across application sessions. It reads data from the local hard drive when GoldenCompass boots up and continuously writes data back to the disk during execution. To maintain the Single Responsibility Principle and implement robust **Self-Healing Data** architecture, the component is divided into three distinct classes:
-* `InternshipStorage`: Manages the saving and loading of `Internship` objects.
-* `InterviewStorage`: Manages `Interview` schedules and links them to existing internships.
-* `AliasStorage`: Manages user-defined command shortcuts and integrates with the command `Executor` for validation.
-
-#### Implementation
-
-The storage system is initialized inside the `GoldenCompass` main class.
-
-**Loading Data (Application Startup):**
-When the application starts, data is loaded in a strict sequence to resolve dependencies and sanitize inputs:
-1. `InternshipStorage.load()` is called first. It reads `data/internships.txt` line by line and parses strings using a flexible regex delimiter (`\\s*\\|\\s*`). It strictly enforces a 3-column format and skips duplicates or ghost entries (strings `< 2` characters).
-2. The parser evaluates the third column (status) using a `switch` statement:
-    - `case "OFFER"`: Calls `loadedInternship.markAsOffer()`.
-    - `case "REJECTED"`: Calls `loadedInternship.markAsRejected()`.
-    - `case "PENDING"`: Leaves the internship in its default initialization state.
-    - `default`: Defaults to `PENDING` and logs a warning to the UI for unknown statuses.
-3. `InterviewStorage.load()` is called next. It extracts the company name and role, and uses the composite key search `internshipList.findInternshipByCompanyAndRole(companyName, role)` to accurately link the newly loaded `Interview` back to its exact parent `Internship` object in memory. "Ghost" interviews with no matching internship are safely discarded.
-4. `AliasStorage.load(Executor executor)` is called last. Instead of blindly loading data, it delegates validation to the `Executor` via `executor.addAlias()`. If the executor throws a `GoldenCompassException` (e.g., trying to alias a non-existent command), the alias is rejected.
-
-**Saving Data (Execution Loop & Auto-Cleanup):**
-GoldenCompass utilizes an **Eager Saving Strategy**. Inside the main `while (true)` loop in `GoldenCompass.run()`, the application calls the `save()` method immediately after every user command is executed. Additionally, if the `Storage` classes detect corrupted lines during the initial `load()` phase, they flag the file for **Auto-Cleanup**, immediately calling `save()` to overwrite the file with the sanitized memory state, thus deleting the corrupted text.
-
-#### Data Formats
-
-Data is stored in custom-delimited text files. The delimiter is a pipe `|` surrounded by optional spaces. This format was chosen because it is simple to parse and remains highly readable if the user opens the file in a standard text editor.
-
-**1. Internships (`data/internships.txt`)**
-Format: `TITLE | COMPANY | STATUS`
-* The `STATUS` column strictly maps to the application's internal state logic (`PENDING`, `OFFER`, or `REJECTED`).
-* Example: `Software Engineer | Google | OFFER`
-* Example: `Frontend Intern | Grab | PENDING`
-
-**2. Interviews (`data/interviews.txt`)**
-Format: `COMPANY | TITLE | ISO_LOCAL_DATE_TIME`
-* Example: `Google | Software Engineer | 2026-03-25T14:30:00`
-
-**3. Aliases (`data/aliases.txt`)**
-Format: `ALIAS | COMMAND`
-* Example: `ls | list`
-* Example: `mk | mark`
-
-The following class diagram shows the main structural components involved in the Storage feature:
-
-![Storage Class Diagram](diagrams/StorageClassDiagram.png)
-
-The following sequence diagram illustrates the execution flow of the eager saving mechanism during the main application loop:
-
-![Storage Sequence Diagram](diagrams/StorageSequenceDiagram.png)
-
-#### Data Validation
-
-Instead of assuming perfect file integrity, the Storage component implements deep data validation when loading from text files to prevent crashes from manually edited or corrupted files:
-
-| Validation Layer | Description | Handling Strategy |
-|-----------------|-------------|-------------------|
-| **Regex Delimiter Check** | Uses `split("\\s*\\|\\s*")` to tolerate user spacing errors (e.g., `A|B` vs `A | B`). | Correctly splits values regardless of adjacent whitespace. |
-| **Strict Format Length** | Verifies a line splits into exactly the required number of parts (e.g., 3 for internships). | Skips the line and appends a warning to the UI error log. |
-| **Ghost/Short String Check** | Ensures parsed titles and company names are `>= 2` characters. | Skips the line to prevent creating empty "ghost" entries. |
-| **Duplicate Sweeping** | Scans the currently loaded list to verify the `Company + Role` combo doesn't already exist. | Keeps the first instance, skips subsequent duplicates, and logs a warning. |
-| **Command Validation** | `AliasStorage` attempts to add the alias via the `Executor`. | Catches `GoldenCompassException` for invalid commands and skips the alias. |
-
-#### Defensive Programming Features
-
-The implementation includes several defensive programming measures:
-
-**1. UI Error Aggregation**: Instead of spamming the console with disjointed warnings, load errors are collected in a `StringBuilder` and passed to the `Ui` component as a single, formatted warning block, improving user experience.
-**2. Null-Safe Directory Auto-Creation**: The system proactively checks if the `data/` folder exists using `File#getParentFile()`. It includes a strict null-check (`parentDir != null && !parentDir.exists()`) before calling `mkdirs()` to prevent `NullPointerException` across different OS file-system roots.
-**3. Assertions**: Verify internal state invariants before executing I/O operations (e.g., `assert filePath != null : "File path cannot be null"`).
-**4. Graceful Date Handling**: Malformed ISO-8601 dates in `interviews.txt` are caught via `DateTimeParseException` and safely discarded without interrupting the overall loading sequence.
-
-#### Design Considerations
-
-**Aspect: Handling Corrupted File Data (Self-Healing vs. Abort)**
-
-* **Alternative 1 (Current Implementation): Self-Healing & Aggregated Reporting**
-    * **Description:** The parser skips corrupted lines, loads valid lines, aggregates error messages to show the user, and immediately overwrites the corrupted file with the sanitized state (`requiresCleanup` flag).
-    * **Pros:** Exceptionally robust. The application never crashes due to bad data, the user is informed of exactly what was skipped, and the corrupted file is automatically fixed.
-    * **Cons:** Slightly more complex loader logic.
-
-* **Alternative 2: Silent Deletion**
-    * **Description:** Skip corrupted lines without informing the user.
-    * **Pros:** Simple code.
-    * **Cons:** Bad UX. The user might make a typo in `aliases.txt` and wonder why their command isn't working, not realizing the application silently deleted it.
-
-* **Alternative 3: Strict Abort**
-    * **Description:** Throw a fatal exception and refuse to start the app if any line is corrupted.
-    * **Pros:** Ensures 100% data integrity.
-    * **Cons:** Unacceptable for a consumer-facing app. One accidental keystroke in a `.txt` file shouldn't permanently brick the application.
-
-**Aspect: Relational Data Mapping (Interviews to Internships)**
-
-* **Alternative 1 (Current Implementation): Composite Key Reference**
-    * **Description:** `InterviewStorage` saves both Company Name and Role. Upon loading, it searches the previously loaded `InternshipList` for an exact match (`findInternshipByCompanyAndRole`) to rebuild the object reference in memory.
-    * **Pros:** Prevents data duplication while accurately mapping interviews even when a user applies to multiple distinct roles at the exact same company. Adheres to the Single Source of Truth principle.
-    * **Cons:** Requires `InternshipList` to be fully loaded *before* `InterviewList` can be loaded.
-
-#### Test Coverage
-
-The storage components are covered by extensive unit tests to ensure file I/O reliability against edge cases:
-
-| Test Case                            | Description                                                 | Expected Outcome |
-|--------------------------------------|-------------------------------------------------------------|------------------|
-| `load_corruptedAndShortLines_skipsInvalidEntries` | Load file with missing delimiters and strings < 2 chars | Skips invalid lines, loads valid lines |
-| `load_duplicateEntries_keepsFirstAndSkipsRest` | Load file with identical `Company + Role` lines manually copy-pasted | Loads the first instance, safely ignores the duplicate |
-| `load_irregularSpacing_parsesCorrectly` | Load file with no spaces around pipes (`A|B|C`) | Regex perfectly parses the data into 3 parts |
-| `load_validAndCorruptedAliases_loadsOnlyValid` | Load alias pointing to a fake command (e.g., `invalid_alias \| fake`) | Executor rejects the bad alias via exception, only valid aliases map |
-| `save_multipleRoles_mapsCorrectly`   | Save two interviews for different roles at the same company | Both interviews are independently linked to the correct roles |
 ## Product scope
 ### Target user profile
 
