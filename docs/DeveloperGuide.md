@@ -9,21 +9,21 @@
   - [Storage](#the-storage-component)
 - [Implementation](#implementation-1)
   - [Internship Management Overview](#internship-management--class-overview)
-  - [Add Internship](#add-internship-command)
-  - [List Internships](#list-command)
-  - [Search Internships](#search-internship-command)
-  - [Delete Internship](#delete-internship-command)
+  - [Add Internship](#add-internship-feature)
+  - [List Internships](#list-internship-feature)
+  - [Search Internships](#search-internship-feature)
+  - [Delete Internship](#delete-internship-feature)
   - [Interview Management Overview](#interview-management--class-overview)
-  - [Add Interview](#add-interview-command)
-  - [Update Interview Date](#update-interview-date)
-  - [Search Interviews](#search-interview-command)
-  - [List Interviews](#list-interview-command)
-  - [List Upcoming Interviews](#list-upcoming-interviews)
-  - [Delete Interview](#delete-interview-command)
-  - [Mark Offer](#mark-offer-command)
-  - [Reject Offer](#reject-offer-command)
-  - [Clear Rejected](#clear-rejected-command)
-  - [Alias](#alias-command)
+  - [Add Interview](#add-interview-feature)
+  - [Update Interview Date](#update-interview-date-feature)
+  - [Search Interviews](#search-interview-feature)
+  - [List Interviews](#list-interview-feature)
+  - [List Upcoming Interviews](#list-upcoming-interviews-feature)
+  - [Delete Interview](#delete-interview-feature)
+  - [Mark Offer](#mark-offer-feature)
+  - [Reject Offer](#reject-offer-feature)
+  - [Clear Rejected](#clear-rejected-feature)
+  - [Alias](#alias-feature)
   - [Data History](#data-history)
   - [Feature Enhancements](#future-enhancements)
 - [Product Scope](#product-scope)
@@ -279,7 +279,7 @@ The following class diagram shows the key classes involved in internship managem
 Each `AddInternshipCommand` holds a reference to the `Parser` and the `InternshipList`.
 The command relies on the `Parser` to extract user inputs and writes the newly created `Internship` directly to the `InternshipList`.
 
-### Add Internship Command
+### Add Internship Feature
 
 #### Overview
 
@@ -388,7 +388,7 @@ The feature is covered by comprehensive unit tests to ensure all edge cases and 
 | `execute_companyNameTooLong_throwsException` | Execute `add [41 chars] /t SWE` | Throws `Exception` for failing maximum length constraint |
 | `execute_invalidSpecialCharacters_throwsException` | Execute `add Meta \| Google /t SWE` | Throws `Exception` for containing invalid symbols |
 
-### List Command
+### List Internship Feature
 
 #### Overview
 
@@ -483,7 +483,7 @@ The feature is covered by comprehensive unit tests in `InternshipListTest`:
 | `add_nullInternship_throwsException`          | Attempt to add null internship           | Throws `IllegalArgumentException`      |
 | `getInternship_invalidIndex_throwsException`  | Access index out of bounds               | Throws `IndexOutOfBoundsException`     |
 
-### Search Internship Command
+### Search Internship Feature
 
 #### Overview
 
@@ -611,7 +611,7 @@ The feature is covered by comprehensive unit tests in `SearchInternshipCommandTe
 | `execute_searchWithExtraWhitespace_worksCorrectly` | Extra whitespace in input         | Trims and works correctly          |
 | `execute_multipleInternshipsSameCompany_showsAll`  | Multiple matches for same company | Shows all matching internships     |
 
-### Delete Internship Command
+### Delete Internship Feature
 
 #### Overview
 
@@ -746,7 +746,7 @@ Each `Interview` holds a reference to the `Internship` it is associated with.
 `AddInterviewCommand` bridges the two lists — it reads from `InternshipList` and writes to `InterviewList`.
 `SetInterviewDeadlineCommand` only needs access to `InterviewList` since it modifies an existing interview.
 
-### Add Interview Command
+### Add Interview Feature
 
 #### Overview
 
@@ -860,7 +860,7 @@ logger.log(Level.WARNING, "Failed to add interview: internship already has an in
 | `execute_invalidMonth_exceptionThrown` | Use `2099-13-09 10:00` (month out of range) | Throws with "is not a valid date" |
 | `execute_dayOutOfRangeForMonth_exceptionThrown` | Use `2099-04-31 10:00` (April has 30 days) | Throws with "is not a valid date" |
 
-### Update Interview Date
+### Update Interview Date Feature
 
 #### Overview
 
@@ -985,7 +985,7 @@ logger.log(Level.INFO, "Successfully updated interview " + index + " to " + date
 | `execute_sequentialUpdatesAfterDateReorder_updatesCorrectInterview` | Push an interview past another, then `update-date` the same visible index | Targets the interview at the displayed position, not a stale sort (regression test for PE-D #192) |
 | `execute_noInterviewsScheduled_suggestsAddInterview` | Call `update-date` with an empty interview list | Throws with "You have no interviews scheduled. Use add-interview to schedule one first." |
 
-### Search Interview Command
+### Search Interview Feature
 
 #### Overview
 
@@ -1081,7 +1081,7 @@ logger.log(Level.INFO, "Search found " + results.size() + " result(s).");
 | `execute_emptyList_printsNoResults` | Search on empty interview list | Prints "No interviews found" |
 
 
-### List Interview Command
+### List Interview Feature
 
 #### Overview
 
@@ -1093,7 +1093,7 @@ Lists all interviews in chronological order.
 
 The implementation is nothing but a for loop since the list of interviews are always maintained in chronological order.
 
-### List Upcoming Interviews
+### List Upcoming Interviews Feature
 
 #### Overview
 
@@ -1123,7 +1123,7 @@ The following sequence diagram illustrates a call to `execute()` of `UpcomingCom
 
 ![Upcoming Command Sequence Diagram](diagrams/UpcomingCommandSequenceDiagram.png)
 
-### Delete Interview Command
+### Delete Interview Feature
 
 #### Overview
 
@@ -1228,7 +1228,7 @@ The feature is covered by comprehensive unit tests in `DeleteInterviewCommandTes
 | `execute_deleteMiddleInterview_deletesCorrectly`  | Delete index 2 from multiple interviews    | Middle interview removed, others remain |
 | `execute_deleteLastInterview_deletesCorrectly`    | Delete last index from multiple interviews | Last interview removed, others remain   |
 
-### Mark Offer Command
+### Mark Offer Feature
 
 #### Overview
 
@@ -1347,7 +1347,7 @@ The feature is covered by comprehensive unit tests to ensure all edge cases are 
 | `execute_alreadyOffered_throwsException` | Execute `mark 1` on an already offered internship | Throws `Exception` to prevent duplicate state transition |
 | `execute_alreadyRejected_throwsException` | Execute `mark 1` on a rejected internship | Throws `Exception` to prevent illegal state transition |
 
-### Reject Offer Command
+### Reject Offer Feature
 
 #### Overview
 
@@ -1465,7 +1465,7 @@ The feature is covered by comprehensive unit tests to ensure all edge cases are 
 | `execute_alreadyRejected_throwsException` | Execute `reject 1` on an already rejected internship | Throws `Exception` to prevent duplicate state transition |
 | `execute_hasOffer_marksRejectSuccessfully` | Execute `reject 1` on an internship marked as OFFER | Internship status updates to REJECTED successfully |
 
-### Clear Rejected Command
+### Clear Rejected Feature
 
 #### Overview
 
@@ -1542,7 +1542,7 @@ logger.log(Level.INFO, "Deleted associated interview for: " + internship.getComp
 | `execute_emptyList_printsNoRejected` | Clear on empty list | No error, message printed |
 
 
-### Alias Command
+### Alias Feature
 #### Overview 
 
 The `alias` command allows user to add an alias to the default set of command words, while the `remove-alias` command
