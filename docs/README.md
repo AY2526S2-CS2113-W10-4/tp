@@ -1,6 +1,9 @@
 # GoldenCompass
 
-{Give product intro here}
+GoldenCompass is a **command-line application for managing internship applications**,
+optimised for fast typists who prefer a keyboard-driven workflow.
+It helps you track internships, schedule interviews, and stay on top of deadlines
+all from your terminal.
 
 Useful links:
 * [User Guide](UserGuide.md)
