@@ -15,7 +15,7 @@
   - [Delete Internship](#delete-internship-command)
   - [Interview Management Overview](#interview-management--class-overview)
   - [Add Interview](#add-interview-command)
-  - [Update Interview Date](#update-interview-date-feature)
+  - [Update Interview Date](#update-interview-date)
   - [Search Interviews](#search-interview-command)
   - [List Interviews](#list-interview-command)
   - [List Upcoming Interviews](#list-upcoming-interviews)
