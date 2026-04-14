@@ -1,5 +1,33 @@
 # GoldenCompass User Guide
 
+## Table of Contents
+- [Introduction](#introduction)
+- [Quick Start](#quick-start)
+- [Features](#features)
+  - [Getting help](#getting-help)
+  - [Exiting the program](#exiting-the-program-bye)
+  - [Adding an internship application](#adding-an-internship-application-add)
+  - [Adding an interview](#adding-an-interview-add-interview)
+  - [Updating interview date](#updating-interview-date-update-date)
+  - [Listing all internships](#listing-all-internships-list)
+  - [Deleting an internship](#deleting-an-internship-delete)
+  - [Deleting an interview](#deleting-an-interview-delete-interview)
+  - [Searching internships](#searching-internships-search)
+  - [Searching interviews](#searching-interviews-search-interview)
+  - [Listing all interviews](#listing-all-interviews-list-interview)
+  - [Listing upcoming interviews](#listing-upcoming-interviews-upcoming)
+  - [Adding alias](#adding-alias-alias)
+  - [Removing alias](#removing-alias-remove-alias)
+  - [Undoing commands](#undoing-commands-undo)
+  - [Redoing commands](#redoing-commands-redo)
+  - [Marking an internship application as offer received](#marking-an-internship-application-as-offer-received-mark)
+  - [Marking an internship application as rejected](#marking-an-internship-application-as-rejected-reject)
+  - [Clearing rejected internships](#clearing-rejected-internships-clear-rejected)
+- [Data Storage](#data-storage)
+- [FAQ](#faq)
+- [Known Issues](#known-issues)
+- [Command Summary](#command-summary)
+
 ## Introduction
 
 GoldenCompass is a **command-line application for managing internship applications**,
@@ -209,19 +237,6 @@ Examples:
 - `search-interview /t Engineer /d 2025-06-15`
 - `search-interview /d 2025-07-01`
 
-### Clearing rejected internships: `clear-rejected`
-
-Removes all internships marked as rejected from the tracker, along with their
-associated interviews (if any).
-
-Format: `clear-rejected`
-
-- If there are no rejected internships, a message is shown indicating nothing to clear.
-- A summary of the removed internships is printed after clearing.
-
-Example:
-- `clear-rejected`
-
 ### Listing all interviews: `list-interview`
 
 Lists all interviews in ascending order of dates.
@@ -279,7 +294,7 @@ You have the following interviews in the upcoming 6 day(s):
 NUS - Bus Driver @ 2026-03-25 11:00
 ```
 
-### Adding Alias: `alias`
+### Adding alias: `alias`
 
 Adds an alias to the commands. Alias **cannot** have alias, while a command can have multiple aliases. 
 
@@ -297,7 +312,7 @@ To add an alias `ls` to `list`:
 alias /c list /a ls
 ```
 
-### Removing Alias: `remove-alias`
+### Removing alias: `remove-alias`
 
 Removes an existing alias. 
 
@@ -394,6 +409,20 @@ Rejection builds character! Marked this internship as [REJECTED]:
 ```text
 Error: This internship has already been rejected!
 ```
+
+### Clearing rejected internships: `clear-rejected`
+
+Removes all internships marked as rejected from the tracker, along with their
+associated interviews (if any).
+
+Format: `clear-rejected`
+
+- If there are no rejected internships, a message is shown indicating nothing to clear.
+- A summary of the removed internships is printed after clearing.
+
+Example:
+- `clear-rejected`
+
 ## Data Storage
 
 GoldenCompass automatically saves your data to your hard drive after any command that modifies your internships, interviews, or aliases. There is no need to manually save your data.
