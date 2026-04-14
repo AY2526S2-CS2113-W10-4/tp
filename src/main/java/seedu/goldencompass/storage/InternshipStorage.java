@@ -68,7 +68,7 @@ public class InternshipStorage {
                 String[] parts = line.split("\\s*\\|\\s*");
 
                 if (parts.length != 3) {
-                    errorLog.append("Error: Corrupted format in internships.txt. Skipping: [")
+                    errorLog.append("Warning: Corrupted format in internships.txt. Skipping and cleaning: [")
                             .append(line).append("]\n");
                     continue;
                 }
@@ -79,7 +79,7 @@ public class InternshipStorage {
 
                 // Check for strings less than 2 characters
                 if (title.length() < 2 || company.length() < 2) {
-                    errorLog.append("Error: Title or company name too short (must be >= 2 chars). Skipping: [")
+                    errorLog.append("Warning: Title or company name must be >= 2 chars. Skipping and cleaning: [")
                             .append(line).append("]\n");
                     continue;
                 }
