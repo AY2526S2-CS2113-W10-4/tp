@@ -9,21 +9,21 @@
   - [Storage](#the-storage-component)
 - [Implementation](#implementation-1)
   - [Internship Management Overview](#internship-management--class-overview)
-  - [Add internship feature](#add-internship-feature)
-  - [List internships](#list-command)
-  - [Search internships](#search-internship-command)
-  - [Delete Internship Command](#delete-internship-command)
+  - [Add Internship](#add-internship-command)
+  - [List Internships](#list-command)
+  - [Search Internships](#search-internship-command)
+  - [Delete Internship](#delete-internship-command)
   - [Interview Management Overview](#interview-management--class-overview)
-  - [Add interview feature](#add-interview-feature)
-  - [Update interview date](#update-interview-date-feature)
-  - [Search interviews](#search-interview-feature)
-  - [List all interviews](#list-all-interviews)
-  - [List upcoming interviews](#list-upcoming-interviews)
-  - [Delete interview command](#delete-interview-command)
-  - [Mark Offer Command](#mark-offer-command)
-  - [Reject Offer Command](#reject-offer-command)
-  - [Clear Rejected Feature](#clear-rejected-feature)
-  - [Alias](#alias)
+  - [Add Interview](#add-interview-command)
+  - [Update Interview Date](#update-interview-date-feature)
+  - [Search Interviews](#search-interview-command)
+  - [List Interviews](#list-interview-command)
+  - [List Upcoming Interviews](#list-upcoming-interviews)
+  - [Delete Interview](#delete-interview-command)
+  - [Mark Offer](#mark-offer-command)
+  - [Reject Offer](#reject-offer-command)
+  - [Clear Rejected](#clear-rejected-command)
+  - [Alias](#alias-command)
   - [Data History](#data-history)
   - [Feature Enhancements](#future-enhancements)
 - [Product Scope](#product-scope)
@@ -279,7 +279,7 @@ The following class diagram shows the key classes involved in internship managem
 Each `AddInternshipCommand` holds a reference to the `Parser` and the `InternshipList`.
 The command relies on the `Parser` to extract user inputs and writes the newly created `Internship` directly to the `InternshipList`.
 
-### Add Internship Feature
+### Add Internship Command
 
 #### Overview
 
@@ -746,7 +746,7 @@ Each `Interview` holds a reference to the `Internship` it is associated with.
 `AddInterviewCommand` bridges the two lists — it reads from `InternshipList` and writes to `InterviewList`.
 `SetInterviewDeadlineCommand` only needs access to `InterviewList` since it modifies an existing interview.
 
-### Add Interview Feature
+### Add Interview Command
 
 #### Overview
 
@@ -985,7 +985,7 @@ logger.log(Level.INFO, "Successfully updated interview " + index + " to " + date
 | `execute_sequentialUpdatesAfterDateReorder_updatesCorrectInterview` | Push an interview past another, then `update-date` the same visible index | Targets the interview at the displayed position, not a stale sort (regression test for PE-D #192) |
 | `execute_noInterviewsScheduled_suggestsAddInterview` | Call `update-date` with an empty interview list | Throws with "You have no interviews scheduled. Use add-interview to schedule one first." |
 
-### Search Interview Feature
+### Search Interview Command
 
 #### Overview
 
@@ -1081,7 +1081,7 @@ logger.log(Level.INFO, "Search found " + results.size() + " result(s).");
 | `execute_emptyList_printsNoResults` | Search on empty interview list | Prints "No interviews found" |
 
 
-### List all interviews
+### List Interview Command
 
 #### Overview
 
@@ -1093,7 +1093,7 @@ Lists all interviews in chronological order.
 
 The implementation is nothing but a for loop since the list of interviews are always maintained in chronological order.
 
-### List upcoming interviews
+### List Upcoming Interviews
 
 #### Overview
 
@@ -1465,7 +1465,7 @@ The feature is covered by comprehensive unit tests to ensure all edge cases are 
 | `execute_alreadyRejected_throwsException` | Execute `reject 1` on an already rejected internship | Throws `Exception` to prevent duplicate state transition |
 | `execute_hasOffer_marksRejectSuccessfully` | Execute `reject 1` on an internship marked as OFFER | Internship status updates to REJECTED successfully |
 
-### Clear Rejected Feature
+### Clear Rejected Command
 
 #### Overview
 
@@ -1542,7 +1542,7 @@ logger.log(Level.INFO, "Deleted associated interview for: " + internship.getComp
 | `execute_emptyList_printsNoRejected` | Clear on empty list | No error, message printed |
 
 
-### Alias
+### Alias Command
 #### Overview 
 
 The `alias` command allows user to add an alias to the default set of command words, while the `remove-alias` command
